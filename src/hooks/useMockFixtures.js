@@ -28,8 +28,10 @@ export function useMockCounts(enabled) {
 export function useSeedMockData() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async () => {
-      const res = await api.functions.invoke('manageMockFixtures', { action: 'seed' });
+    // `modules` limits the example to the modules the caller cares about; the
+    // backend falls back to whatever is currently open.
+    mutationFn: async (modules) => {
+      const res = await api.functions.invoke('manageMockFixtures', { action: 'seed', modules });
       return res.data;
     },
     onSuccess: () => {

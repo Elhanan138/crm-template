@@ -2,6 +2,7 @@ import React from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/api/client';
 import { toast } from 'sonner';
+import RerunWizardCard from '@/components/onboarding/RerunWizardCard';
 import { Bot, Bell, Loader2, Mail, FolderKanban, BarChart3 } from 'lucide-react';
 import { isFeatureEnabled } from '@/lib/features';
 import { ACTIVE_MODULE_IDS } from '@/lib/moduleRegistry';
@@ -87,6 +88,8 @@ export default function GlobalSystemFeaturesPanel() {
 
  return (
   <div className="space-y-5">
+   <RerunWizardCard />
+
    {/* Nothing that was left out of the build is mentioned here at all. */}
    {PAGE_FEATURES.length > 0 && (
    <div className="bg-card rounded-xl border border-border shadow-sm p-5">

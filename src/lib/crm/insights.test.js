@@ -4,8 +4,16 @@ import {
   groupRecords, toCsv, isOverdue, statusFieldOf, moneyFieldOf, deadlineFieldOf,
 } from './insights';
 
-const DAY = 86400000;
-const iso = (offsetDays) => new Date(Date.now() + offsetDays * DAY).toISOString().slice(0, 10);
+// A LOCAL calendar day. Building this through toISOString() shifts the date
+// east of Greenwich once the clock passes midnight, which made these tests
+// pass by day and fail at night.
+const dayString = (offset) => {
+  const d = new Date();
+  d.setDate(d.getDate() + offset);
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+};
+
+const iso = dayString;
 
 const STATUSES = [
   { value: 'draft', label: 'טיוטה', tone: 'muted' },

@@ -6,15 +6,17 @@ import { ShieldCheck, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { isAdminUser } from '@/lib/permissions';
 import { toast } from 'sonner';
+import OnboardingWizard, { ONBOARDING_KEY } from '@/components/onboarding/OnboardingWizard';
 
 /**
- * FirstTimeSetup — guard component for a clean export.
- * If no admin exists in the system, shows a setup screen so the
- * first authenticated user can promote themselves to admin.
- * Once an admin exists, renders children (the main app) normally.
+ * FirstTimeSetup — the gate a brand-new deployment passes through.
+ *
+ * Two steps, in order: somebody has to become the administrator, and then the
+ * wizard turns an empty template into a usable system. Both are one-time; once
+ * they are behind you the app renders normally and neither reappears.
  */
 export default function FirstTimeSetup({ children }) {
-  const { effectiveUser } = useAccessControl();
+  const { effectiveUser, currentUser } = useAccessControl();
   const queryClient = useQueryClient();
 
   const { data: users = [], isLoading } = useQuery({
@@ -53,8 +55,14 @@ export default function FirstTimeSetup({ children }) {
     onError: (e) => toast.error(e?.message || 'ההגדרה כמנהל ראשי נכשלה'),
   });
 
-  // Still loading, admin already exists, or current user is admin → show app
-  if (isLoading || hasAdmin || isAdminUser(effectiveUser)) {
+  const isAdmin = isAdminUser(effectiveUser) || isAdminUser(currentUser);
+
+  // The administrator exists — now the opening wizard, once.
+  if (isLoading || hasAdmin || isAdmin) {
+    const done = !!currentUser?.[ONBOARDING_KEY];
+    if (!isLoading && isAdmin && !done) {
+      return <OnboardingWizard onDone={() => queryClient.invalidateQueries()} />;
+    }
     return children;
   }
 

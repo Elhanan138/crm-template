@@ -8,8 +8,16 @@ import {
 import { CRM_SCHEMAS, LEAD_STAGES } from './schemas';
 import { BILLING_CYCLES } from './sectorSchemas';
 
-const DAY = 86400000;
-const iso = (offsetDays) => new Date(Date.now() + offsetDays * DAY).toISOString().slice(0, 10);
+// A LOCAL calendar day. Building this through toISOString() shifts the date
+// east of Greenwich once the clock passes midnight, which made these tests
+// pass by day and fail at night.
+const dayString = (offset) => {
+  const d = new Date();
+  d.setDate(d.getDate() + offset);
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+};
+
+const iso = dayString;
 
 describe('date helpers', () => {
   it('measure in both directions and refuse to guess', () => {

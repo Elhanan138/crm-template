@@ -5,6 +5,9 @@
 import { OWNER_EMAIL } from '@/lib/owner';
 import { slugify } from '@/lib/projectSlug';
 import { runAutomations } from './automationRunner';
+import { demoDataFor, isDemoRecord, DEMO_FLAG } from '@/lib/demoData';
+import { ACTIVE_MODULE_IDS } from '@/lib/moduleRegistry';
+import { CRM_SCHEMAS } from '@/lib/crm/schemas';
 
 const STORAGE_PREFIX = 'oss_data_';
 const FULL = ['full'];
@@ -296,8 +299,9 @@ export function invokeLocalFunction(name, body = {}) {
     case 'processProjectAlerts':
     case 'routeRoadmapItem':
     case 'adminSyncControl':
-    case 'manageMockFixtures':
       return { data: { success: true, processed: 0 } };
+    case 'manageMockFixtures':
+      return manageMockFixtures(body);
 
     // Server-only: AI, mail and calendar sync.
     case 'agentAction':
@@ -1084,4 +1088,87 @@ function runAutomationRules(body = {}) {
     // shell — down with it.
     return { data: { success: false, error: error?.message || 'הרצת האוטומציות נכשלה' } };
   }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// DEMO DATA
+//
+// The opening wizard offers to start from an example, so the offer has to be
+// real. Records are generated from the schemas of the modules THIS build
+// contains, and every one carries a flag — which is what lets the purge remove
+// exactly the demo rows and never touch anything a person typed.
+// ─────────────────────────────────────────────────────────────────────────────
+function demoEntities() {
+  return ACTIVE_MODULE_IDS.filter((id) => CRM_SCHEMAS[id]).map((id) => CRM_SCHEMAS[id].entity);
+}
+
+/**
+ * Which modules an example should cover.
+ *
+ * The caller may say (the wizard passes the package it just chose). Otherwise
+ * it is every module an administrator has left OPEN — seeding a module that was
+ * switched off produces rows nobody asked for, in a screen nobody can reach.
+ */
+function demoModules(requested) {
+  if (Array.isArray(requested) && requested.length) {
+    return requested.filter((id) => ACTIVE_MODULE_IDS.includes(id) && CRM_SCHEMAS[id]);
+  }
+  const settings = getCollection('SystemSetting').find((s) => s.key === 'global_system_features');
+  const values = settings?.value || {};
+  return ACTIVE_MODULE_IDS.filter(
+    (id) => CRM_SCHEMAS[id] && values[`module:${id}`] !== 'closed'
+  );
+}
+
+function countDemo() {
+  return demoEntities().reduce((total, entity) => total + getCollection(entity).filter(isDemoRecord).length, 0);
+}
+
+function manageMockFixtures(body = {}) {
+  const { action } = body;
+
+  if (action === 'seed') {
+    // Seeding twice would double the example rather than refresh it.
+    const data = demoDataFor(demoModules(body.modules), { ownerEmail: cleanEmail(OWNER_EMAIL) });
+    let created = 0;
+    for (const [entity, records] of Object.entries(data)) {
+      if (getCollection(entity).some(isDemoRecord)) continue;
+      for (const record of records) { entityCreate(entity, record); created += 1; }
+    }
+    return { data: { success: true, created, entities: Object.keys(data).length } };
+  }
+
+  if (action === 'purge') {
+    let removed = 0;
+    for (const entity of demoEntities()) {
+      const rows = getCollection(entity);
+      const keep = rows.filter((r) => !isDemoRecord(r));
+      removed += rows.length - keep.length;
+      if (keep.length !== rows.length) setCollection(entity, keep);
+    }
+    return { data: { success: true, removed } };
+  }
+
+  if (action === 'counts') {
+    return { data: { fixtures: countDemo(), calendar_events: 0, demo_project_exists: false } };
+  }
+
+  if (action === 'list') {
+    // One row per module that currently holds demo data.
+    const fixtures = ACTIVE_MODULE_IDS
+      .filter((id) => CRM_SCHEMAS[id])
+      .map((id) => ({
+        id,
+        key: id,
+        label: CRM_SCHEMAS[id].title,
+        active: getCollection(CRM_SCHEMAS[id].entity).some(isDemoRecord),
+        count: getCollection(CRM_SCHEMAS[id].entity).filter(isDemoRecord).length,
+      }))
+      .filter((f) => f.count > 0);
+    return { data: { fixtures } };
+  }
+
+  // create / update / toggle / delete act on individual fixtures, which the
+  // local generator does not have — it produces a whole example or none.
+  return { data: { success: true, unsupported: action, flag: DEMO_FLAG } };
 }

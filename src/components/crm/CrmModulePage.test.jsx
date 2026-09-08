@@ -10,7 +10,16 @@ import { CRM_SCHEMAS } from '@/lib/crm/schemas';
 // these render the real page against real data rather than against a mock, and
 // exercise the query layer, the permissions and the schema together.
 const PREFIX = 'oss_data_';
-const day = (offset) => new Date(Date.now() + offset * 86400000).toISOString().slice(0, 10);
+// A LOCAL calendar day. Building this through toISOString() shifts the date
+// east of Greenwich once the clock passes midnight, which made these tests
+// pass by day and fail at night.
+const dayString = (offset) => {
+  const d = new Date();
+  d.setDate(d.getDate() + offset);
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+};
+
+const day = dayString;
 
 const seedLeads = (count, extra = []) => {
   const stages = ['new', 'qualified', 'proposal', 'negotiation', 'won', 'lost'];
@@ -53,9 +62,11 @@ describe('the shared list', () => {
     // Deal 4 was never seeded.
     expect(within(table()).queryByText('Deal 4')).toBeNull();
 
-    // Deal 4 would be 'negotiation' at 75%; Deal 1 is 'new' at 10% of 1,000.
-    const firstRow = screen.getAllByRole('row')[1];
-    expect(within(firstRow).getByText('₪100')).toBeTruthy();
+    // Deal 1 is a 'new' deal worth 1,000, and 'new' carries a 10% probability.
+    // The row is found by its name rather than by position: the seeded records
+    // share a created_date, so their default order is not guaranteed.
+    const row = screen.getAllByRole('row').find((r) => r.textContent.includes('Deal 1'));
+    expect(within(row).getByText('₪100')).toBeTruthy();
   });
 
   it('opens on every row and narrows to a segment when one is chosen', async () => {
