@@ -48,6 +48,22 @@ const columnFor = (field) => {
 };
 
 /** Report source for one schema-driven module. */
+/**
+ * Columns for the custom fields an administrator generated for an entity.
+ *
+ * They are read from the same COLUMN_RULES as declared fields, so a custom
+ * `select` groups and a custom `number` totals exactly like a built-in one.
+ * The key is prefixed because the values live in a `custom_fields` object.
+ */
+export function customFieldColumns(entity, customFields = []) {
+  return customFields
+    .filter((f) => f.entity === entity && f.type !== 'textarea')
+    .map((f) => ({
+      ...columnFor({ key: `custom_fields.${f.key}`, label: f.label, type: f.type }),
+      custom: true,
+    }));
+}
+
 function sourceFromSchema(moduleId, schema) {
   const columns = schema.fields
     .filter((f) => f.type !== 'textarea')

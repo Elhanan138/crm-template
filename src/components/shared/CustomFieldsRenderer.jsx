@@ -4,7 +4,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { sortFields } from '@/lib/customFields';
+import { sortFields, visibleFields, pruneHiddenValues } from '@/lib/customFields';
 import PersonSelect from '@/components/shared/PersonSelect';
 import DateField from '@/components/ui/date-field';
 
@@ -17,10 +17,17 @@ const INPUT_CLASS =
  * as `custom_fields`, so adding a field never requires a schema change.
  */
 export default function CustomFieldsRenderer({ fields, values = {}, onChange, columns = 2 }) {
-  const list = sortFields(fields).filter((f) => !f.hidden);
-  if (list.length === 0) return null;
+  // A field with an unmet condition is not asked for at all, and the answer to
+  // a question that has disappeared is dropped rather than saved as a fact
+  // nobody stated.
+  const all = sortFields(fields).filter((f) => !f.hidden);
+  const list = visibleFields(all, values);
+  if (all.length === 0) return null;
 
-  const set = (key, value) => onChange({ ...values, [key]: value });
+  const set = (key, value) => {
+    const next = { ...values, [key]: value };
+    onChange(pruneHiddenValues(all, next));
+  };
 
   return (
     <div className={`grid grid-cols-1 ${columns === 2 ? 'sm:grid-cols-2' : ''} gap-3`}>

@@ -187,12 +187,25 @@ export function useCrmRecords(schema) {
 /** Search + filter, shared by every CRM list. */
 export function filterRecords(records, schema, { search, filters }) {
   const q = search.trim().toLowerCase();
+  // Long-form fields and the values of custom fields are searched too: a phrase
+  // typed into a note or into a field an administrator generated is exactly the
+  // kind of thing someone later searches for and could not find.
+  const keys = [
+    ...new Set([
+      ...(schema.searchFields || []),
+      ...(schema.fields || []).filter((f) => f.type === 'textarea').map((f) => f.key),
+    ]),
+  ];
   return records.filter((r) => {
     for (const [key, value] of Object.entries(filters || {})) {
       if (value === 'all' || value === undefined) continue;
-      if (String(r[key]) !== String(value)) return false;
+      const actual = key.startsWith('custom_fields.')
+        ? r.custom_fields?.[key.slice('custom_fields.'.length)]
+        : r[key];
+      if (String(actual) !== String(value)) return false;
     }
     if (!q) return true;
-    return (schema.searchFields || []).some((f) => String(r[f] || '').toLowerCase().includes(q));
+    if (keys.some((f) => String(r[f] || '').toLowerCase().includes(q))) return true;
+    return Object.values(r.custom_fields || {}).some((v) => String(v ?? '').toLowerCase().includes(q));
   });
 }

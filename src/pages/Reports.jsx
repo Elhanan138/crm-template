@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { useQueries, useQuery } from '@tanstack/react-query';
 import { withDerivedRows } from '@/lib/crm/derived';
+import { customFieldColumns } from '@/lib/reports/registry';
 import { CRM_SCHEMAS } from '@/lib/crm/schemas';
 import { api } from '@/api/client';
 import { useAccessControl } from '@/hooks/useAccessControl';
@@ -39,6 +40,13 @@ export default function Reports() {
     queryFn: () => api.entities.Project.list(),
   });
 
+  // Fields an administrator generated are reported on like any other field.
+  const { data: customFields = [] } = useQuery({
+    queryKey: ['custom-fields'],
+    queryFn: () => api.entities.CustomField.list(),
+    staleTime: 60000,
+  });
+
   // One query per report source, so every module's data arrives without the
   // page knowing anything about which modules exist.
   const results = useQueries({
@@ -53,11 +61,25 @@ export default function Reports() {
     const map = {};
     visibleSources.forEach((source, i) => {
       // Derived columns are computed here, once, so the report table can filter,
-      // group, total and export them exactly like stored ones.
-      map[source.id] = withDerivedRows(CRM_SCHEMAS[source.module], results[i]?.data || []);
+      // group, total and export them exactly like stored ones. Custom values are
+      // lifted out of their object for the same reason: the table reads rows as
+      // plain objects in a dozen places.
+      const rows = withDerivedRows(CRM_SCHEMAS[source.module], results[i]?.data || []);
+      const custom = customFieldColumns(entityOf(source), customFields);
+      map[source.id] = custom.length === 0 ? rows : rows.map((row) => {
+        const flat = { ...row };
+        for (const column of custom) {
+          flat[column.key] = row.custom_fields?.[column.key.replace('custom_fields.', '')] ?? '';
+        }
+        return flat;
+      });
     });
     return map;
-  }, [visibleSources, results]);
+  }, [visibleSources, results, customFields]);
+
+  // The active source's columns, with the custom ones appended.
+  const columnsFor = (source) =>
+    source ? [...source.columns, ...customFieldColumns(entityOf(source), customFields)] : [];
 
   const { data: globalTabRes } = useQuery({
     queryKey: ['global-tab-visibility'],
@@ -187,7 +209,11 @@ export default function Reports() {
       </div>
 
       {activeSource && (
-        <BiDataTable dataSource={activeSource} data={activeRows} projectNames={projectNames} />
+        <BiDataTable
+          dataSource={{ ...activeSource, columns: columnsFor(activeSource) }}
+          data={activeRows}
+          projectNames={projectNames}
+        />
       )}
     </div>
   );

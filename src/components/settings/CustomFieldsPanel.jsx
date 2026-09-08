@@ -13,11 +13,12 @@ import { Plus, Trash2, Pencil, ArrowUp, ArrowDown, Loader2, SlidersHorizontal } 
 import { toast } from 'sonner';
 import {
   FIELD_TYPES, FIELD_TYPE_MAP, CUSTOM_FIELD_ENTITIES, fieldKeyFrom, sortFields,
+  VISIBILITY_OPERATORS,
 } from '@/lib/customFields';
 
 const INPUT = 'h-9 rounded-lg text-sm';
 
-function FieldDialog({ open, onOpenChange, field, entity, existingKeys, onSave }) {
+function FieldDialog({ open, onOpenChange, field, entity, existingKeys, siblings = [], onSave }) {
   const [draft, setDraft] = useState(
     () => field || { label: '', type: 'text', required: false, placeholder: '', help: '', options: [] }
   );
@@ -74,6 +75,43 @@ function FieldDialog({ open, onOpenChange, field, entity, existingKeys, onSave }
                 className="w-full rounded-lg border border-border bg-background p-2 text-sm"
                 placeholder={'נמוך\nבינוני\nגבוה'}
               />
+            </div>
+          )}
+
+          {/* Conditional visibility — the same operators the automations use,
+              so there is one vocabulary for "when is this true". */}
+          {siblings.length > 0 && (
+            <div className="space-y-1">
+              <Label className="text-xs text-muted-foreground">הצג רק כאשר</Label>
+              <div className="grid grid-cols-3 gap-2">
+                <Select
+                  value={draft.visible_when?.field || '__always__'}
+                  onValueChange={(v) => set({ visible_when: v === '__always__' ? null : { ...(draft.visible_when || {}), field: v, operator: draft.visible_when?.operator || 'eq' } })}
+                >
+                  <SelectTrigger className={INPUT}><SelectValue placeholder="תמיד" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="__always__">תמיד מוצג</SelectItem>
+                    {siblings.map((sib) => <SelectItem key={sib.key} value={sib.key}>{sib.label}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+                <Select
+                  value={draft.visible_when?.operator || 'eq'}
+                  onValueChange={(v) => set({ visible_when: { ...(draft.visible_when || {}), operator: v } })}
+                  disabled={!draft.visible_when?.field}
+                >
+                  <SelectTrigger className={INPUT}><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    {VISIBILITY_OPERATORS.map((op) => <SelectItem key={op.value} value={op.value}>{op.label}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+                <Input
+                  value={draft.visible_when?.value ?? ''}
+                  onChange={(e) => set({ visible_when: { ...(draft.visible_when || {}), value: e.target.value } })}
+                  disabled={!draft.visible_when?.field || ['empty', 'not_empty'].includes(draft.visible_when?.operator)}
+                  placeholder="ערך"
+                  className={INPUT}
+                />
+              </div>
             </div>
           )}
 
@@ -225,6 +263,9 @@ export default function CustomFieldsPanel() {
           field={editing}
           entity={entity}
           existingKeys={allFields.map((f) => f.key)}
+          // A field can only depend on another field of the same entity, and
+          // never on itself.
+          siblings={fields.filter((f) => f.key !== editing?.key)}
           onSave={(data) => saveMutation.mutate({ ...data, order: editing?.order ?? fields.length })}
         />
       )}
