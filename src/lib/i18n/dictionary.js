@@ -462,6 +462,13 @@ export const EN = {
   "ענבר": "Ember",
   "ארגמן": "Crimson",
 
+  // ── Global search ────────────────────────────────────────────────────────
+  "פעולות": "Actions",
+  "נפתחו לאחרונה": "Recently opened",
+  "חיפושים אחרונים": "Recent searches",
+  "לא נמצאו תוצאות עבור": "No results for",
+  "מעבר להגדרות": "Go to settings",
+
   // ── Server availability ───────────────────────────────────────────────────
   "מצב חיבור לשרת": "Server connection",
   "לא מוגדר · דורש שרת": "Not configured · needs a server",

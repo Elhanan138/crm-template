@@ -10,11 +10,14 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { cleanEmail } from '@/lib/permissions';
 import { normalizeHebrew, scoreMatch, freshnessBonus } from '@/lib/hebrewSearch';
 import { getProjectPath } from '@/lib/projectSlug';
-import { CRM_SEARCH_SOURCES, sourceForType, searchTextsOf } from '@/lib/crm/searchSources';
+import { CRM_SEARCH_SOURCES, sourceForType, searchTextsOf, docText } from '@/lib/crm/searchSources';
+import { quickActionsFor, matchesAction } from '@/lib/crm/quickActions';
+import { recentSearches, rememberSearch, recentRecords, rememberRecord } from '@/lib/recentActivity';
+import { useI18n } from '@/lib/i18n';
 import { CRM_SCHEMAS } from '@/lib/crm/schemas';
 import { useRecordViewer, visibleModuleRecords } from '@/lib/crm/visibility';
-import { CheckSquare, FileSignature,
-  BookOpen, Users,
+import { CheckSquare, FileSignature, FileText,
+  BookOpen, Users, Zap,
   Search, Clock, CornerDownLeft, X
 } from 'lucide-react';
 import { CubeIcon } from '@radix-ui/react-icons';
@@ -81,8 +84,10 @@ for (const source of CRM_SEARCH_SOURCES) {
 
 // Project-side types first — they are what most searches are for — then the
 // modules, in the order the manifest declares them.
+TYPE_META.note = { label: 'פתקים', icon: FileText, color: 'text-primary', path: '/notes', idParam: 'page' };
+
 const TYPE_ORDER = [
-  'project', 'task', 'quote', 'guide', 'member',
+  'project', 'task', 'quote', 'note', 'guide', 'member',
   ...CRM_SEARCH_SOURCES.map((s) => s.type),
 ];
 
@@ -104,8 +109,10 @@ export default function GlobalSearch() {
     queryKey: ['currentUser'],
     queryFn: () => api.auth.me(),
   });
-  const dashboardPrefs = currentUser?.dashboard_prefs || {};
-  const recentSearches = dashboardPrefs.recent_searches || [];
+  const { t } = useI18n();
+  const [history, setHistory] = useState(() => ({ searches: recentSearches(), records: recentRecords() }));
+  const refreshHistory = () => setHistory({ searches: recentSearches(), records: recentRecords() });
+  const actions = useMemo(() => quickActionsFor({ t }), [t]);
 
   const searchActive = open || mobileOpen;
 
@@ -121,6 +128,10 @@ export default function GlobalSearch() {
   });
   const { data: quotes = [] } = useQuery({
     queryKey: ['allProposals'], queryFn: () => api.entities.Proposal.list(),
+    enabled: searchActive,
+  });
+  const { data: notePages = [] } = useQuery({
+    queryKey: ['allProjectPages'], queryFn: () => api.entities.ProjectPage.list(),
     enabled: searchActive,
   });
   const { data: guides = [] } = useQuery({
@@ -237,6 +248,18 @@ export default function GlobalSearch() {
       project: buildGroup(projects, 'project', p => canViewProject(p.id)),
       task: buildGroup(tasks, 'task', t => projectIds.has(t.project_id) && canAccess(t)),
       quote: buildGroup(enrichedQuotes, 'quote', qt => projectIds.has(qt.project_id) && canAccess(qt)),
+      note: (notePages || [])
+        .filter((p) => !p.is_archived)
+        .map((record) => ({
+          record,
+          type: 'note',
+          // The title is the primary text; the flattened body is secondary, so
+          // a title hit still outranks a body hit.
+          score: scoreMatch(q, record.title, docText(record.doc || record.content)) + freshnessBonus(record),
+        }))
+        .filter((x) => x.score > 0)
+        .sort((a, b) => b.score - a.score)
+        .slice(0, 5),
       guide: buildGroup(guides, 'guide'),
       member: buildGroup(teamMembers, 'member'),
     };
@@ -265,7 +288,7 @@ export default function GlobalSearch() {
       .sort((a, b) => b.topScore - a.topScore);
 
     return { groups, leading, showLeading, groupOrder, totalCount: allScored.length };
-  }, [query, projects, tasks, quotes, guides, teamMembers, clientMap, canViewProject, canAccess, crmData, viewer]);
+  }, [query, projects, tasks, quotes, guides, notePages, teamMembers, clientMap, canViewProject, canAccess, crmData, viewer]);
 
   const totalCount = results?.totalCount ?? 0;
 
@@ -288,26 +311,47 @@ export default function GlobalSearch() {
     } catch { /* ignore */ }
   }, [query, queryClient]);
 
+  // What was searched for, and what it led to, is what the empty box offers
+  // next time. Remembered on the way out, so a query that found nothing useful
+  // is not stored as if it had.
+  const remember = (type, record, path) => {
+    rememberSearch(query);
+    const source = TYPE_META[type]?.crm ? sourceForType(type) : null;
+    rememberRecord({
+      id: record.id,
+      type,
+      path,
+      label: source ? record[source.titleField] : (record.title || record.name || record.client_name || ''),
+      sub: TYPE_META[type]?.label || '',
+    });
+    refreshHistory();
+  };
+
   const handleSelect = (type, record) => {
     const meta = TYPE_META[type];
     // A module record opens where it lives, with its sheet already open.
     if (meta.crm) {
-      navigate(`${meta.path}?recordId=${encodeURIComponent(record.id)}`);
+      const path = `${meta.path}?recordId=${encodeURIComponent(record.id)}`;
+      navigate(path);
+      remember(type, record, path);
       savePrefs(null);
       setOpen(false);
       setMobileOpen(false);
       return;
     }
     const projectId = type === 'project' ? record.id : record.project_id;
+    let path;
     if (meta.path) {
       const qs = meta.idParam ? `?${meta.idParam}=${record.id}` : '';
-      navigate(`${meta.path}${qs}`);
+      path = `${meta.path}${qs}`;
     } else {
       const projectObj = type === 'project' ? record : projects.find(p => p.id === record.project_id);
       const basePath = projectObj ? getProjectPath(projectObj) : `/projects/${projectId}`;
       const params = type === 'project' ? `tab=${meta.tab}` : `tab=${meta.tab}&itemId=${record.id}`;
-      navigate(`${basePath}?${params}`);
+      path = `${basePath}?${params}`;
     }
+    navigate(path);
+    remember(type, record, path);
     savePrefs(type === 'project' ? projectId : null);
     setOpen(false);
     setMobileOpen(false);
@@ -358,34 +402,92 @@ export default function GlobalSearch() {
   // ── Shared results renderer (used by both desktop and mobile) ──
   const renderResults = () => {
     if (!results) {
-      if (recentSearches.length === 0) return null;
+      // An empty box is not an empty panel: the things you were most likely
+      // about to do, then what you searched for and opened last.
       return (
         <div className="p-1">
-          <CommandGroup heading="חיפושים אחרונים" className="mb-1">
-            {recentSearches.slice(0, 5).map((s, idx) => (
+          {actions.length > 0 && (
+            <CommandGroup heading={t('פעולות')} className="mb-1">
+              {actions.map((action) => (
+                <CommandItem
+                  key={action.id}
+                  value={action.id}
+                  onSelect={() => { navigate(action.path); setOpen(false); setMobileOpen(false); }}
+                  className="min-h-[44px] cursor-pointer gap-3"
+                >
+                  <div className="w-8 h-8 rounded-lg bg-accent flex items-center justify-center flex-shrink-0">
+                    <action.icon className="w-4 h-4 text-primary" />
+                  </div>
+                  <span className="text-sm flex-1 truncate">{action.label}</span>
+                </CommandItem>
+              ))}
+            </CommandGroup>
+          )}
+          {history.records.length > 0 && (
+            <CommandGroup heading={t('נפתחו לאחרונה')} className="mb-1">
+              {history.records.map((r) => (
+                <CommandItem
+                  key={`recent-record-${r.type}-${r.id}`}
+                  value={`recent-record-${r.type}-${r.id}`}
+                  onSelect={() => { navigate(r.path); setOpen(false); setMobileOpen(false); }}
+                  className="min-h-[44px] cursor-pointer gap-3"
+                >
+                  <div className="w-8 h-8 rounded-lg bg-muted/60 flex items-center justify-center flex-shrink-0">
+                    <Clock className="w-4 h-4 text-muted-foreground" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm truncate">{r.label}</p>
+                    {r.sub && <p className="text-[11px] text-muted-foreground truncate">{r.sub}</p>}
+                  </div>
+                </CommandItem>
+              ))}
+            </CommandGroup>
+          )}
+          {history.searches.length > 0 && (
+            <CommandGroup heading={t('חיפושים אחרונים')} className="mb-1">
+              {history.searches.map((text, idx) => (
+                <CommandItem
+                  key={`recent-search-${idx}`}
+                  value={`recent-search-${idx}`}
+                  onSelect={() => setQuery(text)}
+                  className="min-h-[44px] cursor-pointer"
+                >
+                  <Zap className="w-4 h-4 text-muted-foreground" />
+                  <span className="text-sm flex-1 truncate">{text}</span>
+                </CommandItem>
+              ))}
+            </CommandGroup>
+          )}
+        </div>
+      );
+    }
+    if (totalCount === 0 && !actions.some((a) => matchesAction(a, query))) {
+      return (
+        <div className="py-10 text-center text-sm text-muted-foreground">
+          {t('לא נמצאו תוצאות עבור')} "{query}"
+        </div>
+      );
+    }
+    const matching = actions.filter((a) => matchesAction(a, query));
+    return (
+      <>
+        {matching.length > 0 && (
+          <CommandGroup heading={t('פעולות')} className="mb-1">
+            {matching.map((action) => (
               <CommandItem
-                key={`recent-search-${idx}`}
-                value={`recent-search-${idx}`}
-                onSelect={() => setQuery(s.text)}
-                className="min-h-[44px] cursor-pointer"
+                key={action.id}
+                value={action.id}
+                onSelect={() => { navigate(action.path); setOpen(false); setMobileOpen(false); }}
+                className="min-h-[44px] cursor-pointer gap-3"
               >
-                <Clock className="w-4 h-4 text-muted-foreground" />
-                <span className="text-sm flex-1 truncate">{s.text}</span>
+                <div className="w-8 h-8 rounded-lg bg-accent flex items-center justify-center flex-shrink-0">
+                  <action.icon className="w-4 h-4 text-primary" />
+                </div>
+                <span className="text-sm flex-1 truncate">{action.label}</span>
               </CommandItem>
             ))}
           </CommandGroup>
-        </div>
-      );
-    }
-    if (totalCount === 0) {
-      return (
-        <div className="py-10 text-center text-sm text-muted-foreground">
-          לא נמצאו תוצאות עבור "{query}"
-        </div>
-      );
-    }
-    return (
-      <>
+        )}
         {results.showLeading && (
           <CommandGroup heading="תוצאה מובילה" className="mb-1">
             {renderItem(results.leading, true)}
@@ -442,7 +544,7 @@ export default function GlobalSearch() {
             />
           </div>
           {/* Results panel — anchored below input */}
-          {open && (results || recentSearches.length > 0) && (
+          {open && (
             <div className="absolute top-full mt-1 right-0 left-0 min-w-full max-w-xl z-50 animate-slide-in rounded-lg border border-border bg-popover text-popover-foreground shadow-lg overflow-hidden">
               <CommandList className="max-h-[60vh] overflow-y-auto overflow-x-hidden p-2">
                 {renderResults()}

@@ -151,6 +151,18 @@ export default function CrmModulePage({
   };
   const openEditor = (record) => { setSheetRecord(record); setSheetOpen(true); };
 
+  // A quick action from global search asks for the create form directly. It is
+  // the same sheet the page's own button opens — not a second way in.
+  const wantsNew = searchParams.get('new');
+  useEffect(() => {
+    if (!wantsNew) return;
+    setSheetRecord(null);
+    setSheetOpen(true);
+    const next = new URLSearchParams(searchParams);
+    next.delete('new');
+    setSearchParams(next, { replace: true });
+  }, [wantsNew]);
+
   // Open a record named in the URL once it has loaded, then drop the param so
   // a refresh or a back-navigation does not reopen the sheet.
   const requestedId = searchParams.get('recordId');
