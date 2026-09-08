@@ -66,10 +66,6 @@ export default function Calendar() {
   const rangeEnd = useMemo(() => format(addMonths(endOfMonth(cursor), 1), 'yyyy-MM-dd'), [cursor]);
 
   const { data: projects = [], isLoading: lp } = useQuery({ queryKey: ['projects'], queryFn: () => api.entities.Project.list('-created_date') });
-  const { data: milestones = [], isLoading: lm } = useQuery({
-    queryKey: ['milestones', rangeStart, rangeEnd],
-    queryFn: () => api.entities.Milestone.filter({ target_date: { $gte: rangeStart, $lte: rangeEnd } }),
-  });
   const { data: tasks = [], isLoading: lt } = useQuery({
     queryKey: ['tasks', rangeStart, rangeEnd],
     queryFn: () => api.entities.Task.filter({ due_date: { $gte: rangeStart, $lte: rangeEnd } }),
@@ -82,10 +78,6 @@ export default function Calendar() {
     queryKey: ['quotes', rangeStart, rangeEnd],
     queryFn: () => api.entities.Quote.filter({ follow_up_date: { $gte: rangeStart, $lte: rangeEnd } }),
   });
-  const { data: meetings = [], isLoading: lmt } = useQuery({
-    queryKey: ['meetings', rangeStart, rangeEnd],
-    queryFn: () => api.entities.MeetingLog.filter({ date: { $gte: rangeStart, $lte: rangeEnd } }),
-  });
 
   const { data: outlookConfig = {} } = useOutlookCalendarConfig();
   const outlookEnabled = outlookConfig.enabled && outlookConfig.connected && outlookConfig.userVisible !== false;
@@ -93,7 +85,7 @@ export default function Calendar() {
   const outlookEvents = outlookEventsQuery.data || [];
   const outlookError = outlookEventsQuery.isError;
 
-  const loading = aclLoading || lp || lm || lt || lr || lq || lmt;
+  const loading = aclLoading || lp || lt || lr || lq;
 
   const visibleProjects = useMemo(
     () => projects.filter(p => canViewProject(p.id)),
@@ -155,9 +147,7 @@ export default function Calendar() {
       push(p.licensing_start_date, 'licensing', `תחילת חיוב רישוי — ${p.client_name || p.name}`, p.id);
       push(p.frozen_until, 'frozen', `סיום הקפאה — ${p.client_name || p.name}`, p.id);
     }
-    for (const m of milestones) push(m.target_date, 'milestone', `${m.name} — ${projectName(m.project_id)}`, m.project_id);
     for (const t of tasks) push(t.due_date, 'task', `${t.title} — ${projectName(t.project_id)}`, t.project_id);
-    for (const mt of meetings) push(mt.date, 'meeting', `${mt.title} — ${projectName(mt.project_id)}`, mt.project_id, mt.start_time);
     for (const r of reminders) push(r.reminder_date, 'reminder', r.message || 'תזכורת', r.project_id, r.reminder_time);
     for (const q of quotes) push(q.follow_up_date, 'quote_followup', `מעקב הצעה: ${q.title} — ${projectName(q.project_id)}`, q.project_id);
     for (const oe of outlookEvents) {
@@ -165,7 +155,7 @@ export default function Calendar() {
       if (d) out.push({ date: d, type: 'outlook', title: oe.subject || '(ללא כותרת)', projectId: null, time: null, outlookData: oe });
     }
     return out.filter(e => !disabledTypes.has(eventCategory(e.type)));
-  }, [visibleProjects, milestones, tasks, meetings, reminders, quotes, outlookEvents, visibleIds, disabledProjects, disabledTypes, projectMap]);
+  }, [visibleProjects, tasks, reminders, quotes, outlookEvents, visibleIds, disabledProjects, disabledTypes, projectMap]);
 
   // Sort events within a day: timed events first (ascending), then date-only
   const sortDayEvents = (dayEvents) => {

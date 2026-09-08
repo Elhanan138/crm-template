@@ -183,7 +183,7 @@ export default function ProjectDocuments({ project, bare = false }) {
     </label>
    </div>
 
-   {/* Timeline list — matches MilestoneTimeline pattern */}
+   {/* Timeline list */}
    {docs.length === 0 ? (
     <EmptyState
      icon={FolderOpen}

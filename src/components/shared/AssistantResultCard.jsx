@@ -9,8 +9,6 @@ function getNavTarget(action) {
     case 'markTaskDone':
     case 'addTaskComment':
       return '/tasks';
-    case 'createMeeting':
-      return '/meeting-summaries';
     case 'createSupportTicket':
     case 'updateTicketStatus':
       return '/support';

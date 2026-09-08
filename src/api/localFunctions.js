@@ -11,9 +11,9 @@ const FULL = ['full'];
 const ADMIN_USER_ID = 'local-admin-001';
 
 const CHILD_ENTITIES = [
-  'Task', 'Milestone', 'MeetingLog', 'ProjectNote', 'Quote',
+  'Task', 'ProjectNote', 'Quote',
   'GanttItem', 'GanttGroup', 'GanttColumn', 'GanttView',
-  'Reminder', 'TaskComment', 'ProjectAlert', 'MeetingTranscript',
+  'Reminder', 'TaskComment', 'ProjectAlert',
   'ProjectDocumentText', 'ProjectStage', 'ProjectChecklistItem', 'ClientHighlight',
 ];
 const ROADMAP_ENTITIES = ['RoadmapItem', 'RoadmapMessage'];
@@ -265,8 +265,6 @@ export function invokeLocalFunction(name, body = {}) {
       return listProjectPermissions(body);
     case 'deleteTask':
       return deleteTask(body);
-    case 'deleteMilestones':
-      return deleteMilestones(body);
     case 'manageCustomField':
       return manageCustomField(body);
     case 'logAudit':
@@ -284,10 +282,6 @@ export function invokeLocalFunction(name, body = {}) {
       return transferProjectOwnership(body);
     case 'manageMyTeam':
       return manageMyTeam(body);
-    case 'manageMeetingTranscript':
-      return manageMeetingTranscript(body);
-    case 'linkMeetingToProject':
-      return linkMeetingToProject(body);
     case 'syncDirectory':
       return syncDirectory(body);
     case 'runAutomations':
@@ -307,14 +301,10 @@ export function invokeLocalFunction(name, body = {}) {
 
     // Server-only: AI, mail and calendar sync.
     case 'agentAction':
-    case 'askMeeting':
     case 'projectAgent':
     case 'projectChat':
     case 'reportsChat':
-    case 'summarizeMeeting':
-    case 'transcribeMeeting':
     case 'guideFromText':
-    case 'createTasksFromSummary':
     case 'ingestProjectDocument':
     case 'sendGmail':
     case 'backfillEmailLogs':
@@ -725,7 +715,6 @@ function manageProject(body = {}) {
   const {
     action,
     project_data: data = {},
-    milestones = [],
     client_highlights = [],
     playbook_template_id: templateId,
     project_id: projectId,
@@ -773,14 +762,6 @@ function manageProject(body = {}) {
       custom_fields: data.custom_fields || {},
     });
 
-    const milestonesCreated = createChildRecords('Milestone', milestones, project, (m, i) => ({
-      name: m.name.trim(),
-      target_date: m.target_date || null,
-      billing_amount: m.billing_amount ? Number(m.billing_amount) : null,
-      status: 'not_started',
-      order: i,
-    }));
-
     const highlightsCreated = createChildRecords('ClientHighlight', client_highlights, project, (h, i) => ({
       category: h.category || 'other',
       title: h.title.trim(),
@@ -809,7 +790,6 @@ function manageProject(body = {}) {
         project_id: project.id,
         project_name: project.name,
         slug: project.slug,
-        milestones_created: milestonesCreated,
         highlights_created: highlightsCreated,
         playbook_applied: playbookApplied,
       },
@@ -848,13 +828,6 @@ function manageProject(body = {}) {
     entityUpdate('Project', projectId, updateData);
     const updated = getCollection('Project').find(p => p.id === projectId);
 
-    const milestonesCreated = createChildRecords('Milestone', milestones, updated, (m, i) => ({
-      name: m.name.trim(),
-      target_date: m.target_date || null,
-      billing_amount: m.billing_amount ? Number(m.billing_amount) : null,
-      status: 'not_started',
-      order: i,
-    }));
     const highlightsCreated = createChildRecords('ClientHighlight', client_highlights, updated, (h, i) => ({
       category: h.category || 'other',
       title: h.title.trim(),
@@ -871,7 +844,6 @@ function manageProject(body = {}) {
         project_id: projectId,
         project_name: updated.name,
         slug: updated.slug,
-        milestones_created: milestonesCreated,
         highlights_created: highlightsCreated,
       },
     };
@@ -953,12 +925,6 @@ function deleteTask(body = {}) {
   if (!id) throw Object.assign(new Error('taskId חובה'), { status: 400 });
   entityDelete('Task', id);
   return { data: { success: true } };
-}
-
-function deleteMilestones(body = {}) {
-  const ids = body.milestoneIds || (body.milestoneId ? [body.milestoneId] : []);
-  ids.forEach((id) => entityDelete('Milestone', id));
-  return { data: { success: true, deleted: ids.length } };
 }
 
 function manageCustomField(body = {}) {
@@ -1085,23 +1051,6 @@ function manageMyTeam(body = {}) {
   const member = getCollection('TeamMember').find((m) => cleanEmail(m.email) === cleanEmail(email));
   if (!member) return { data: { success: false, reason: 'member_not_found' } };
   entityUpdate('TeamMember', member.id, { manager_email: action === 'add' ? me : '' });
-  return { data: { success: true } };
-}
-
-function manageMeetingTranscript(body = {}) {
-  const { action, transcript_id: id, data = {} } = body;
-  if (action === 'delete') { entityDelete('MeetingTranscript', id); return { data: { success: true } }; }
-  if (action === 'update' || id) {
-    entityUpdate('MeetingTranscript', id, data);
-    return { data: { success: true, transcript: getCollection('MeetingTranscript').find((t) => t.id === id) } };
-  }
-  return { data: { success: true, transcript: entityCreate('MeetingTranscript', data) } };
-}
-
-function linkMeetingToProject(body = {}) {
-  const { transcript_id: id, project_id: projectId = null } = body;
-  if (!id) throw Object.assign(new Error('transcript_id חובה'), { status: 400 });
-  entityUpdate('MeetingTranscript', id, { project_id: projectId });
   return { data: { success: true } };
 }
 

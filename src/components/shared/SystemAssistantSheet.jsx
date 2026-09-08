@@ -7,8 +7,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   Bot, ArrowLeft, ArrowRight, Globe, History, X, Loader2, ShieldAlert,
   ChevronDown, ChevronUp, Maximize2, Minimize2, ChevronDown as ChevronDownIcon,
-  SquareCheckBig, Flag, CalendarCheck, BellRing, Undo2, BookOpen, BookOpenCheck,
-  ListChecks, Mail, LifeBuoy, ScrollText, MessagesSquare, CheckCheck, SquarePen,
+  SquareCheckBig, Flag, BellRing, Undo2, BookOpen, BookOpenCheck,
+  ListChecks, Mail, LifeBuoy, MessagesSquare, CheckCheck, SquarePen,
   SlidersHorizontal, ThumbsUp, ThumbsDown,
 } from 'lucide-react';
 import { CubeIcon } from '@radix-ui/react-icons';
@@ -35,14 +35,11 @@ const ACTION_ICONS = {
   addFlag: Flag,
   markTaskDone: CheckCheck,
   resolveFlag: Flag,
-  createMeeting: CalendarCheck,
   createReminder: BellRing,
   revertLastAction: Undo2,
   batch: ListChecks,
   openGuide: BookOpen,
   applyPlaybook: BookOpenCheck,
-  summarizeMeetingAction: ScrollText,
-  createTasksFromMeeting: ListChecks,
   sendEmail: Mail,
   createSupportTicket: LifeBuoy,
   updateTicketStatus: LifeBuoy,

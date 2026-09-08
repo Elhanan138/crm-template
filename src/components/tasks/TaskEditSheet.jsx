@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import EntityCustomFields from '@/components/shared/EntityCustomFields';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Loader2, User, Check, MessageCircle, ChevronDown, ChevronUp, GanttChart } from 'lucide-react';
+import { Loader2, User, Check, MessageCircle, ChevronDown, ChevronUp, GanttChart, Clock } from 'lucide-react';
 import { toast } from 'sonner';
 import TaskComments from '@/components/tasks/TaskComments';
 import TaskChecklist from '@/components/tasks/TaskChecklist';
@@ -73,6 +73,7 @@ export default function TaskEditSheet({ open, task, projectId, onClose }) {
    priority: task?.priority || 'medium',
    status: task?.status || 'not_started',
    checklist: task?.checklist || [],
+   hours_spent: task?.hours_spent ?? '',
    show_in_gantt: task?.show_in_gantt || false,
    project_id: task?.project_id || projectId || '',
    custom_fields: task?.custom_fields || {},
@@ -278,8 +279,23 @@ export default function TaskEditSheet({ open, task, projectId, onClose }) {
        onChange={v => set('due_date', v)}
        placeholder="ללא תאריך"
        clearable
-       className="h-8 px-2.5 text-xs w-[150px] ms-auto"
+       className="h-8 px-2.5 text-xs w-[150px]"
       />
+      {/* Hours booked on the work itself — the project's hours bank is their sum. */}
+      <div className="flex items-center gap-1.5 ms-auto">
+       <Clock className="w-3.5 h-3.5 text-muted-foreground flex-shrink-0"/>
+       <Input
+        type="number"
+        inputMode="decimal"
+        min="0"
+        step="0.25"
+        dir="ltr"
+        value={form.hours_spent ?? ''}
+        onChange={e => set('hours_spent', e.target.value === '' ? '' : Number(e.target.value))}
+        placeholder="שעות"
+        className="h-8 w-20 text-xs px-2"
+       />
+      </div>
      </div>
 
      <EntityCustomFields

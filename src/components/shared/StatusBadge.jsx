@@ -36,9 +36,7 @@ export const STATUS_MAP = {
   open:              { label: 'בטיפול',      tone: 'info' },
   in_progress:       { label: 'בטיפול',      tone: 'info' },
   done:              { label: 'הושלם',       tone: 'success' },
-  // Milestone
   not_started:       { label: 'טרם התחיל',   tone: 'neutral' },
-  ready_for_billing: { label: 'מוכן לחיוב',  tone: 'accent' },
   complete:          { label: 'הושלם',       tone: 'success' },
   paid:              { label: 'שולם',        tone: 'success' },
   // Quote
@@ -74,16 +72,7 @@ export const STATUS_MAP = {
   // Boolean
   true:              { label: 'כן',          tone: 'success' },
   false:             { label: 'לא',          tone: 'neutral' },
-  // Meeting types
   training:          { label: 'הדרכה',       tone: 'info' },
-  meeting:           { label: 'פגישה',        tone: 'accent' },
-  workshop:          { label: 'סדנה',        tone: 'warning' },
-  demo:              { label: 'דמו',         tone: 'neutral' },
-  // MeetingTranscript statuses
-  recording:         { label: 'מקליט',       tone: 'warning' },
-  uploading:         { label: 'מעלה',        tone: 'info' },
-  processing:        { label: 'מעבד',        tone: 'info' },
-  ready:             { label: 'מוכן',        tone: 'success' },
   failed:            { label: 'נכשל',        tone: 'destructive' },
   // Priorities (shared across Task / SupportTicket / DevItem)
   low:               { label: 'נמוכה',       tone: 'neutral' },

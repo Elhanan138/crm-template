@@ -160,10 +160,10 @@ describe('paging', () => {
     await findInTable('Deal 1');
 
     expect(rowTexts()).toHaveLength(50);
-    expect(within(table()).queryByText('Deal 51')).toBeNull();
+    expect(rowTexts().some((t) => t.includes('Deal 51'))).toBe(false);
 
     await user.click(screen.getByRole('button', { name: '2' }));
-    await waitFor(() => expect(inTable('Deal 51')).toBeTruthy());
+    await waitFor(() => expect(rowTexts().some((t) => t.includes('Deal 51'))).toBe(true));
     expect(rowTexts()).toHaveLength(12);
   });
 

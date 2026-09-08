@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { api } from '@/api/client';
 import { useAccessControl } from '@/hooks/useAccessControl';
-import { CheckSquare, LifeBuoy, Clock, Calendar, FileText, Settings2, X, BarChart3, ChevronLeft } from 'lucide-react';
+import { CheckSquare, LifeBuoy, Clock, FileText, Settings2, X, BarChart3, ChevronLeft } from 'lucide-react';
 import { CubeIcon } from '@radix-ui/react-icons';
 import { Button } from '@/components/ui/button';
 import ReportCard from '@/components/development/ReportCard';
@@ -19,7 +19,6 @@ const ALL_REPORTS = [
  { id: 'tasks', label: 'המשימות שלי', icon: CheckSquare },
  { id: 'tickets_type', label: 'פניות לפי סוג', icon: LifeBuoy },
  { id: 'tickets_priority', label: 'פניות לפי עדיפות', icon: LifeBuoy },
- { id: 'meetings', label: 'מפגשים', icon: Calendar },
  { id: 'quotes', label: 'הצעות מחיר', icon: FileText },
 ];
 
@@ -39,7 +38,6 @@ export default function UserReports() {
 
  const { data: tasks = [] } = useQuery({ queryKey: ['allTasks'], queryFn: () => api.entities.Task.list() });
  const { data: tickets = [] } = useQuery({ queryKey: ['allTickets'], queryFn: () => api.entities.SupportTicket.list() });
- const { data: meetings = [] } = useQuery({ queryKey: ['allMeetings'], queryFn: () => api.entities.MeetingLog.list() });
  const { data: projects = [] } = useQuery({ queryKey: ['projects'], queryFn: () => api.entities.Project.list() });
  const { data: quotes = [] } = useQuery({ queryKey: ['allQuotes'], queryFn: () => api.entities.Quote.list() });
 
@@ -69,10 +67,6 @@ export default function UserReports() {
   () => tickets.filter(t => cleanEmail(t.submitted_by_email) === cleanEmail(myEmail)),
   [tickets, myEmail]
  );
- const myMeetings = useMemo(
-  () => meetings.filter(m => m.implementers?.includes(myName) || m.created_by_id === myUserId),
-  [meetings, myName, myUserId]
- );
  const myProjects = useMemo(
   () => isRealAdmin ? projects : projects.filter(p => p.project_manager === myName || p.current_liaison === myName || p.created_by_id === myUserId),
   [projects, isRealAdmin, myName, myUserId]
@@ -84,14 +78,14 @@ export default function UserReports() {
 
  const doneTasks = myTasks.filter(t => t.status === 'done').length;
  const openTickets = myTickets.filter(t => t.status !== 'resolved').length;
- const totalHours = myMeetings.filter(m => m.billable).reduce((sum, m) => sum + (m.effective_hours || 0), 0);
+ const totalHours = myTasks.reduce((sum, t) => sum + (Number(t.hours_spent) || 0), 0);
  const projectNames = useMemo(() => {
   const map = {};
   projects.forEach(p => { map[p.id] = p.client_name || p.name; });
   return map;
  }, [projects]);
 
- const hasData = myTasks.length > 0 || myTickets.length > 0 || myMeetings.length > 0 || myProjects.length > 0;
+ const hasData = myTasks.length > 0 || myTickets.length > 0 || myProjects.length > 0;
 
  if (!hasData) {
   return (
@@ -124,7 +118,7 @@ export default function UserReports() {
     <KpiCard icon={CubeIcon} value={myProjects.length} label="הפרויקטים שלי"tone="primary"density="compact"/>
     <KpiCard icon={CheckSquare} value={myTasks.length} label="המשימות שלי"sub={`${doneTasks} הושלמו`} tone="success"density="compact"/>
     <KpiCard icon={LifeBuoy} value={openTickets} label="פניות פתוחות"sub={`מתוך ${myTickets.length}`} tone="warning"density="compact"/>
-    <KpiCard icon={Clock} value={totalHours.toFixed(1)} label="שעות הדרכה"sub={`${myMeetings.length} מפגשים`} tone="info"density="compact"/>
+    <KpiCard icon={Clock} value={totalHours.toFixed(1)} label="שעות שרשמתי"sub={`על ${myTasks.length} משימות`} tone="info"density="compact"/>
    </div>
 
    <div className="flex items-center justify-between gap-3">
@@ -222,20 +216,6 @@ export default function UserReports() {
        { key: 'type', label: 'סוג', badge: true },
        { key: 'priority', label: 'עדיפות', badge: true },
        { key: 'status', label: 'סטטוס', badge: true },
-      ]}
-     />
-    )}
-    {isVisible('meetings') && myMeetings.length > 0 && (
-     <ReportCard
-      title="המפגשים שלי לפי סוג"
-      icon={Calendar}
-      data={aggregate(myMeetings, 'type')}
-      details={myMeetings.map(m => ({ ...m, project_name: projectNames[m.project_id] || '—' }))}
-      columns={[
-       { key: 'title', label: 'מפגש' },
-       { key: 'project_name', label: 'פרויקט' },
-       { key: 'type', label: 'סוג', badge: true },
-       { key: 'date', label: 'תאריך', format: 'date' },
       ]}
      />
     )}

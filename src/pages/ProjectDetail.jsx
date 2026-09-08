@@ -386,7 +386,6 @@ export default function ProjectDetail() {
      {activeTab === 'overview' && (
       <OverviewTab
        project={project}
-       meetings={[]}
        tasks={tasks}
        canEditCustom={canAccess}
        onNavigate={setActiveTab}
@@ -447,7 +446,7 @@ export default function ProjectDetail() {
     }}
    />
 
-   <ProjectPdfExport ref={pdfExportRef} project={project} meetings={[]} />
+   <ProjectPdfExport ref={pdfExportRef} project={project} />
 
    {/* Delete Project Dialog */}
    <DeleteDialog

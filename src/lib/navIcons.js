@@ -23,8 +23,6 @@ export const NAV_ICONS = {
   tasks: CheckboxIcon,
   calendar: CalendarIcon,
   guides: ReaderIcon,
-  milestones: TargetIcon,
-  meetingSummaries: Pencil1Icon,
   forms: LayersIcon,
   leads: Filter,
   contacts: Contact,

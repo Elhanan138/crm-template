@@ -15,18 +15,6 @@ export const TRIGGER_CATALOG = [
     configFields: [],
   },
   {
-    id: 'milestone_overdue',
-    label: 'אבן דרך באיחור',
-    description: 'אבן דרך שתאריך היעד שלה עבר וטרם הושלמה',
-    configFields: [],
-  },
-  {
-    id: 'milestone_billing',
-    label: 'אבן דרך מוכנה לחיוב',
-    description: 'אבן דרך הגיעה לסטטוס "מוכן לחיוב"',
-    configFields: [],
-  },
-  {
     id: 'stage_completed',
     label: 'שלב הושלם',
     description: 'שלב בחיי הפרויקט הושלם',
@@ -109,10 +97,6 @@ export function describeAlert(alert) {
     }
     case 'task_overdue':
       return 'משימה באיחור';
-    case 'milestone_overdue':
-      return 'אבן דרך באיחור';
-    case 'milestone_billing':
-      return 'אבן דרך מוכנה לחיוב';
     case 'stage_completed':
       return 'שלב הושלם';
     case 'hours_low': {

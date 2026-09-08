@@ -13,7 +13,7 @@ import { getProjectPath } from '@/lib/projectSlug';
 import { CRM_SEARCH_SOURCES, sourceForType, searchTextsOf } from '@/lib/crm/searchSources';
 import { CRM_SCHEMAS } from '@/lib/crm/schemas';
 import { useRecordViewer, visibleModuleRecords } from '@/lib/crm/visibility';
-import { CheckSquare, Calendar, FileSignature,
+import { CheckSquare, FileSignature,
   BookOpen, Users,
   Search, Clock, CornerDownLeft, X
 } from 'lucide-react';
@@ -26,10 +26,6 @@ function scoreRecord(q, record, type) {
       primary = [record.client_name, record.name];
       secondary = [(record.tags || []).join(' '), record.project_manager, record.current_liaison];
       break;
-    case 'milestone':
-      primary = record.name;
-      secondary = [record.description, record.assigned_to];
-      break;
     case 'task':
       primary = record.title;
       secondary = [record.description, record.assigned_to];
@@ -37,10 +33,6 @@ function scoreRecord(q, record, type) {
     case 'quote':
       primary = [record.proposal_number, record.client_name];
       secondary = [record.notes, record.status];
-      break;
-    case 'meeting':
-      primary = record.title;
-      secondary = [record.summary, record.attendees, (record.implementers || []).join(' ')];
       break;
     case 'guide':
       primary = record.title;
@@ -73,7 +65,6 @@ const TYPE_META = {
   project:   { label: 'פרויקטים',  icon: CubeIcon,    color: 'text-primary',  tab: 'overview' },
   task:      { label: 'משימות',    icon: CheckSquare,      color: 'text-info',     tab: 'tasks' },
   quote:     { label: 'הצעות',     icon: FileSignature,    color: 'text-warning',  path: '/proposals' },
-  meeting:   { label: 'פגישות',    icon: Calendar,         color: 'text-warning',  tab: 'meetings' },
   guide:     { label: 'מדריכים',   icon: BookOpen,         color: 'text-success',  path: '/guides', idParam: 'guideId' },
   member:    { label: 'אנשי צוות', icon: Users,            color: 'text-secondary', path: '/profile', idParam: 'memberId' },
 };
@@ -91,7 +82,7 @@ for (const source of CRM_SEARCH_SOURCES) {
 // Project-side types first — they are what most searches are for — then the
 // modules, in the order the manifest declares them.
 const TYPE_ORDER = [
-  'project', 'task', 'quote', 'meeting', 'guide', 'member',
+  'project', 'task', 'quote', 'guide', 'member',
   ...CRM_SEARCH_SOURCES.map((s) => s.type),
 ];
 
@@ -124,20 +115,12 @@ export default function GlobalSearch() {
     queryKey: ['projects'], queryFn: () => api.entities.Project.list(),
     enabled: searchActive,
   });
-  const { data: milestones = [] } = useQuery({
-    queryKey: ['allMilestones'], queryFn: () => api.entities.Milestone.list(),
-    enabled: searchActive,
-  });
   const { data: tasks = [] } = useQuery({
     queryKey: ['allTasks'], queryFn: () => api.entities.Task.list(),
     enabled: searchActive,
   });
   const { data: quotes = [] } = useQuery({
     queryKey: ['allProposals'], queryFn: () => api.entities.Proposal.list(),
-    enabled: searchActive,
-  });
-  const { data: meetings = [] } = useQuery({
-    queryKey: ['allMeetings'], queryFn: () => api.entities.MeetingLog.list(),
     enabled: searchActive,
   });
   const { data: guides = [] } = useQuery({
@@ -254,7 +237,6 @@ export default function GlobalSearch() {
       project: buildGroup(projects, 'project', p => canViewProject(p.id)),
       task: buildGroup(tasks, 'task', t => projectIds.has(t.project_id) && canAccess(t)),
       quote: buildGroup(enrichedQuotes, 'quote', qt => projectIds.has(qt.project_id) && canAccess(qt)),
-      meeting: buildGroup(meetings, 'meeting', mt => projectIds.has(mt.project_id) && canAccess(mt)),
       guide: buildGroup(guides, 'guide'),
       member: buildGroup(teamMembers, 'member'),
     };
@@ -283,7 +265,7 @@ export default function GlobalSearch() {
       .sort((a, b) => b.topScore - a.topScore);
 
     return { groups, leading, showLeading, groupOrder, totalCount: allScored.length };
-  }, [query, projects, milestones, tasks, quotes, meetings, guides, teamMembers, clientMap, canViewProject, canAccess, crmData, viewer]);
+  }, [query, projects, tasks, quotes, guides, teamMembers, clientMap, canViewProject, canAccess, crmData, viewer]);
 
   const totalCount = results?.totalCount ?? 0;
 

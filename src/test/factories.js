@@ -61,23 +61,6 @@ export function makeTask(overrides = {}) {
   }
 }
 
-export function makeMilestone(overrides = {}) {
-  return {
-    project_id: 'proj-1',
-    name: 'Test Milestone',
-    description: 'A test milestone',
-    assigned_to: 'Test User',
-    target_date: '',
-    billing_amount: 0,
-    status: 'not_started',
-    depends_on: '',
-    order: 0,
-    member_emails: ['test@blossom-kc.com'],
-    editor_emails: ['test@blossom-kc.com'],
-    ...overrides,
-  }
-}
-
 export function makeTicket(overrides = {}) {
   return {
     submitted_by: 'Test User',
@@ -112,7 +95,6 @@ export function makeNotification(overrides = {}) {
     recipient_email: 'test@blossom-kc.com',
     message: 'Test notification',
     project_id: '',
-    milestone_id: '',
     ticket_id: '',
     task_id: '',
     form_template_id: '',

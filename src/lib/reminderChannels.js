@@ -1,5 +1,5 @@
 // Unified reminder channel labels — single source of truth for all entities.
-// Used by ReminderFields, QuoteForm, MilestoneForm, HighlightForm, etc.
+// Used by ReminderFields, QuoteForm, HighlightForm, etc.
 
 export const REMINDER_CHANNEL_LABELS = {
   bell: 'פעמון',

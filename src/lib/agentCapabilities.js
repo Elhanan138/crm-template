@@ -6,8 +6,6 @@
  *
  * Feature IDs match GlobalSystemFeaturesPanel.jsx:
  *   tasks → null (always available)
- *   milestones → 'milestones'
- *   meetings → 'meeting_summaries'
  *   reminders → null
  *   email → null + adminOnly
  *   tickets → null
@@ -30,34 +28,6 @@ export const CAPABILITIES = [
       scopes: ['project', 'global'],
     },
     cardPriority: 2,
-  },
-  {
-    id: 'milestones',
-    featureId: 'milestones',
-    adminOnly: false,
-    actions: ['createMilestone', 'updateMilestoneStatus'],
-    card: {
-      icon: Target,
-      title: 'צור אבן דרך',
-      subtitle: 'עם תאריך יעד וחיוב',
-      prompt: 'צור אבן דרך',
-      scopes: ['project'],
-    },
-    cardPriority: 4,
-  },
-  {
-    id: 'meetings',
-    featureId: 'meeting_summaries',
-    adminOnly: false,
-    actions: ['createMeeting', 'summarizeMeetingAction', 'createTasksFromMeeting', 'logMeetingHours'],
-    card: {
-      icon: CalendarCheck,
-      title: 'תעד פגישה',
-      subtitle: 'תאריך, משתתפים ותוכן',
-      prompt: 'תעד פגישה',
-      scopes: ['project', 'global'],
-    },
-    cardPriority: 5,
   },
   {
     id: 'reminders',
@@ -308,8 +278,6 @@ export function getCapabilityGroups({ systemDisabledFeatures, userDisabledAction
 
 const CAPABILITY_GROUP_NAMES = {
   tasks: 'משימות',
-  milestones: 'אבני דרך',
-  meetings: 'פגישות',
   reminders: 'תזכורות',
   email: 'מייל',
   tickets: 'פניות תמיכה',
@@ -326,8 +294,6 @@ const CAPABILITY_GROUP_NAMES = {
 
 const CAPABILITY_GROUP_DESCRIPTIONS = {
   tasks: 'יצירה, עדכון והשלמת משימות',
-  milestones: 'יצירה ועדכון סטטוס אבני דרך',
-  meetings: 'יצירת פגישות, רישום שעות וסיכום תמלולים',
   reminders: 'יצירת תזכורות אישיות',
   email: 'שליחת מיילים למשתמשים רשומים',
   tickets: 'יצירה ועדכון פניות תמיכה',

@@ -7,12 +7,10 @@ import { CubeIcon } from '@radix-ui/react-icons';
  */
 export const KPI_ICONS = {
   projects: CubeIcon,
-  milestones: Target,
   tasks: CheckSquare,
   hours: Clock,
   money: DollarSign,
   project_life: Route,
-  meetings: Users,
   support: LifeBuoy,
 };
 

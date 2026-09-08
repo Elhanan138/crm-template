@@ -30,7 +30,6 @@ const TITLE_MAP = [
   { match: /^\/projects$/,                 title: 'פרויקטים' },
   { match: /^\/tasks$/,                    title: 'משימות' },
   { match: /^\/calendar$/,                 title: 'יומן' },
-  { match: /^\/milestones$/,               title: 'אבני דרך' },
   { match: /^\/support$/,                  title: 'תמיכה' },
   { match: /^\/settings$/,                 title: 'הגדרות' },
   { match: /^\/notifications$/,            title: 'התראות' },

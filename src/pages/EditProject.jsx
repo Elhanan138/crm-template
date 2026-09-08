@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent } from '@/components/ui/card';
-import { Loader2, Save, FileText, CalendarDays, ImagePlus, X, LayoutDashboard, Route, GanttChart, FileSignature, CheckSquare, SlidersHorizontal } from 'lucide-react';
+import { Loader2, Save, FileText, ImagePlus, X, LayoutDashboard, Route, GanttChart, FileSignature, CheckSquare, SlidersHorizontal } from 'lucide-react';
 import { toast } from 'sonner';
 import { useAccessControl } from '@/hooks/useAccessControl';
 import { useSelectablePeople } from '@/hooks/useSelectablePeople';
@@ -21,7 +21,6 @@ const PROJECT_TABS = [
  { id: 'gantt', label: 'גאנט', icon: GanttChart },
  { id: 'finance', label: 'הצעות ותעריפים', icon: FileSignature },
  { id: 'tasks', label: 'משימות', icon: CheckSquare },
- { id: 'meetings', label: 'פגישות והדרכות', icon: CalendarDays },
  ];
 
 export default function EditProject() {

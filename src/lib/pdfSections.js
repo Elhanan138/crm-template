@@ -3,7 +3,6 @@ export const PDF_SECTIONS = [
   { id: 'project-life', label: 'חיי פרויקט' },
   { id: 'tasks', label: 'משימות' },
   { id: 'gantt', label: 'גאנט' },
-  { id: 'meetings', label: 'פגישות והדרכות' },
   { id: 'quotes', label: 'הצעות מחיר' },
   { id: 'rates', label: 'תעריפים' },
   { id: 'notes', label: 'הערות' },

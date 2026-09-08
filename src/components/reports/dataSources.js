@@ -12,11 +12,9 @@ export const VALUE_LABELS = {
   open: 'פתוח',
   in_progress: 'בתהליך',
   done: 'הושלם',
-  // Milestone status
   not_started: 'טרם התחיל',
   complete: 'הושלם',
   paid: 'שולם',
-  ready_for_billing: 'מוכן לחיוב',
   // Quote status
   draft: 'טיוטה',
   sent: 'נשלח',
@@ -50,11 +48,7 @@ export const VALUE_LABELS = {
   manual: 'ידני',
   ai: 'AI',
   contract: 'חוזה',
-  // Meeting types
   training: 'הדרכה',
-  meeting: 'פגישה',
-  workshop: 'סדנה',
-  demo: 'דמו',
   // Boolean
   true: 'כן',
   false: 'לא',

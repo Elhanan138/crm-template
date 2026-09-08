@@ -110,7 +110,7 @@ function HighlightForm({ highlight, projectId, memberEmails, onClose }) {
     <DateField value={form.deadline} onChange={v => setForm(f => ({ ...f, deadline: v }))} placeholder="בחר תאריך"className="h-9 text-sm"/>
    </div>
 
-   {/* Optional reminder — unified component shared with QuoteForm and MilestoneForm */}
+   {/* Optional reminder — unified component shared with QuoteForm */}
    <ReminderFields
     value={{ reminder_date: form.reminder_date, reminder_time: form.reminder_time, reminder_channel: form.reminder_channel }}
     onChange={patch => setForm(f => ({ ...f, ...patch }))}

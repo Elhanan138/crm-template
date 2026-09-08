@@ -37,17 +37,13 @@ describe('manageProject (local)', () => {
     expect(read('Project')[0].training_hours_purchased).toBe(0);
   });
 
-  it('creates milestones and highlights attached to the project', () => {
+  it('creates highlights attached to the project, and skips the blank ones', () => {
     const { data } = invokeLocalFunction('manageProject', {
       action: 'create',
       project_data: { client_name: 'Globex' },
-      milestones: [{ name: 'קיקאוף', billing_amount: '5000' }, { name: '' }],
-      client_highlights: [{ title: 'איש קשר', content: 'דנה' }],
+      client_highlights: [{ title: 'איש קשר', content: 'דנה' }, { title: '' }],
     });
-    expect(data.milestones_created).toBe(1);
     expect(data.highlights_created).toBe(1);
-    expect(read('Milestone')[0].project_id).toBe(data.project_id);
-    expect(read('Milestone')[0].billing_amount).toBe(5000);
     expect(read('ClientHighlight')[0].project_id).toBe(data.project_id);
   });
 
@@ -87,11 +83,11 @@ describe('manageProject (local)', () => {
     const { data } = invokeLocalFunction('manageProject', {
       action: 'create',
       project_data: { client_name: 'Soylent' },
-      milestones: [{ name: 'שלב א' }],
+      client_highlights: [{ title: 'הערה', content: 'x' }],
     });
     invokeLocalFunction('deleteProjectCascade', { projectId: data.project_id });
     expect(read('Project')).toHaveLength(0);
-    expect(read('Milestone')).toHaveLength(0);
+    expect(read('ClientHighlight')).toHaveLength(0);
   });
 });
 

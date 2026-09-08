@@ -8,7 +8,7 @@ import { REMINDER_CHANNEL_OPTIONS } from '@/lib/reminderChannels';
 
 /**
  * Unified reminder fields UI — extracted 1:1 from HighlightForm.
- * Used by HighlightForm, QuoteForm, MilestoneForm — single source of truth.
+ * Used by HighlightForm and QuoteForm — single source of truth.
  *
  * @param {object} value - { reminder_date, reminder_time, reminder_channel }
  * @param {function} onChange - receives a patch object to merge into parent form state

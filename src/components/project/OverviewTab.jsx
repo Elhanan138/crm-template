@@ -6,18 +6,14 @@ import KpiCard from '@/components/shared/KpiCard';
 import { KPI_ICONS, formatKpi, resolveTone } from '@/lib/kpi';
 import { isFixedPrice } from '@/lib/pricingModel';
 
-export default function OverviewTab({ project, meetings, tasks, canEditCustom = false, onNavigate }) {
+export default function OverviewTab({ project, tasks, canEditCustom = false, onNavigate }) {
   const openTasks = tasks.filter(t => t.status !== 'done').length;
   const urgentTasks = tasks.filter(t => t.priority === 'urgent' && t.status !== 'done').length;
 
-  const effectiveHours = (m) => {
-    if (m.effective_hours != null) return m.effective_hours;
-    const dur = m.duration_hours || 0;
-    const count = (m.implementers && m.implementers.length) ? m.implementers.length : 1;
-    return dur * count;
-  };
+  // Hours used are the hours booked on the project's tasks. They used to be
+  // derived from meeting records; the work itself is the honest source.
   const purchasedHours = project.training_hours_purchased || 0;
-  const usedHours = meetings.reduce((s, m) => s + effectiveHours(m), 0);
+  const usedHours = tasks.reduce((s, t) => s + (Number(t.hours_spent) || 0), 0);
   const remainingHours = purchasedHours - usedHours;
 
   const { data: projectStages = [] } = useQuery({
@@ -73,16 +69,16 @@ export default function OverviewTab({ project, meetings, tasks, canEditCustom = 
             icon={KPI_ICONS.hours}
             tone={resolveTone({ metric: 'hours', value: purchasedHours > 0 ? (usedHours / purchasedHours) * 100 : 0, threshold: { warning: 80, destructive: 90 } })}
             density="compact"
-            onClick={() => onNavigate('meetings')}
+            onClick={() => onNavigate('tasks')}
           />
         ) : (
           <KpiCard
-            label="פגישות תועדו"
-            value={formatKpi(meetings.length, 'count')}
-            icon={KPI_ICONS.meetings}
+            label="שעות שנרשמו"
+            value={formatKpi(usedHours, 'count')}
+            icon={KPI_ICONS.hours}
             tone="neutral"
             density="compact"
-            onClick={() => onNavigate('meetings')}
+            onClick={() => onNavigate('tasks')}
           />
         )}
         <KpiCard

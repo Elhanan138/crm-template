@@ -1,22 +1,20 @@
 import {
-  Flag, Rocket, Target, CheckSquare, Bell, FileText, Snowflake, Key, Users, Mail,
+  Flag, Rocket, CheckSquare, Bell, FileText, Snowflake, Key, Mail,
 } from 'lucide-react';
 
 // Category → design-system tone mapping (for chip rendering)
 const CATEGORY_TONES = {
   outlook: 'info',
-  milestone: 'success',
   task: 'warning',
   reminder: 'accent',
   other: 'neutral',
 };
 
 // Filter categories — 4 meaningful options shown in the filter dropdown.
-// Events whose type maps to 'other' (kickoff, go_live, licensing, frozen, meeting)
+// Events whose type maps to 'other' (kickoff, go_live, licensing, frozen)
 // are not individually filterable — they appear only when no type filter is active.
 export const CATEGORY_LABELS = {
   outlook: 'פגישות Outlook',
-  milestone: 'אבני דרך',
   task: 'משימות',
   reminder: 'תזכורות ומעקבים',
 };
@@ -28,10 +26,8 @@ export const EVENT_TYPES = {
   go_live:         { label: 'עלייה לאוויר',   icon: Rocket,      category: 'other' },
   licensing:       { label: 'רישוי',         icon: Key,         category: 'other' },
   frozen:          { label: 'הקפאה',          icon: Snowflake,   category: 'other' },
-  milestone:       { label: 'אבן דרך',        icon: Target,      category: 'milestone' },
   task:            { label: 'משימה',          icon: CheckSquare, category: 'task' },
   reminder:        { label: 'תזכורת',         icon: Bell,        category: 'reminder' },
-  meeting:         { label: 'פגישה',          icon: Users,       category: 'other' },
   outlook:         { label: 'Outlook',        icon: Mail,        category: 'outlook' },
   quote_followup:  { label: 'מעקב הצעה',     icon: FileText,    category: 'reminder' },
 };
@@ -50,10 +46,9 @@ export function eventTone(type) {
 
 // Maps an event type to the project tab that shows its details.
 export function tabForEvent(type) {
-  if (type === 'milestone') return 'milestones';
   if (type === 'task') return 'tasks';
   if (type === 'quote_followup') return 'finance';
-  if (type === 'reminder' || type === 'meeting') return 'meetings';
+  if (type === 'reminder') return 'overview';
   return 'overview';
 }
 

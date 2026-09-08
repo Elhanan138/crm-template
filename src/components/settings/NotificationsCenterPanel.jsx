@@ -4,8 +4,7 @@ import { api } from '@/api/client';
 import { Switch } from '@/components/ui/switch';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Loader2, BellRing, Clock, CalendarX, Play } from 'lucide-react';
+import { Loader2, BellRing, Clock, Play } from 'lucide-react';
 import { toast } from 'sonner';
 import AllNotificationsTable from './notifications/AllNotificationsTable';
 
@@ -51,32 +50,6 @@ export default function NotificationsCenterPanel() {
     onError: () => toast.error('שמירה נכשלה'),
   });
 
-  // --- Undocumented meetings config ---
-  const { data: umRes } = useQuery({
-    queryKey: ['undocumented-config'],
-    queryFn: () => api.functions.invoke('notificationsAdmin', { action: 'getConfig', settingKey: 'undocumented_meetings_config' }),
-    retry: 1, meta: { silent: true },
-  });
-  const umConfig = umRes?.data?.value || {};
-
-  const saveUm = useMutation({
-    mutationFn: (value) => api.functions.invoke('notificationsAdmin', { action: 'setConfig', settingKey: 'undocumented_meetings_config', value }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['undocumented-config'] });
-      toast.success('תצורת סריקת פגישות נשמרה');
-    },
-    onError: () => toast.error('שמירה נכשלה'),
-  });
-
-  // --- Preview (undocumented meetings count) ---
-  const { data: previewRes } = useQuery({
-    queryKey: ['undocumented-preview'],
-    queryFn: () => api.functions.invoke('notificationsAdmin', { action: 'preview' }),
-    retry: 1, meta: { silent: true },
-  });
-  const previewCount = previewRes?.data?.count || 0;
-  const previewMinDays = previewRes?.data?.minDaysPending ?? 3;
-
   // --- Status (last run timestamps) ---
   const { data: statusRes } = useQuery({
     queryKey: ['notifications-status'],
@@ -118,17 +91,6 @@ export default function NotificationsCenterPanel() {
     end_hour: hbConfig.end_hour ?? 18,
     days: hbConfig.days ?? [0, 1, 2, 3, 4],
     frequency_minutes: hbConfig.frequency_minutes ?? 15,
-  };
-
-  // --- Local state for undocumented editing ---
-  const [umDraft, setUmDraft] = useState(null);
-  const um = umDraft || {
-    enabled: umConfig.enabled !== false,
-    min_days_pending: umConfig.min_days_pending ?? 3,
-    frequency_hours: umConfig.frequency_hours ?? 72,
-    recipients_mode: umConfig.recipients_mode || 'owner',
-    custom_emails: Array.isArray(umConfig.custom_emails) ? umConfig.custom_emails : [],
-    channels: umConfig.channels || { bell: true, email: false },
   };
 
   const fmtTime = (iso) => {
@@ -280,86 +242,6 @@ export default function NotificationsCenterPanel() {
           </Button>
         </div>
       </div>
-
-      {/* ═══ Card C: Undocumented meetings ═══ */}
-      <div className="bg-card rounded-xl border border-border shadow-sm p-5">
-        <div className="flex items-center gap-2.5 mb-4">
-          <div className="w-8 h-8 rounded-lg bg-accent flex items-center justify-center flex-shrink-0">
-            <CalendarX className="w-4 h-4 text-primary" />
-          </div>
-          <div>
-            <h3 className="text-sm font-bold text-foreground">פגישות שלא תועדו</h3>
-            <p className="text-[11px] text-muted-foreground">סריקה תקופתית של פגישות מהיומן שטרם תועדו</p>
-          </div>
-        </div>
-
-        <div className="space-y-3">
-          <div className="flex items-center justify-between rounded-lg bg-muted/40 px-3 py-2">
-            <span className="text-sm font-medium">סריקה פעילה</span>
-            <Switch checked={um.enabled} onCheckedChange={(v) => setUmDraft({ ...um, enabled: v })} />
-          </div>
-
-          <div className="grid grid-cols-2 gap-2">
-            <div className="space-y-1">
-              <label className="text-[11px] text-muted-foreground">ימים מינימליים להמתנה</label>
-              <Input type="number" min={0} value={um.min_days_pending} onChange={(e) => setUmDraft({ ...um, min_days_pending: Number(e.target.value) })} className="h-8 text-sm" />
-            </div>
-            <div className="space-y-1">
-              <label className="text-[11px] text-muted-foreground">תדירות סריקה (שעות)</label>
-              <Input type="number" min={0.1} step={0.1} value={um.frequency_hours} onChange={(e) => setUmDraft({ ...um, frequency_hours: Number(e.target.value) })} className="h-8 text-sm" />
-            </div>
-          </div>
-
-          <div className="space-y-1">
-            <label className="text-[11px] text-muted-foreground">נמענים</label>
-            <Select value={um.recipients_mode} onValueChange={(v) => setUmDraft({ ...um, recipients_mode: v })}>
-              <SelectTrigger className="h-8 text-sm"><SelectValue /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="owner">בעלי היומן</SelectItem>
-                <SelectItem value="admins">אדמינים</SelectItem>
-                <SelectItem value="custom">כתובות מותאמות</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          {um.recipients_mode === 'custom' && (
-            <div className="space-y-1">
-              <label className="text-[11px] text-muted-foreground">כתובות מייל (מופרדות בפסיק)</label>
-              <Input
-                value={um.custom_emails.join(', ')}
-                onChange={(e) => setUmDraft({ ...um, custom_emails: e.target.value.split(',').map(s => s.trim()).filter(Boolean) })}
-                className="h-8 text-sm"
-                placeholder="a@b.com, c@d.com"
-              />
-            </div>
-          )}
-
-          <div className="flex items-center gap-4">
-            <label className="flex items-center gap-1.5 text-xs">
-              <Switch checked={um.channels?.bell} onCheckedChange={(v) => setUmDraft({ ...um, channels: { ...um.channels, bell: v } })} />
-              פעמון
-            </label>
-            <label className="flex items-center gap-1.5 text-xs">
-              <Switch checked={um.channels?.email} onCheckedChange={(v) => setUmDraft({ ...um, channels: { ...um.channels, email: v } })} />
-              מייל
-            </label>
-          </div>
-
-          {/* Live preview */}
-          <div className="rounded-lg bg-muted/30 px-3 py-2">
-            <p className="text-[11px] text-muted-foreground">
-              כרגע <span className="font-bold text-foreground">{previewCount}</span> פגישות ממתינות לתיעוד מעל <span className="font-bold text-foreground">{previewMinDays}</span> ימים
-            </p>
-            <p className="text-[11px] text-muted-foreground">ריצה אחרונה: {fmtTime(status.undocumentedLastRun)}</p>
-          </div>
-
-          <Button size="sm" onClick={() => saveUm.mutate(um)} disabled={saveUm.isPending || !umDraft} className="w-full">
-            {saveUm.isPending && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
-            שמור תצורה
-          </Button>
-        </div>
-      </div>
-
       {/* ═══ Run now buttons ═══ */}
       <div className="bg-card rounded-xl border border-border shadow-sm p-5">
         <div className="flex items-center gap-2.5 mb-3">

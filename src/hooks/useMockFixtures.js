@@ -18,7 +18,7 @@ export function useMockCounts(enabled) {
     queryKey: ['mock-counts'],
     queryFn: async () => {
       const res = await api.functions.invoke('manageMockFixtures', { action: 'counts' });
-      return res.data || { calendar_events: 0, meeting_logs: 0, fixtures: 0, demo_project_exists: false };
+      return res.data || { calendar_events: 0, fixtures: 0, demo_project_exists: false };
     },
     enabled: !!enabled,
     retry: false,

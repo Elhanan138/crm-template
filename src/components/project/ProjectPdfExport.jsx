@@ -20,7 +20,7 @@ const QUOTE_STATUS = { draft: 'טיוטה', sent: 'נשלח', signed: 'חתום'
 const TASK_STATUS = { open: 'פתוחה', in_progress: 'בתהליך', done: 'הושלמה' };
 const GANTT_STATUS = { not_started: 'לא התחיל', in_progress: 'בתהליך', stuck: 'תקוע', done: 'הושלם' };
 
-const ProjectPdfExport = forwardRef(({ project, meetings = [] }, ref) => {
+const ProjectPdfExport = forwardRef(({ project }, ref) => {
   const [busy, setBusy] = useState(false);
   const [activeSections, setActiveSections] = useState(null);
   const [reportData, setReportData] = useState(null);
@@ -38,17 +38,12 @@ const ProjectPdfExport = forwardRef(({ project, meetings = [] }, ref) => {
           api.entities.Rate.filter({ project_id: project.id }),
         ]);
 
-        const recentMeetings = [...meetings]
-          .sort((a, b) => new Date(b.date || 0) - new Date(a.date || 0))
-          .slice(0, 10);
-
         setReportData({
           openQuotes: quotes.filter(q => q.status !== 'signed' && q.status !== 'rejected'),
           tasks,
           ganttItems,
           notes,
           rates,
-          recentMeetings,
         });
         setActiveSections(sections);
 
@@ -187,23 +182,6 @@ const ProjectPdfExport = forwardRef(({ project, meetings = [] }, ref) => {
                     <tr key={g.id} style={{ borderBottom: '1px solid #eee' }}>
                       <Td>{g.name}</Td><Td>{fmtDate(g.start_date)}</Td>
                       <Td>{fmtDate(g.end_date)}</Td><Td>{GANTT_STATUS[g.status] || g.status}</Td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            )}
-          </Section>
-        )}
-
-        {sections.includes('meetings') && (
-          <Section title="פגישות והדרכות">
-            {!reportData?.recentMeetings?.length ? <Empty /> : (
-              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12px' }}>
-                <thead><tr style={{ background: '#f5f5f5' }}><Th>נושא</Th><Th>תאריך</Th><Th>שעות</Th></tr></thead>
-                <tbody>
-                  {reportData.recentMeetings.map(m => (
-                    <tr key={m.id} style={{ borderBottom: '1px solid #eee' }}>
-                      <Td>{m.title}</Td><Td>{fmtDate(m.date)}</Td><Td>{m.effective_hours || m.duration_hours || '—'}</Td>
                     </tr>
                   ))}
                 </tbody>

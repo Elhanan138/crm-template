@@ -113,55 +113,7 @@
 }
 
 /* ReactQuill mobile + RTL optimization */
-.meeting-quill-wrapper .ql-toolbar {
-  direction: rtl;
-  border-radius: 8px 8px 0 0;
-  border-color: hsl(var(--border));
-  overflow-x: auto;
-  white-space: nowrap;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 2px;
-  padding: 6px 4px;
-}
-.meeting-quill-wrapper .ql-toolbar .ql-formats {
-  display: inline-flex;
-  margin-left: 4px;
-  margin-right: 4px;
-}
-.meeting-quill-wrapper .ql-container {
-  border-radius: 0 0 8px 8px;
-  border-color: hsl(var(--border));
-  min-height: 240px;
-  font-size: 15px;
-  line-height: 1.8;
-}
-.meeting-quill-wrapper .ql-editor {
-  direction: rtl;
-  text-align: right;
-  font-family: var(--font-sans);
-  min-height: 240px;
-  padding: 16px 18px;
-  line-height: 1.8;
-}
-.meeting-quill-wrapper .ql-editor.ql-blank::before {
-  right: 12px;
-  left: auto;
-  direction: rtl;
-  text-align: right;
-}
 @media (max-width: 640px) {
-  .meeting-quill-wrapper .ql-container {
-    min-height: 200px;
-  }
-  .meeting-quill-wrapper .ql-editor {
-    min-height: 200px;
-    padding: 14px;
-  }
-  .meeting-quill-wrapper .ql-toolbar button {
-    width: 26px;
-    height: 26px;
-  }
 }
 
 /* Micro-animations */

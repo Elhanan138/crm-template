@@ -26,7 +26,7 @@ export default function NotificationBell({ userEmail }) {
  const unread = notifications.filter(n => !n.is_read);
 
  // Make every notification clickable: mark it read and navigate to the most
- // specific related screen (project, with milestones tab when relevant).
+ // specific related screen (the project it belongs to).
  const handleOpenNotification = (n) => {
   if (!n.is_read) markReadMutation.mutate(n.id);
   setOpen(false);
