@@ -128,6 +128,7 @@ export default function CustomFieldsPanel() {
   const deleteMutation = useMutation({
     mutationFn: (id) => api.entities.CustomField.delete(id),
     onSuccess: () => { invalidate(); toast.success('השדה נמחק'); },
+    onError: (e) => toast.error(e?.message || 'מחיקת השדה נכשלה'),
   });
 
   const move = (field, delta) => {

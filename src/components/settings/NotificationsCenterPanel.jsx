@@ -27,7 +27,11 @@ export default function NotificationsCenterPanel() {
 
   const toggleMaster = useMutation({
     mutationFn: ({ tabId, enabled }) => api.functions.invoke('globalTabVisibility', { action: 'set', settingKey: 'notifications_master', tabId, enabled }),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['notifications-master'] }),
+    onSuccess: (_r, { enabled }) => {
+      queryClient.invalidateQueries({ queryKey: ['notifications-master'] });
+      toast.success(enabled ? 'ההתראות הופעלו' : 'ההתראות כובו');
+    },
+    onError: (e) => toast.error(e?.message || 'שינוי מצב ההתראות נכשל'),
   });
 
   // --- Heartbeat config ---

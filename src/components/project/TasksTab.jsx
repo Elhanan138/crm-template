@@ -165,6 +165,7 @@ export default function TasksTab({ projectId, project, focusItemId, onFocusHandl
    setReminderDate(''); setReminderTime(''); setReminderMsg('');
    toast.success('תזכורת נשמרה');
   },
+  onError: (e) => toast.error(e?.message || 'שמירת התזכורת נכשלה'),
  });
 
  const filteredTasks = filter === 'all' ? tasks : tasks.filter(t => t.status === filter);

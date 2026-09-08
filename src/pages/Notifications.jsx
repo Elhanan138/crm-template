@@ -7,6 +7,7 @@ import PageHeader from '@/components/shared/PageHeader';
 import ListSkeleton from '@/components/shared/ListSkeleton';
 import EmptyState from '@/components/shared/EmptyState';
 import { formatDate } from '@/lib/formatDate';
+import { toast } from 'sonner';
 import { useAccessControl } from '@/hooks/useAccessControl';
 
 export default function Notifications() {
@@ -25,6 +26,7 @@ export default function Notifications() {
   const markReadMutation = useMutation({
     mutationFn: (id) => api.entities.Notification.update(id, { is_read: true }),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['notifications', userEmail] }),
+    onError: (e) => toast.error(e?.message || 'סימון ההתראה כנקראה נכשל'),
   });
 
   const markAllReadMutation = useMutation({
@@ -33,12 +35,20 @@ export default function Notifications() {
         await api.entities.Notification.update(n.id, { is_read: true });
       }
     },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['notifications', userEmail] }),
+    onSuccess: (_r, _v, _c) => {
+      queryClient.invalidateQueries({ queryKey: ['notifications', userEmail] });
+      toast.success('כל ההתראות סומנו כנקראו');
+    },
+    onError: (e) => toast.error(e?.message || 'סימון ההתראות נכשל'),
   });
 
   const deleteMutation = useMutation({
     mutationFn: (id) => api.entities.Notification.delete(id),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['notifications', userEmail] }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['notifications', userEmail] });
+      toast.success('ההתראה נמחקה');
+    },
+    onError: (e) => toast.error(e?.message || 'מחיקת ההתראה נכשלה'),
   });
 
   const filtered = filter === 'unread' ? notifications.filter(n => !n.is_read)

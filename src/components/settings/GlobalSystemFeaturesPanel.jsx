@@ -1,6 +1,7 @@
 import React from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/api/client';
+import { toast } from 'sonner';
 import { Bot, Bell, Loader2, Mail, FolderKanban, BarChart3 } from 'lucide-react';
 import { isFeatureEnabled } from '@/lib/features';
 import { ACTIVE_MODULE_IDS } from '@/lib/moduleRegistry';
@@ -47,7 +48,14 @@ export default function GlobalSystemFeaturesPanel() {
 
  const toggleMutation = useMutation({
   mutationFn: ({ tabId, enabled }) => api.functions.invoke('globalTabVisibility', { action: 'set', settingKey: 'global_system_features', tabId, enabled }),
-  onSuccess: () => queryClient.invalidateQueries({ queryKey: ['global-system-features'] }),
+  // A switch that changes what a whole organisation can reach must say so.
+  // Silence here reads as "it did not save", and the setting gets toggled twice.
+  onSuccess: (_r, { label, enabled }) => {
+   queryClient.invalidateQueries({ queryKey: ['global-system-features'] });
+   const state = ACCESS_STATES.find(s => s.value === enabled)?.label || enabled;
+   toast.success(`${label || 'היכולת'} — ${state}`);
+  },
+  onError: (e) => toast.error(e?.message || 'שינוי ההרשאה נכשל'),
  });
 
  // Project alerts mode
@@ -62,7 +70,11 @@ export default function GlobalSystemFeaturesPanel() {
 
  const alertsModeMutation = useMutation({
   mutationFn: (mode) => api.functions.invoke('globalTabVisibility', { action: 'set', settingKey: 'project_alerts_mode', tabId: 'project_alerts_mode', enabled: mode }),
-  onSuccess: () => queryClient.invalidateQueries({ queryKey: ['project-alerts-mode'] }),
+  onSuccess: () => {
+   queryClient.invalidateQueries({ queryKey: ['project-alerts-mode'] });
+   toast.success('מצב ההתראות עודכן');
+  },
+  onError: (e) => toast.error(e?.message || 'עדכון מצב ההתראות נכשל'),
  });
 
  if (isLoading) {
@@ -105,7 +117,7 @@ export default function GlobalSystemFeaturesPanel() {
          {ACCESS_STATES.map(state => (
           <button
            key={state.value}
-           onClick={() => toggleMutation.mutate({ tabId: feature.id, enabled: state.value })}
+           onClick={() => toggleMutation.mutate({ tabId: feature.id, enabled: state.value, label: feature.label })}
            className={`flex-1 text-[11px] py-1.5 rounded-md transition-colors ${
             accessLevel === state.value
              ? 'bg-primary text-primary-foreground font-semibold'

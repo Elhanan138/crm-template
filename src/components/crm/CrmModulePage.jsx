@@ -23,6 +23,7 @@ import CrmRecordSheet from './CrmRecordSheet';
 import BoardView, { StatStrip } from './BoardView';
 import { useCrmRecords, filterRecords, formatValue, currency } from '@/lib/crm/useCrmRecords';
 import { TONE_CLASS } from '@/lib/crm/schemas';
+import { readField } from '@/lib/crm/derived';
 import {
   statsFor, segmentsFor, groupOptionsFor, boardConfigFor, sortRecords,
   groupRecords, toCsv, isOverdue, statusFieldOf, moneyFieldOf,
@@ -158,7 +159,7 @@ export default function CrmModulePage({
   };
 
   const cell = (field, record) => {
-    const raw = record[field.key];
+    const raw = readField(field, record);
     if (field.type === 'select' && field.options?.[0]?.tone !== undefined) {
       return <StatusPill meta={field.options.find((o) => String(o.value) === String(raw))} />;
     }
@@ -249,7 +250,7 @@ export default function CrmModulePage({
   );
 
   const groupTotal = (items) =>
-    moneyField ? items.reduce((s, r) => s + Number(r[moneyField.key] || 0), 0) : 0;
+    moneyField ? items.reduce((s, r) => s + Number(readField(moneyField, r) || 0), 0) : 0;
 
   return (
     <div dir="rtl" className="pb-10">
@@ -442,9 +443,9 @@ export default function CrmModulePage({
             openRecord={openRecord}
             subtitleOf={(r) => {
               const field = columns.find((f) => f.key !== schema.titleField && f.type !== 'select');
-              return field ? formatValue(field, r[field.key], lookups) : '';
+              return field ? formatValue(field, readField(field, r), lookups) : '';
             }}
-            amountOf={moneyField ? (r) => r[moneyField.key] : undefined}
+            amountOf={moneyField ? (r) => readField(moneyField, r) : undefined}
             formatValue={currency}
           />
         ) : (

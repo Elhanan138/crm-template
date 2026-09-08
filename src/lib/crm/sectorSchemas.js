@@ -2,6 +2,11 @@ import {
   Users, UserPlus, GraduationCap, Boxes, ShoppingCart, Laptop,
   Wrench, ShieldCheck, AlertTriangle, Repeat,
 } from 'lucide-react';
+import {
+  monthlyRevenue, stockValue, stockState, STOCK_STATES, riskScore, riskBand,
+  RISK_BANDS, slaState, SLA_STATES, warrantyState, WARRANTY_STATES,
+  yearsSince, daysUntil, ageInStage,
+} from '@/lib/crm/derived';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // SECTOR MODULES
@@ -123,6 +128,7 @@ export const SECTOR_SCHEMAS = {
         { value: 'student', label: 'סטודנט' },
       ], list: true },
       { key: 'start_date', label: 'תאריך תחילה', type: 'date', list: true },
+      { key: 'tenure_years', label: 'ותק (שנים)', type: 'number', list: true, derive: (r) => yearsSince(r.start_date) },
       { key: 'end_date', label: 'תאריך סיום', type: 'date' },
       { key: 'work_percent', label: 'היקף משרה %', type: 'percent' },
       { key: 'email', label: 'אימייל', type: 'email' },
@@ -160,6 +166,9 @@ export const SECTOR_SCHEMAS = {
       ], list: true },
       { key: 'expected_salary', label: 'ציפיות שכר', type: 'currency' },
       { key: 'interview_date', label: 'ראיון הבא', type: 'date', list: true },
+      // How long this candidate has been waiting where they are. A pipeline
+      // rots by stalling, not by rejecting.
+      { key: 'days_in_stage', label: 'ימים בשלב', type: 'number', list: true, derive: ageInStage },
       { key: 'rating', label: 'דירוג 1-5', type: 'number' },
       { key: 'email', label: 'אימייל', type: 'email' },
       { key: 'phone', label: 'טלפון', type: 'phone' },
@@ -189,6 +198,7 @@ export const SECTOR_SCHEMAS = {
       { key: 'mandatory', label: 'חובה', type: 'checkbox', list: true },
       { key: 'assigned_date', label: 'תאריך הקצאה', type: 'date' },
       { key: 'due_date', label: 'תאריך יעד', type: 'date', list: true },
+      { key: 'days_left', label: 'ימים ליעד', type: 'number', list: true, derive: (r) => (r.status === 'completed' ? null : daysUntil(r.due_date)) },
       { key: 'completed_date', label: 'תאריך השלמה', type: 'date' },
       { key: 'score', label: 'ציון', type: 'number' },
       { key: 'hours', label: 'שעות', type: 'number' },
@@ -222,6 +232,8 @@ export const SECTOR_SCHEMAS = {
         { value: 'meter', label: 'מטר' },
       ], default: 'unit' },
       { key: 'unit_cost', label: 'עלות ליחידה', type: 'currency', list: true },
+      { key: 'stock_value', label: 'שווי מלאי', type: 'currency', list: true, derive: stockValue },
+      { key: 'stock_state', label: 'מצב מלאי', type: 'select', options: STOCK_STATES, list: true, derive: stockState },
       { key: 'location', label: 'מיקום במחסן', type: 'text', list: true },
       { key: 'supplier', label: 'ספק', type: 'text' },
       { key: 'active', label: 'פעיל', type: 'checkbox', default: true },
@@ -252,6 +264,7 @@ export const SECTOR_SCHEMAS = {
       ], default: 'ILS' },
       { key: 'order_date', label: 'תאריך הזמנה', type: 'date', list: true },
       { key: 'expected_date', label: 'אספקה צפויה', type: 'date', list: true },
+      { key: 'delivery_days_left', label: 'ימים לאספקה', type: 'number', list: true, derive: (r) => (r.received_date || ['received', 'cancelled'].includes(r.status) ? null : daysUntil(r.expected_date)) },
       { key: 'received_date', label: 'תאריך קבלה', type: 'date' },
       { key: 'approved_by', label: 'אושר על ידי', type: 'person', by: 'name' },
       { key: 'cost_center', label: 'מרכז עלות', type: 'text' },
@@ -287,6 +300,7 @@ export const SECTOR_SCHEMAS = {
       { key: 'purchase_date', label: 'תאריך רכישה', type: 'date' },
       { key: 'purchase_cost', label: 'עלות', type: 'currency' },
       { key: 'warranty_until', label: 'אחריות עד', type: 'date', list: true },
+      { key: 'warranty_state', label: 'מצב אחריות', type: 'select', options: WARRANTY_STATES, list: true, derive: warrantyState },
       { key: 'location', label: 'מיקום', type: 'text' },
       OWNER,
       { key: 'notes', label: 'הערות', type: 'textarea' },
@@ -318,7 +332,8 @@ export const SECTOR_SCHEMAS = {
       { key: 'completed_date', label: 'מועד סיום', type: 'date' },
       { key: 'labor_hours', label: 'שעות עבודה', type: 'number' },
       { key: 'parts_cost', label: 'עלות חלקים', type: 'currency' },
-      { key: 'sla_due', label: 'יעד SLA', type: 'date' },
+      { key: 'sla_due', label: 'יעד SLA', type: 'date', list: true },
+      { key: 'sla_state', label: 'עמידה ב-SLA', type: 'select', options: SLA_STATES, list: true, derive: slaState },
       OWNER,
       { key: 'description', label: 'תיאור התקלה', type: 'textarea' },
     ],
@@ -385,6 +400,10 @@ export const SECTOR_SCHEMAS = {
       ], list: true },
       { key: 'likelihood', label: 'הסתברות', type: 'select', options: RISK_LEVELS, required: true, list: true, default: 3 },
       { key: 'impact', label: 'השפעה', type: 'select', options: RISK_LEVELS, required: true, list: true, default: 3 },
+      // Likelihood x impact — the score every risk register is read by, and the
+      // band it lands in. Both were implicit in two fields nobody multiplied.
+      { key: 'risk_score', label: 'ציון סיכון', type: 'number', list: true, derive: riskScore },
+      { key: 'risk_band', label: 'רמת סיכון', type: 'select', options: RISK_BANDS.map(({ value, label, tone }) => ({ value, label, tone })), list: true, derive: riskBand },
       { key: 'response', label: 'אסטרטגיה', type: 'select', options: RISK_RESPONSES, list: true },
       { key: 'status', label: 'סטטוס', type: 'select', options: [
         { value: 'open', label: 'פתוח', tone: 'warning' },
@@ -419,6 +438,7 @@ export const SECTOR_SCHEMAS = {
       { key: 'status', label: 'סטטוס', type: 'select', options: SUBSCRIPTION_STATUSES, required: true, list: true, default: 'active' },
       { key: 'amount', label: 'סכום לתקופה', type: 'currency', required: true, list: true },
       { key: 'billing_cycle', label: 'מחזור חיוב', type: 'select', options: BILLING_CYCLES, required: true, list: true, default: 'monthly' },
+      { key: 'mrr', label: 'MRR', type: 'currency', list: true, derive: monthlyRevenue(BILLING_CYCLES) },
       { key: 'seats', label: 'מושבים', type: 'number' },
       { key: 'start_date', label: 'תחילת מנוי', type: 'date', list: true },
       { key: 'renewal_date', label: 'חידוש', type: 'date', list: true },

@@ -15,6 +15,7 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 import { accountKey } from '@/lib/crm/accountKey';
+import { readField, parseDate } from '@/lib/crm/derived';
 
 // "Finished" cannot be read off the tone alone: `muted` is worn both by the
 // FIRST state of a flow (draft, new) and by its dead end (void, lost). Treating
@@ -41,11 +42,9 @@ const startOfToday = () => {
   return d;
 };
 
-const asDate = (value) => {
-  if (!value) return null;
-  const d = new Date(value);
-  return Number.isNaN(d.getTime()) ? null : d;
-};
+// Shared with the derived layer so "is this late" gets the same answer here,
+// in a derived column and in a report — a date-only field is a local day.
+const asDate = parseDate;
 
 /** The select field that carries the module's status, if it has one. */
 export const statusFieldOf = (schema) =>
@@ -68,18 +67,18 @@ export const ownerFieldOf = (schema) =>
   (schema?.fields || []).find((f) => f.type === 'person') || null;
 
 const toneOf = (field, record) =>
-  field?.options?.find((o) => String(o.value) === String(record?.[field.key]))?.tone;
+  field?.options?.find((o) => String(o.value) === String(readField(field, record)))?.tone;
 
 const isClosed = (statusField, record) => {
   if (!statusField) return false;
   if (CLOSED_TONES.has(toneOf(statusField, record))) return true;
-  return TERMINAL_VALUES.has(String(record?.[statusField.key] ?? '').toLowerCase());
+  return TERMINAL_VALUES.has(String(readField(statusField, record) ?? '').toLowerCase());
 };
 
 const isOverdue = (schema, record, today = startOfToday()) => {
   const field = deadlineFieldOf(schema);
   if (!field) return false;
-  const date = asDate(record?.[field.key]);
+  const date = asDate(readField(field, record));
   return !!date && date < today && !isClosed(statusFieldOf(schema), record);
 };
 
@@ -100,7 +99,7 @@ export function statsFor(schema, records = [], { formatCurrency = String } = {})
 
   if (moneyField) {
     const open = statusField ? records.filter((r) => !isClosed(statusField, r)) : records;
-    const total = open.reduce((sum, r) => sum + Number(r[moneyField.key] || 0), 0);
+    const total = open.reduce((sum, r) => sum + Number(readField(moneyField, r) || 0), 0);
     stats.push({
       label: statusField ? `${moneyField.label} — פתוח` : `${moneyField.label} — סה"כ`,
       value: formatCurrency(total),
@@ -179,7 +178,7 @@ export function segmentsFor(schema, { myEmail = '', myName = '' } = {}) {
       id: 'soon',
       label: 'ב-30 הימים הקרובים',
       test: (r) => {
-        const date = asDate(r?.[deadlineField.key]);
+        const date = asDate(readField(deadlineField, r));
         if (!date) return false;
         const today = startOfToday();
         const horizon = new Date(today);
@@ -225,14 +224,14 @@ export function sortRecords(records, sort, schema) {
   const empty = (v) => v === undefined || v === null || v === '';
 
   return [...records].sort((a, b) => {
-    const av = a?.[sort.key];
-    const bv = b?.[sort.key];
+    const av = readField(field, a) ?? a?.[sort.key];
+    const bv = readField(field, b) ?? b?.[sort.key];
     if (empty(av) && empty(bv)) return 0;
     if (empty(av)) return 1;
     if (empty(bv)) return -1;
 
     if (field && NUMERIC_TYPES.has(field.type)) return (Number(av) - Number(bv)) * factor;
-    if (field?.type === 'date') return (new Date(av) - new Date(bv)) * factor;
+    if (field?.type === 'date') return (asDate(av) - asDate(bv)) * factor;
     if (field?.type === 'checkbox') return ((av ? 1 : 0) - (bv ? 1 : 0)) * factor;
     if (field?.type === 'select') {
       // Sort by the order the schema declares, not alphabetically: a pipeline
@@ -257,9 +256,10 @@ export function groupRecords(records, groupKey, schema, formatValue) {
   const buckets = new Map();
 
   for (const record of records) {
-    const shown = formatValue(field, record[groupKey]) || '—';
+    const raw = readField(field, record);
+    const shown = formatValue(field, raw) || '—';
     // Bucket on identity, label with the first spelling encountered.
-    const id = byAccount ? accountKey(record[groupKey]) || shown : shown;
+    const id = byAccount ? accountKey(raw) || shown : shown;
     if (!buckets.has(id)) buckets.set(id, { label: shown, items: [] });
     buckets.get(id).items.push(record);
   }
@@ -285,6 +285,6 @@ export function toCsv(records, columns, formatValue) {
     return /[",\n]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text;
   };
   const header = columns.map((c) => escape(c.label)).join(',');
-  const rows = records.map((r) => columns.map((c) => escape(formatValue(c, r[c.key]))).join(','));
+  const rows = records.map((r) => columns.map((c) => escape(formatValue(c, readField(c, r)))).join(','));
   return `﻿${[header, ...rows].join('\r\n')}`;
 }

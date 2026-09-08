@@ -154,6 +154,7 @@ export default function EditProject() {
    toast.success('הפרויקט עודכן בהצלחה');
    navigate(getProjectPath(updated || project));
   },
+  onError: (e) => toast.error(e?.message || 'עדכון הפרויקט נכשל'),
  });
 
  const update = (field, value) => setForm(prev => ({ ...prev, [field]: value }));

@@ -45,6 +45,9 @@ export default function QuickTaskForm({ projects, defaultProjectId, onOpenFullFo
       toast.success('משימה נוצרה', { duration: 2000 });
       setForm({ ...EMPTY, project_id: form.project_id });
     },
+    // Without this the form silently keeps what you typed and looks like it
+    // simply ignored you.
+    onError: (e) => toast.error(e?.message || 'יצירת המשימה נכשלה'),
   });
 
   const submit = () => {

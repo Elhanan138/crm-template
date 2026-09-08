@@ -6,6 +6,7 @@ import { Bell, BellRing, Check, X, ChevronLeft, CheckCheck, Trash2 } from 'lucid
 import { createPortal } from 'react-dom';
 import { getProjectPathFromId } from '@/lib/projectSlug';
 import { formatDate } from '@/lib/formatDate';
+import { toast } from 'sonner';
 
 
 export default function NotificationBell({ userEmail }) {
@@ -52,6 +53,7 @@ export default function NotificationBell({ userEmail }) {
  const markReadMutation = useMutation({
   mutationFn: (id) => api.entities.Notification.update(id, { is_read: true }),
   onSuccess: () => queryClient.invalidateQueries({ queryKey: ['notifications', userEmail] }),
+  onError: (e) => toast.error(e?.message || 'סימון ההתראה כנקראה נכשל'),
  });
 
  const markAllReadMutation = useMutation({
@@ -60,12 +62,20 @@ export default function NotificationBell({ userEmail }) {
     await api.entities.Notification.update(n.id, { is_read: true });
    }
   },
-  onSuccess: () => queryClient.invalidateQueries({ queryKey: ['notifications', userEmail] }),
+  onSuccess: () => {
+   queryClient.invalidateQueries({ queryKey: ['notifications', userEmail] });
+   toast.success('כל ההתראות סומנו כנקראו');
+  },
+  onError: (e) => toast.error(e?.message || 'סימון ההתראות נכשל'),
  });
 
  const deleteOneMutation = useMutation({
   mutationFn: (id) => api.entities.Notification.delete(id),
-  onSuccess: () => queryClient.invalidateQueries({ queryKey: ['notifications', userEmail] }),
+  onSuccess: () => {
+   queryClient.invalidateQueries({ queryKey: ['notifications', userEmail] });
+   toast.success('ההתראה נמחקה');
+  },
+  onError: (e) => toast.error(e?.message || 'מחיקת ההתראה נכשלה'),
  });
 
  useEffect(() => {

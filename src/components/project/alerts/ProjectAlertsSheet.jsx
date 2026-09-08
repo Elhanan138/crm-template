@@ -118,6 +118,9 @@ export default function ProjectAlertsSheet({ open, onOpenChange, project, teamMe
  const recreateMutation = useMutation({
   mutationFn: (data) => api.entities.ProjectAlert.create(data),
   onSuccess: () => queryClient.invalidateQueries({ queryKey }),
+  // This one runs behind an "undo" — if it fails, the row someone just
+  // restored simply never comes back.
+  onError: (e) => toast.error(e?.message || 'שחזור ההתראה נכשל'),
  });
 
  const toggleActiveMutation = useMutation({

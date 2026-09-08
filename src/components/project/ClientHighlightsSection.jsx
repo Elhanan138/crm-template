@@ -60,6 +60,7 @@ function HighlightForm({ highlight, projectId, memberEmails, onClose }) {
    toast.success('מידע נוסף');
    onClose();
   },
+  onError: (e) => toast.error(e?.message || 'הוספת המידע נכשלה'),
  });
 
  const updateMutation = useMutation({
@@ -75,6 +76,7 @@ function HighlightForm({ highlight, projectId, memberEmails, onClose }) {
    toast.success('מידע עודכן');
    onClose();
   },
+  onError: (e) => toast.error(e?.message || 'עדכון המידע נכשל'),
  });
 
  const handleSubmit = (e) => {
@@ -142,6 +144,7 @@ export default function ClientHighlightsSection({ projectId, memberEmails }) {
   onSuccess: () => {
    queryClient.invalidateQueries({ queryKey: ['clientHighlights', projectId] });
   },
+  onError: (e) => toast.error(e?.message || 'עדכון המידע נכשל'),
  });
 
  const deleteMutation = useMutation({
@@ -151,6 +154,7 @@ export default function ClientHighlightsSection({ projectId, memberEmails }) {
    setDeleteDialog({ open: false, highlight: null });
    toast.success('מידע נמחק');
   },
+  onError: (e) => toast.error(e?.message || 'מחיקת המידע נכשלה'),
  });
 
  // Permission check: non-member (non-admin) doesn't see the section at all

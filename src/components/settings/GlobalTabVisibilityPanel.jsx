@@ -1,6 +1,7 @@
 import React from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/api/client';
+import { toast } from 'sonner';
 import { Switch } from '@/components/ui/switch';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Eye, Lock, Loader2 } from 'lucide-react';
@@ -18,7 +19,11 @@ export default function GlobalTabVisibilityPanel() {
 
  const toggleMutation = useMutation({
   mutationFn: ({ tabId, enabled }) => api.functions.invoke('globalTabVisibility', { action: 'set', tabId, enabled }),
-  onSuccess: () => queryClient.invalidateQueries({ queryKey: ['global-tab-visibility'] }),
+  onSuccess: (_r, { label, enabled }) => {
+   queryClient.invalidateQueries({ queryKey: ['global-tab-visibility'] });
+   toast.success(enabled ? `הלשונית "${label}" הוצגה` : `הלשונית "${label}" הוסתרה`);
+  },
+  onError: (e) => toast.error(e?.message || 'עדכון הלשונית נכשל'),
  });
 
  if (isLoading) {
@@ -70,7 +75,7 @@ export default function GlobalTabVisibilityPanel() {
        ) : (
         <Switch
          checked={isVisible}
-         onCheckedChange={(checked) => toggleMutation.mutate({ tabId: tab.id, enabled: checked })}
+         onCheckedChange={(checked) => toggleMutation.mutate({ tabId: tab.id, enabled: checked, label: tab.label })}
         />
        )}
       </div>

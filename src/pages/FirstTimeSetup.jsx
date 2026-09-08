@@ -5,6 +5,7 @@ import { useAccessControl } from '@/hooks/useAccessControl';
 import { ShieldCheck, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { isAdminUser } from '@/lib/permissions';
+import { toast } from 'sonner';
 
 /**
  * FirstTimeSetup — guard component for a clean export.
@@ -44,8 +45,12 @@ export default function FirstTimeSetup({ children }) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries();
+      toast.success('הוגדרת כמנהל הראשי — טוען מחדש');
       window.location.reload();
     },
+    // The one action that decides who owns the deployment. Failing it silently
+    // leaves someone staring at a button that appears to do nothing.
+    onError: (e) => toast.error(e?.message || 'ההגדרה כמנהל ראשי נכשלה'),
   });
 
   // Still loading, admin already exists, or current user is admin → show app

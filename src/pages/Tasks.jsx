@@ -85,6 +85,7 @@ export default function Tasks() {
    setReminderDate(''); setReminderTime(''); setReminderMsg('');
    toast.success('תזכורת נשמרה');
   },
+  onError: (e) => toast.error(e?.message || 'שמירת התזכורת נכשלה'),
  });
 
  const openReminder = (task) => { setReminderDialog({ open: true, task }); setReminderMsg(`תזכורת: ${task.title}`); };

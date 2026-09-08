@@ -444,11 +444,13 @@ export default function ProposalsView({ projectId }) {
         ? api.entities.Proposal.update(id, payload)
         : api.entities.Proposal.create(payload);
     },
-    onSuccess: () => {
+    onSuccess: (_r, vars) => {
       queryClient.invalidateQueries({ queryKey: ['proposals'] });
       setFormOpen(false);
       setEditingProposal(null);
+      toast.success(vars?.id ? 'הצעת המחיר עודכנה' : 'הצעת המחיר נוצרה');
     },
+    onError: (e) => toast.error(e?.message || 'שמירת הצעת המחיר נכשלה'),
   });
 
   // The document is mounted off-screen at full width, captured, then unmounted —

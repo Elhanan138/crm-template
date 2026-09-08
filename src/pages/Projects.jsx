@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useMemo } from 'react';
+import { toast } from 'sonner';
 import { api } from '@/api/client';
 import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
@@ -81,7 +82,6 @@ function ProjectRow({ project, dragHandleProps, isReordering }) {
 export default function Projects() {
   const [search, setSearch] = useState('');
   const [view, setView] = useState('grid');
-  const [ordered, setOrdered] = useState([]);
 
   const { isRealAdmin, canViewProject, isLoading: aclLoading, currentUser, effectiveUser, updateUser } = useAccessControl();
   const canCreateProject = true;
@@ -108,9 +108,14 @@ export default function Projects() {
    api.auth.updateMe({ ui_prefs: uiPrefs });
   };
 
-  useEffect(() => {
-   setOrdered(applyUserOrder(scopedProjects, currentUser?.project_order));
-  }, [scopedProjects, currentUser?.project_order]);
+  // Derived, not stored. As state fed by an effect this looped forever:
+  // `scopedProjects` is rebuilt on every render, so the effect saw a new
+  // dependency every time, set state, and re-rendered — thousands of times a
+  // second behind a page that looked fine.
+  const ordered = useMemo(
+   () => applyUserOrder(scopedProjects, currentUser?.project_order),
+   [allProjects, scope, isRealAdmin, identity.myName, identity.myEmail, identity.myUserId, currentUser?.project_order]
+  );
 
   const isSearching = !!search.trim();
   const filteredProjects = isSearching
@@ -137,7 +142,11 @@ export default function Projects() {
    const ids = ordered.map(p => p.id);
    const newOrder = reorder(ids, result.source.index, result.destination.index);
    updateUser({ project_order: newOrder });
-   await api.auth.updateMe({ project_order: newOrder });
+   try {
+    await api.auth.updateMe({ project_order: newOrder });
+   } catch (e) {
+    toast.error(e?.message || 'שמירת סדר הפרויקטים נכשלה');
+   }
   };
 
   if (isLoading || aclLoading) {

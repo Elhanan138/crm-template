@@ -86,6 +86,7 @@ export default function NotionTab({ projectId, project }) {
    queryClient.invalidateQueries({ queryKey: ['projectPages', projectId || 'global'] });
    toast.success('העמוד נמחק');
   },
+  onError: (e) => toast.error(e?.message || 'מחיקת העמוד נכשלה'),
  });
 
  const archiveMutation = useMutation({
@@ -101,6 +102,7 @@ export default function NotionTab({ projectId, project }) {
     },
    });
   },
+  onError: (e) => toast.error(e?.message || 'העברת העמוד לארכיון נכשלה'),
  });
 
  const setActivePage = useCallback((id) => {

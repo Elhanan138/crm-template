@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/api/client';
+import { toast } from 'sonner';
 
 // Org-level toggle + user connection state — any authenticated user
 export function useOutlookCalendarConfig() {
@@ -101,6 +102,7 @@ export function useAdminSyncAction() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['outlook-admin-users'] });
     },
+    onError: (e) => toast.error(e?.message || 'פעולת הסנכרון נכשלה'),
   });
 }
 
@@ -119,7 +121,9 @@ export function useSaveSetting() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['outlook-sync-settings'] });
+      toast.success('ההגדרה נשמרה');
     },
+    onError: (e) => toast.error(e?.message || 'שמירת ההגדרה נכשלה'),
   });
 }
 
@@ -141,8 +145,13 @@ export function useSyncMyCalendar() {
   return useMutation({
     mutationFn: async (payload) => {
       const res = await api.functions.invoke('syncOutlookCalendar', payload);
+      // A server-only function reports its absence in the payload rather than
+      // by throwing; without this the button looked like it had synced.
+      if (res.data?.success === false) throw new Error(res.data.message || 'הסנכרון נכשל');
       return res.data;
     },
+    onSuccess: () => toast.success('היומן סונכרן'),
+    onError: (e) => toast.error(e?.message || 'סנכרון היומן נכשל'),
   });
 }
 
@@ -157,5 +166,6 @@ export function useFetchTeamsAttendance() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['outlook-calendar-events'] });
     },
+    onError: (e) => toast.error(e?.message || 'שליפת נתוני ההשתתפות נכשלה'),
   });
 }

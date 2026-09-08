@@ -8,6 +8,7 @@ import { GROUPS, groupOf } from './supportGroups';
 import TicketRow from './TicketRow';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/api/client';
+import { toast } from 'sonner';
 
 // The smart list: search + filters, decision-based groups, multi-select batch actions.
 export default function TicketListPane({ tickets, teamMembers = [], activeId, onOpen, onNewInternal, onBatch, batchPending }) {
@@ -15,6 +16,9 @@ export default function TicketListPane({ tickets, teamMembers = [], activeId, on
   const updateMutation = useMutation({
     mutationFn: ({ id, data }) => api.entities.SupportTicket.update(id, data),
     onSettled: () => { queryClient.invalidateQueries({ queryKey: ['tickets'] }); },
+    // A ticket dragged to another state that quietly snaps back is the worst
+    // kind of failure: it looks like the list, not the save, is broken.
+    onError: (e) => toast.error(e?.message || 'עדכון הפנייה נכשל'),
   });
   const [search, setSearch] = useState('');
   const [typeFilter, setTypeFilter] = useState('all');

@@ -74,6 +74,7 @@ export default function CapabilitiesPanel() {
   const resetMutation = useMutation({
     mutationFn: () => api.functions.invoke('globalTabVisibility', { action: 'reset', settingKey: SETTINGS_KEY }),
     onSuccess: () => { invalidate(); toast.success('הכל הוחזר לפתוח'); },
+    onError: (e) => toast.error(e?.message || 'האיפוס נכשל'),
   });
 
   const closedCount = Object.values(values).filter((v) => v === 'closed').length;

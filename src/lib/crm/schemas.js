@@ -1,6 +1,9 @@
 import {
   Filter, Contact, Receipt, Package, Route, TrendingUp,
 } from 'lucide-react';
+import {
+  weightedValue, invoiceBalance, invoiceOverdueDays, marginPercent,
+} from '@/lib/crm/derived';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // CRM SCHEMAS
@@ -155,6 +158,9 @@ const CORE_SCHEMAS = {
       { key: 'contact_phone', label: 'טלפון', type: 'phone' },
       { key: 'stage', label: 'שלב', type: 'select', options: LEAD_STAGES, required: true, list: true, default: 'new' },
       { key: 'value', label: 'שווי צפוי', type: 'currency', list: true },
+      // The number a pipeline is actually judged on: the deal discounted by the
+      // probability its own stage already declares.
+      { key: 'weighted_value', label: 'שווי משוקלל', type: 'currency', list: true, derive: weightedValue(LEAD_STAGES) },
       { key: 'expected_close', label: 'סגירה צפויה', type: 'date', list: true },
       { key: 'source', label: 'מקור', type: 'select', options: [
         { value: 'inbound', label: 'פנייה נכנסת' },
@@ -212,6 +218,9 @@ const CORE_SCHEMAS = {
       { key: 'amount', label: 'סכום לפני מע"מ', type: 'currency', required: true, list: true },
       { key: 'vat_percent', label: 'מע"מ %', type: 'percent', default: 18 },
       { key: 'paid_amount', label: 'שולם', type: 'currency', list: true },
+      // Gross of VAT and net of what came in — the figure that is actually owed.
+      { key: 'balance', label: 'יתרה לתשלום', type: 'currency', list: true, derive: invoiceBalance },
+      { key: 'overdue_days', label: 'ימי איחור', type: 'number', list: true, derive: invoiceOverdueDays },
       { key: 'issue_date', label: 'תאריך הנפקה', type: 'date', required: true, list: true },
       { key: 'due_date', label: 'מועד תשלום', type: 'date', list: true },
       OWNER_FIELD,
@@ -242,6 +251,7 @@ const CORE_SCHEMAS = {
       ], default: 'hour', list: true },
       { key: 'list_price', label: 'מחיר מחירון', type: 'currency', required: true, list: true },
       { key: 'cost', label: 'עלות', type: 'currency' },
+      { key: 'margin_percent', label: 'מרווח %', type: 'percent', list: true, derive: marginPercent },
       { key: 'max_discount_percent', label: 'הנחה מרבית %', type: 'percent' },
       { key: 'active', label: 'פעיל', type: 'checkbox', default: true, list: true },
       { key: 'description', label: 'תיאור', type: 'textarea' },

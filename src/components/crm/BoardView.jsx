@@ -1,5 +1,6 @@
 import React, { useMemo } from 'react';
 import { TONE_CLASS } from '@/lib/crm/schemas';
+import { readField } from '@/lib/crm/derived';
 
 /**
  * Reusable stage board. Any schema that declares `boardField` + `boardStages`
@@ -16,7 +17,8 @@ export default function BoardView({
   const stages = schema?.boardStages || [];
   const columns = useMemo(
     () => stages.map((stage) => {
-      const items = records.filter((r) => String(r?.[schema.boardField]) === String(stage.value));
+      const boardField = (schema.fields || []).find((f) => f.key === schema.boardField) || { key: schema.boardField };
+      const items = records.filter((r) => String(readField(boardField, r)) === String(stage.value));
       const total = amountOf ? items.reduce((s, r) => s + Number(amountOf(r) || 0), 0) : null;
       return { stage, items, total };
     }),

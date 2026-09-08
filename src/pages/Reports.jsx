@@ -1,5 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { useQueries, useQuery } from '@tanstack/react-query';
+import { withDerivedRows } from '@/lib/crm/derived';
+import { CRM_SCHEMAS } from '@/lib/crm/schemas';
 import { api } from '@/api/client';
 import { useAccessControl } from '@/hooks/useAccessControl';
 import PageHeader from '@/components/shared/PageHeader';
@@ -49,7 +51,11 @@ export default function Reports() {
 
   const dataBySource = useMemo(() => {
     const map = {};
-    visibleSources.forEach((source, i) => { map[source.id] = results[i]?.data || []; });
+    visibleSources.forEach((source, i) => {
+      // Derived columns are computed here, once, so the report table can filter,
+      // group, total and export them exactly like stored ones.
+      map[source.id] = withDerivedRows(CRM_SCHEMAS[source.module], results[i]?.data || []);
+    });
     return map;
   }, [visibleSources, results]);
 

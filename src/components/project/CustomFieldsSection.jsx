@@ -78,9 +78,11 @@ function CustomFieldForm({ field, projectId, onClose }) {
 
  const createMutation = useMutation({
   mutationFn: (data) => api.functions.invoke('manageCustomField', { action: 'create', project_ref: projectId, field: data }),
+  onError: (e) => toast.error(e?.message || 'יצירת השדה נכשלה'),
  });
  const updateMutation = useMutation({
   mutationFn: (data) => api.functions.invoke('manageCustomField', { action: 'update', project_ref: projectId, field_id: field.id, field: data }),
+  onError: (e) => toast.error(e?.message || 'עדכון השדה נכשל'),
  });
 
  const handleSubmit = async () => {
