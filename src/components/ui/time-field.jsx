@@ -32,11 +32,11 @@ export default function TimeField({
   const selectMinute = (newM) => onChange(formatTime(h, Number(newM)));
 
   return (
-    <div className={className} dir="rtl">
+    <div className={className}>
       <div className="grid grid-cols-2 gap-2" dir="ltr">
         <Select value={String(h)} onValueChange={selectHour} disabled={disabled}>
           <SelectTrigger className="h-9"><SelectValue /></SelectTrigger>
-          <SelectContent dir="rtl" className="max-h-60">
+          <SelectContent className="max-h-60">
             {HOURS.map(hour => (
               <SelectItem key={hour} value={String(hour)}>{String(hour).padStart(2, '0')}</SelectItem>
             ))}
@@ -44,7 +44,7 @@ export default function TimeField({
         </Select>
         <Select value={String(m)} onValueChange={selectMinute} disabled={disabled}>
           <SelectTrigger className="h-9"><SelectValue /></SelectTrigger>
-          <SelectContent dir="rtl" className="max-h-60">
+          <SelectContent className="max-h-60">
             {MINUTES.map(min => (
               <SelectItem key={min} value={String(min)}>{String(min).padStart(2, '0')}</SelectItem>
             ))}

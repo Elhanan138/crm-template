@@ -15,7 +15,7 @@ export default function InlineProjectCell({ value, onChange, projects = [] }) {
           {label}
         </button>
       </PopoverTrigger>
-      <PopoverContent align="center" dir="rtl" className="w-48 p-1.5 max-h-60 overflow-y-auto" onClick={e => e.stopPropagation()}>
+      <PopoverContent align="center" className="w-48 p-1.5 max-h-60 overflow-y-auto" onClick={e => e.stopPropagation()}>
         <div className="space-y-0.5">
           <button
             onClick={e => { e.stopPropagation(); onChange(''); setOpen(false); }}

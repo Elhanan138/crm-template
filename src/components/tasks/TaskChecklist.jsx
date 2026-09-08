@@ -53,7 +53,7 @@ export default function TaskChecklist({ items = [], onChange }) {
  const progress = items.length > 0 ? Math.round((doneCount / items.length) * 100) : 0;
 
  return (
-  <div className="bg-card rounded-lg border border-border overflow-hidden shadow-sm"dir="rtl">
+  <div className="bg-card rounded-lg border border-border overflow-hidden shadow-sm">
    {/* Header with progress bar */}
    <div className="px-4 py-2.5 border-b border-border">
     <div className="flex items-center justify-between mb-1.5">
@@ -93,7 +93,6 @@ export default function TaskChecklist({ items = [], onChange }) {
         value={item.text}
         onChange={e => updateText(item.id, e.target.value)}
         className={`flex-1 bg-transparent text-xs outline-none text-right transition-all ${item.done ? 'line-through text-muted-foreground' : 'text-foreground'}`}
-        dir="rtl"
        />
        <button
         onClick={() => remove(item.id)}
@@ -118,7 +117,6 @@ export default function TaskChecklist({ items = [], onChange }) {
      onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); add(); } }}
      placeholder="הוסף פריט לצ'קליסט…"
      className="flex-1 bg-transparent text-xs outline-none placeholder:text-muted-foreground text-right text-foreground"
-     dir="rtl"
     />
     {newText.trim() && (
      <button onClick={add} className="text-[11px] text-primary hover:underline font-medium">הוסף</button>

@@ -61,7 +61,7 @@ export default function OutboxFilters({ filters, onChange, senders }) {
           <SelectTrigger className="w-auto h-8 text-xs min-w-[120px]">
             <SelectValue />
           </SelectTrigger>
-          <SelectContent dir="rtl">
+          <SelectContent>
             {SOURCE_OPTIONS.map(opt => (
               <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
             ))}
@@ -72,7 +72,7 @@ export default function OutboxFilters({ filters, onChange, senders }) {
           <SelectTrigger className="w-auto h-8 text-xs min-w-[120px]">
             <SelectValue />
           </SelectTrigger>
-          <SelectContent dir="rtl">
+          <SelectContent>
             <SelectItem value="all">כל השולחים</SelectItem>
             {senders.map(s => (
               <SelectItem key={s} value={s}>{s}</SelectItem>

@@ -89,7 +89,7 @@ function HighlightForm({ highlight, projectId, memberEmails, onClose }) {
  const busy = createMutation.isPending || updateMutation.isPending;
 
  return (
-  <form onSubmit={handleSubmit} className="space-y-4"dir="rtl">
+  <form onSubmit={handleSubmit} className="space-y-4">
    <div className="grid grid-cols-3 gap-2">
     <div className="col-span-2 space-y-1.5">
      <Label className="text-xs font-medium text-muted-foreground">כותרת *</Label>
@@ -254,7 +254,7 @@ export default function ClientHighlightsSection({ projectId, memberEmails }) {
              <MoreVertical className="w-3.5 h-3.5"/>
             </button>
            </DropdownMenuTrigger>
-           <DropdownMenuContent align="start"className="w-40"dir="rtl">
+           <DropdownMenuContent align="start"className="w-40">
             <DropdownMenuItem
              onSelect={() => togglePin(h)}
              className="flex items-center gap-2 cursor-pointer text-xs"
@@ -286,7 +286,7 @@ export default function ClientHighlightsSection({ projectId, memberEmails }) {
    </div>
 
    <Sheet open={dialog.open} onOpenChange={open => !open && setDialog({ open: false, highlight: null })}>
-    <SheetContent side="left"dir="rtl"className="w-full sm:max-w-md p-0 flex flex-col">
+    <SheetContent side="left"className="w-full sm:max-w-md p-0 flex flex-col">
      <SheetHeader className="px-5 py-3.5 border-b border-border text-right shrink-0">
       <SheetTitle className="text-base font-bold">
        {dialog.highlight ? 'עריכת מידע' : 'מידע חדש'}

@@ -74,13 +74,13 @@ export default function UserTicketList({ tickets, isLoading, initialTicketId }) 
      <div className="flex items-center gap-1.5 flex-wrap">
       <Select value={statusFilter} onValueChange={setStatusFilter}>
        <SelectTrigger className="h-8 text-xs w-auto gap-1"><SelectValue /></SelectTrigger>
-       <SelectContent dir="rtl">
+       <SelectContent>
         {STATUS_OPTIONS.map(s => <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>)}
        </SelectContent>
       </Select>
       <Select value={typeFilter} onValueChange={setTypeFilter}>
        <SelectTrigger className="h-8 text-xs w-auto gap-1"><SelectValue /></SelectTrigger>
-       <SelectContent dir="rtl">
+       <SelectContent>
         <SelectItem value="all">כל הסוגים</SelectItem>
         {Object.entries(TYPE_CONFIG).map(([k, v]) => <SelectItem key={k} value={k}>{v.label}</SelectItem>)}
        </SelectContent>

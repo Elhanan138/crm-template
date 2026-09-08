@@ -76,7 +76,7 @@ export default function OutlookEventChip({ e, showDate = false, variant = 'chip'
             <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full flex-shrink-0 ${badgeClasses}`}>Outlook</span>
           </button>
         </PopoverTrigger>
-        <PopoverContent dir="rtl" align="start" className="w-auto p-4">
+        <PopoverContent align="start" className="w-auto p-4">
           <EventDetails data={data} title={e.title} />
         </PopoverContent>
       </Popover>
@@ -92,7 +92,7 @@ export default function OutlookEventChip({ e, showDate = false, variant = 'chip'
           {showDate && <span className="text-[10px] opacity-70 flex-shrink-0 mt-0.5 font-semibold">{formatDate(e.date, 'day-month-padded')}</span>}
         </button>
       </PopoverTrigger>
-      <PopoverContent dir="rtl" align="start" className="w-auto p-4">
+      <PopoverContent align="start" className="w-auto p-4">
         <EventDetails data={data} title={e.title} />
       </PopoverContent>
     </Popover>

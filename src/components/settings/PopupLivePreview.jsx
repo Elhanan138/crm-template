@@ -6,7 +6,7 @@ export default function PopupLivePreview({ popup }) {
   const [device, setDevice] = useState('desktop');
 
   return (
-    <div dir="rtl" className="flex flex-col items-center gap-3">
+    <div className="flex flex-col items-center gap-3">
       <div className="flex items-center gap-1 bg-muted/50 rounded-lg p-1">
         <button
           onClick={() => setDevice('desktop')}

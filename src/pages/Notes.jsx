@@ -5,7 +5,7 @@ import NotionTab from '@/components/project/NotionTab';
 
 export default function Notes() {
   return (
-    <div dir="rtl">
+    <div>
       <PageHeader
         icon={SectionIcon}
         title="פתקים"

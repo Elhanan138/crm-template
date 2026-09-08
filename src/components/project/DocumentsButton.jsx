@@ -38,7 +38,7 @@ export default function DocumentsButton({ project }) {
    </Button>
 
    <Dialog open={open} onOpenChange={setOpen}>
-    <DialogContent className="sm:max-w-lg rounded-lg p-0 overflow-hidden"dir="rtl">
+    <DialogContent className="sm:max-w-lg rounded-lg p-0 overflow-hidden">
      <DialogHeader className="px-5 pt-5 pb-3 border-b border-border">
       <DialogTitle className="text-base font-bold text-right flex items-center gap-2">
        <FolderOpen className="w-4 h-4 text-primary"/>

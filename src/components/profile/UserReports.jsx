@@ -103,7 +103,7 @@ export default function UserReports() {
  }
 
  return (
-  <div dir="rtl"className="space-y-5">
+  <div className="space-y-5">
    <button
     onClick={() => navigate('/reports')}
     className="w-full flex items-center justify-between gap-3 bg-gradient-to-l from-primary/10 to-success/5 border border-primary/20 rounded-lg p-4 hover:from-primary/15 hover:to-success/10 transition-colors group"

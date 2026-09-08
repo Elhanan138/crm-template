@@ -170,7 +170,7 @@ export default function TaskEditSheet({ open, task, projectId, onClose }) {
 
  return (
   <Sheet open={open} onOpenChange={o => !o && handleClose()}>
-   <SheetContent side="left"dir="rtl"className="w-full sm:max-w-lg p-0 flex flex-col">
+   <SheetContent side="left"className="w-full sm:max-w-lg p-0 flex flex-col">
     <SheetHeader className="px-5 py-3.5 border-b border-border text-right shrink-0 flex-row items-center justify-between">
      <SheetTitle className="text-base font-bold leading-tight">
       {isEditing ? 'עריכת משימה' : 'משימה חדשה'}
@@ -182,14 +182,13 @@ export default function TaskEditSheet({ open, task, projectId, onClose }) {
      )}
     </SheetHeader>
 
-    <div className="flex-1 overflow-y-auto px-5 py-4 space-y-4"dir="rtl">
+    <div className="flex-1 overflow-y-auto px-5 py-4 space-y-4">
      {/* Title */}
      <Input
       value={form.title || ''}
       onChange={e => set('title', e.target.value)}
       placeholder="כותרת המשימה"
       className="h-11 rounded-xl text-right font-medium"
-      dir="rtl"
      />
 
      {/* Checklist — right below title, edit only */}
@@ -204,7 +203,7 @@ export default function TaskEditSheet({ open, task, projectId, onClose }) {
      {!isEditing && !projectId && (
       <Select value={form.project_id || '__none__'} onValueChange={v => set('project_id', v === '__none__' ? '' : v)}>
        <SelectTrigger className="h-9 rounded-xl text-sm text-right"><SelectValue placeholder="פרויקט"/></SelectTrigger>
-       <SelectContent dir="rtl">
+       <SelectContent>
         <SelectItem value="__none__">שוטף (ללא פרויקט)</SelectItem>
         {allProjects.map(p => <SelectItem key={p.id} value={p.id}>{p.client_name || p.name}</SelectItem>)}
        </SelectContent>
@@ -269,7 +268,7 @@ export default function TaskEditSheet({ open, task, projectId, onClose }) {
         <User className="w-3.5 h-3.5"/>
         <SelectValue placeholder="אחראי"/>
        </SelectTrigger>
-       <SelectContent dir="rtl">
+       <SelectContent>
         <SelectItem value="__none__">— ללא אחראי —</SelectItem>
         {teamMembers.map(m => <SelectItem key={m.id} value={m.name}>{m.name}</SelectItem>)}
        </SelectContent>

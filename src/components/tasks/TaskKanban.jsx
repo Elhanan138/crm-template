@@ -25,7 +25,7 @@ export default function TaskKanban({ tasks, projectMap, onStatusChange, onEdit, 
 
  return (
   <DragDropContext onDragEnd={handleDragEnd}>
-   <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4"dir="rtl">
+   <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
     {COLUMNS.map(col => {
      const list = byStatus(col.id);
      return (

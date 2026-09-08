@@ -119,7 +119,7 @@ export default function ProjectPermissionsDialog({ projectId, projectName, proje
 
  return (
   <Dialog open={open} onOpenChange={o => !o && onClose()}>
-   <DialogContent className="sm:max-w-lg rounded-lg max-h-[85vh] overflow-hidden flex flex-col"dir="rtl">
+   <DialogContent className="sm:max-w-lg rounded-lg max-h-[85vh] overflow-hidden flex flex-col">
     <DialogHeader>
      <DialogTitle className="text-base font-bold text-right flex items-center gap-2">
       <Users className="w-4 h-4 text-primary"/>
@@ -139,7 +139,7 @@ export default function ProjectPermissionsDialog({ projectId, projectName, proje
         <label className="text-[11px] font-medium text-muted-foreground mb-1 block">מנהל פרויקט</label>
         <Select value={newPm} onValueChange={setNewPm}>
          <SelectTrigger className="w-full rounded-lg h-9 text-sm"><SelectValue placeholder="בחר מנהל פרויקט"/></SelectTrigger>
-         <SelectContent dir="rtl">
+         <SelectContent>
           {teamMembers.map(m => <SelectItem key={m.id} value={m.name}>{m.name}</SelectItem>)}
          </SelectContent>
         </Select>
@@ -148,7 +148,7 @@ export default function ProjectPermissionsDialog({ projectId, projectName, proje
         <label className="text-[11px] font-medium text-muted-foreground mb-1 block">מלווה</label>
         <Select value={newLiaison} onValueChange={setNewLiaison}>
          <SelectTrigger className="w-full rounded-lg h-9 text-sm"><SelectValue placeholder="בחר מלווה"/></SelectTrigger>
-         <SelectContent dir="rtl">
+         <SelectContent>
           {teamMembers.map(m => <SelectItem key={m.id} value={m.name}>{m.name}</SelectItem>)}
          </SelectContent>
         </Select>

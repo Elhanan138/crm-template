@@ -56,7 +56,7 @@ export default function ReminderFields({ value, onChange, disabled, label = '×ª×
           <SelectTrigger className="h-9 rounded-lg text-sm">
             <SelectValue />
           </SelectTrigger>
-          <SelectContent dir="rtl">
+          <SelectContent>
             {REMINDER_CHANNEL_OPTIONS.map(opt => (
               <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
             ))}

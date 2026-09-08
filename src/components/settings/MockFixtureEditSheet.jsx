@@ -75,7 +75,7 @@ export default function MockFixtureEditSheet({ fixture, open, onOpenChange, onSa
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="left" dir="rtl" className="w-full sm:max-w-lg overflow-y-auto">
+      <SheetContent side="left" className="w-full sm:max-w-lg overflow-y-auto">
         <SheetHeader>
           <SheetTitle>{isCreate ? 'תרחיש חדש' : `עריכת: ${fixture?.scenario_key}`}</SheetTitle>
         </SheetHeader>
@@ -95,7 +95,7 @@ export default function MockFixtureEditSheet({ fixture, open, onOpenChange, onSa
             <Label>סוג</Label>
             <Select value={fixtureType} onValueChange={setFixtureType} disabled={!isCreate}>
               <SelectTrigger className="h-9"><SelectValue /></SelectTrigger>
-              <SelectContent dir="rtl">
+              <SelectContent>
                 {FIXTURE_TYPES.map((t) => (
                   <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>
                 ))}

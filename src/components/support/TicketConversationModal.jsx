@@ -119,7 +119,7 @@ export default function TicketConversationModal({ ticket, open, onOpenChange }) 
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl p-0 gap-0 overflow-hidden flex flex-col max-h-[90vh]" dir="rtl">
+      <DialogContent className="max-w-2xl p-0 gap-0 overflow-hidden flex flex-col max-h-[90vh]">
         {/* Header */}
         <DialogHeader className="px-5 py-4 border-b border-border text-start flex-shrink-0">
           <div className="flex items-center gap-2.5">
@@ -208,7 +208,6 @@ export default function TicketConversationModal({ ticket, open, onOpenChange }) 
               placeholder="כתוב הודעה... (ניתן להדביק צילומי מסך ישירות)"
               rows={2}
               className="resize-none text-sm min-h-[40px] flex-1"
-              dir="rtl"
               onKeyDown={(e) => {
                 if (e.key === 'Enter' && !e.shiftKey) {
                   e.preventDefault();

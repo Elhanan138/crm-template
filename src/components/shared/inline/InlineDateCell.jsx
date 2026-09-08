@@ -26,7 +26,7 @@ export default function InlineDateCell({ value, onChange, canEdit = true, placeh
           {display}
         </button>
       </PopoverTrigger>
-      <PopoverContent align="center" dir="rtl" className="w-auto p-2" onClick={e => e.stopPropagation()}>
+      <PopoverContent align="center" className="w-auto p-2" onClick={e => e.stopPropagation()}>
         <DateField
           value={value || ''}
           onChange={v => { onChange(v); setOpen(false); }}

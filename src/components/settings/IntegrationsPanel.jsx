@@ -19,7 +19,7 @@ export default function IntegrationsPanel() {
  });
 
  return (
-  <div dir="rtl">
+  <div>
    <div className="flex items-center justify-between mb-4 flex-wrap gap-3">
     <div className="flex items-center gap-3">
      <div className="w-10 h-10 rounded-lg bg-accent flex items-center justify-center">

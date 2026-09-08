@@ -22,7 +22,7 @@ export default function Pagination({ total, page, pageSize = 10, onPageChange, c
   for (let i = start; i <= end; i++) pages.push(i);
 
   return (
-    <div className={`flex items-center justify-between ${className}`} dir="rtl">
+    <div className={`flex items-center justify-between ${className}`}>
       <div className="flex items-center gap-1">
         <button
           onClick={() => onPageChange(page - 1)}

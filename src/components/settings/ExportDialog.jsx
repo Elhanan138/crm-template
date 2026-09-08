@@ -135,7 +135,7 @@ export default function ExportDialog({ open, onOpenChange }) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent dir="rtl" className="max-w-lg">
+      <DialogContent className="max-w-lg">
         <DialogHeader>
           <DialogTitle>ייצוא לפריסה (Vercel / Netlify)</DialogTitle>
           <DialogDescription>

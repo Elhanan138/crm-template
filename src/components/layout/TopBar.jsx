@@ -29,7 +29,6 @@ export default function TopBar({ collapsed, onToggle }) {
   return (
     <div
       className="hidden md:flex sticky top-0 z-30 items-center gap-3 h-16 px-6 bg-background/80 backdrop-blur-md border-b border-border"
-      dir="rtl"
     >
       {/* Global search — centered input (start side in RTL) */}
       <div className="order-1 flex-1 flex justify-center">

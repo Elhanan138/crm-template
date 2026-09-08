@@ -2,6 +2,8 @@ import React from 'react'
 import { render } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { MemoryRouter } from 'react-router-dom'
+import { LanguageProvider } from '@/lib/i18n'
+import { AuthProvider } from '@/lib/AuthContext'
 
 export function renderWithProviders(ui, options = {}) {
   const queryClient = new QueryClient({
@@ -15,11 +17,15 @@ export function renderWithProviders(ui, options = {}) {
 
   function Wrapper({ children }) {
     return (
-      <QueryClientProvider client={queryClient}>
-        <MemoryRouter initialEntries={[route]}>
-          {children}
-        </MemoryRouter>
-      </QueryClientProvider>
+      <LanguageProvider>
+        <AuthProvider>
+        <QueryClientProvider client={queryClient}>
+          <MemoryRouter initialEntries={[route]}>
+            {children}
+          </MemoryRouter>
+        </QueryClientProvider>
+        </AuthProvider>
+      </LanguageProvider>
     )
   }
 

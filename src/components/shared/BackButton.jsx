@@ -15,7 +15,6 @@ export default function BackButton({ className, onBeforeBack }) {
   return (
     <button
       onClick={handleClick}
-      dir="rtl"
       className={`flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors min-h-[40px] py-2 -my-2 ${className || ''}`}
     >
       <ArrowRight className="w-4 h-4 flex-shrink-0" />

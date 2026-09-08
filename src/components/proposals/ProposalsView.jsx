@@ -114,7 +114,7 @@ function ProposalForm({ open, onOpenChange, proposal, clients, projects, existin
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange} dir="rtl">
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{proposal ? 'עריכת הצעת מחיר' : 'הצעת מחיר חדשה'}</DialogTitle>
@@ -225,7 +225,7 @@ function ProposalForm({ open, onOpenChange, proposal, clients, projects, existin
         </div>
 
         {/* Pricing summary */}
-        <div className="bg-muted/40 rounded-lg p-4 space-y-1.5 text-sm" dir="rtl">
+        <div className="bg-muted/40 rounded-lg p-4 space-y-1.5 text-sm">
           <div className="flex justify-between">
             <span className="text-muted-foreground">סכום ביניים</span>
             <span className="font-semibold" dir="ltr">₪{pricing.subtotal.toLocaleString()}</span>
@@ -282,7 +282,7 @@ function ProposalDocument({ proposal, client, innerRef }) {
     company?.bank && `בנק: ${company.bank}`,
   ].filter(Boolean).join(' | ');
   return (
-    <div ref={innerRef} className="bg-white text-black w-[800px] max-w-full mx-auto px-8 py-10" dir="rtl">
+    <div ref={innerRef} className="bg-white text-black w-[800px] max-w-full mx-auto px-8 py-10">
       <div>
         {/* Header */}
         <div className="flex justify-between items-start mb-8 border-b-2 border-primary pb-4">
@@ -320,7 +320,7 @@ function ProposalDocument({ proposal, client, innerRef }) {
         </div>
 
         {/* Pricing details */}
-        <table className="w-full mb-6 text-sm" dir="rtl">
+        <table className="w-full mb-6 text-sm">
           <thead>
             <tr className="border-b-2 border-border">
               <th className="text-right py-2">תיאור</th>
@@ -369,7 +369,7 @@ function ProposalDocument({ proposal, client, innerRef }) {
 
 function ProposalPrintView({ proposal, client, onClose, onPdf, pdfBusy }) {
   return (
-    <div className="proposal-print fixed inset-0 z-50 bg-white overflow-y-auto" dir="rtl">
+    <div className="proposal-print fixed inset-0 z-50 bg-white overflow-y-auto">
       <div className="max-w-[800px] mx-auto px-8 pt-8">
         <div className="flex justify-between items-center mb-4 print:hidden">
           <Button variant="outline" onClick={onClose}>סגירה</Button>
@@ -490,7 +490,7 @@ export default function ProposalsView({ projectId }) {
 
   if (isLoading) {
     return (
-      <div dir="rtl">
+      <div>
         <PageHeader icon={FileText} title="הצעות מחיר" subtitle="טוען..." />
         <CardSkeleton count={4} />
       </div>
@@ -498,7 +498,7 @@ export default function ProposalsView({ projectId }) {
   }
 
   return (
-    <div dir="rtl">
+    <div>
       {!projectId ? (
         <PageHeader
           icon={FileText}

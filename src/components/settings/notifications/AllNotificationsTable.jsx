@@ -150,7 +150,7 @@ export default function AllNotificationsTable({ items = [], loading }) {
   );
 
   return (
-    <div className="bg-card rounded-xl border border-border shadow-sm p-5" dir="rtl">
+    <div className="bg-card rounded-xl border border-border shadow-sm p-5">
       <div className="flex items-center gap-2.5 mb-4">
         <div className="w-8 h-8 rounded-lg bg-accent flex items-center justify-center flex-shrink-0">
           <ListChecks className="w-4 h-4 text-primary" />
@@ -171,7 +171,7 @@ export default function AllNotificationsTable({ items = [], loading }) {
         />
         <Select value={filterType} onValueChange={setFilterType}>
           <SelectTrigger className="h-8 text-xs w-[140px]"><SelectValue /></SelectTrigger>
-          <SelectContent dir="rtl">
+          <SelectContent>
             <SelectItem value="all">כל הסוגים</SelectItem>
             <SelectItem value="alert">אלרטים</SelectItem>
             <SelectItem value="reminder">תזכורות</SelectItem>
@@ -180,7 +180,7 @@ export default function AllNotificationsTable({ items = [], loading }) {
         </Select>
         <Select value={filterProject} onValueChange={setFilterProject}>
           <SelectTrigger className="h-8 text-xs w-[160px]"><SelectValue /></SelectTrigger>
-          <SelectContent dir="rtl">
+          <SelectContent>
             <SelectItem value="all">כל הפרויקטים</SelectItem>
             {projects.map(p => <SelectItem key={p} value={p}>{p}</SelectItem>)}
           </SelectContent>

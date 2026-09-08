@@ -212,7 +212,6 @@ export default function ProjectAIChat({ project, teamMembers = [] }) {
     exit={{ opacity: 0, y: 20, scale: 0.95 }}
     transition={{ duration: 0.2 }}
     className="fixed z-50 bottom-4 left-3 right-3 top-auto h-[560px] max-h-[calc(100dvh-2rem)] sm:left-4 sm:right-auto sm:w-[400px] bg-card rounded-xl shadow-xl border border-border flex flex-col overflow-hidden"
-    dir="rtl"
    >
     {/* Header */}
     <div className="flex items-center justify-between px-3 py-2.5 border-b border-border bg-accent flex-shrink-0">
@@ -334,7 +333,6 @@ export default function ProjectAIChat({ project, teamMembers = [] }) {
        placeholder="שאל שאלה על המסמך..."
        className="h-8 rounded-full text-xs flex-1 border-border"
        disabled={loading}
-       dir="rtl"
       />
       <Button
         size="icon"

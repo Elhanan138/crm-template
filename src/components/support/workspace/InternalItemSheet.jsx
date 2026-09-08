@@ -54,7 +54,7 @@ export default function InternalItemSheet({ open, onOpenChange, user, projects =
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="left" className="w-full sm:max-w-md overflow-y-auto p-5" dir="rtl">
+      <SheetContent side="left" className="w-full sm:max-w-md overflow-y-auto p-5">
         <SheetHeader className="text-start">
           <SheetTitle>פריט פיתוח חדש</SheetTitle>
         </SheetHeader>
@@ -66,7 +66,7 @@ export default function InternalItemSheet({ open, onOpenChange, user, projects =
             <Field label="סוג" htmlFor="ii-type">
               <Select value={form.type} onValueChange={v => set('type', v)}>
                 <SelectTrigger id="ii-type"><SelectValue /></SelectTrigger>
-                <SelectContent dir="rtl">
+                <SelectContent>
                   {Object.entries(TYPE_CONFIG).map(([k, v]) => <SelectItem key={k} value={k}>{v.label}</SelectItem>)}
                 </SelectContent>
               </Select>
@@ -74,7 +74,7 @@ export default function InternalItemSheet({ open, onOpenChange, user, projects =
             <Field label="עדיפות" htmlFor="ii-priority">
               <Select value={form.priority} onValueChange={v => set('priority', v)}>
                 <SelectTrigger id="ii-priority"><SelectValue /></SelectTrigger>
-                <SelectContent dir="rtl">
+                <SelectContent>
                   <SelectItem value="high">גבוהה</SelectItem>
                   <SelectItem value="medium">בינונית</SelectItem>
                   <SelectItem value="low">נמוכה</SelectItem>
@@ -88,7 +88,7 @@ export default function InternalItemSheet({ open, onOpenChange, user, projects =
           <Field label="שיוך פרויקט" htmlFor="ii-project" help="אופציונלי">
             <Select value={form.project_id || 'none'} onValueChange={v => set('project_id', v === 'none' ? '' : v)}>
               <SelectTrigger id="ii-project"><SelectValue /></SelectTrigger>
-              <SelectContent dir="rtl">
+              <SelectContent>
                 <SelectItem value="none">ללא שיוך</SelectItem>
                 {projects.map(p => <SelectItem key={p.id} value={p.id}>{p.client_name || p.name}</SelectItem>)}
               </SelectContent>

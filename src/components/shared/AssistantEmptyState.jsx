@@ -23,7 +23,7 @@ export default function AssistantEmptyState({ scope = 'global', userName, onSamp
   const firstName = getFirstName(userName);
 
   return (
-    <div dir="rtl" style={{ padding: '20px 16px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+    <div style={{ padding: '20px 16px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
       {/* Greeting */}
       <div>
         <h3 style={{ fontFamily: 'Heebo, sans-serif', fontWeight: 700, fontSize: '22px', color: 'hsl(var(--foreground))', margin: 0, lineHeight: 1.2 }}>

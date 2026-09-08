@@ -86,7 +86,7 @@ export default function GlobalSystemFeaturesPanel() {
  }
 
  return (
-  <div className="space-y-5"dir="rtl">
+  <div className="space-y-5">
    {/* Nothing that was left out of the build is mentioned here at all. */}
    {PAGE_FEATURES.length > 0 && (
    <div className="bg-card rounded-xl border border-border shadow-sm p-5">

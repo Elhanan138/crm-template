@@ -26,7 +26,7 @@ export default function SupportTypePie({ tickets, size = 120 }) {
   }
 
   return (
-    <div className="flex items-center gap-3" dir="rtl">
+    <div className="flex items-center gap-3">
       <div style={{ width: size, height: size }} className="flex-shrink-0">
         <ResponsiveContainer width="100%" height="100%">
           <PieChart>

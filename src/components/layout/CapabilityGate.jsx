@@ -24,7 +24,7 @@ export default function CapabilityGate({ moduleId, workspaceId, children }) {
   if (moduleOpen && workspaceOpen) return children;
 
   return (
-    <div dir="rtl" className="pb-10">
+    <div className="pb-10">
       <EmptyState
         icon={ShieldOff}
         title="העמוד סגור"

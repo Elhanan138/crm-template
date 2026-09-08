@@ -77,7 +77,6 @@ export default function ErrorDisplay({ code = 'ERR_UNKNOWN_500', context = {}, c
 
  return (
   <div
-   dir="rtl"
    className={`rounded-lg border border-destructive/30 bg-destructive/5 ${compact ? 'p-3' : 'p-5'}`}
   >
    <div className="flex items-start gap-3">
@@ -117,9 +116,9 @@ export default function ErrorDisplay({ code = 'ERR_UNKNOWN_500', context = {}, c
 
    {/* Ticket Dialog */}
    <Dialog open={ticketOpen} onOpenChange={setTicketOpen}>
-    <DialogContent className="rounded-lg"dir="rtl">
+    <DialogContent className="rounded-lg">
      <DialogHeader>
-      <DialogTitle className="text-right">פנייה חדשה — שגיאה {code}</DialogTitle>
+      <DialogTitle className="text-start">פנייה חדשה — שגיאה {code}</DialogTitle>
      </DialogHeader>
      <div className="space-y-3">
       <Input

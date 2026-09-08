@@ -218,7 +218,7 @@ export default function EditProject() {
  const canEdit = isRealAdmin || hasProject(projectId);
 
  return (
-  <div dir="rtl"className="w-full">
+  <div className="w-full">
    {/* Sticky save bar */}
    <div className="sticky top-0 z-30 -mx-4 px-4 py-2.5 mb-3 bg-background/90 backdrop-blur-sm border-b border-border flex items-center justify-between gap-3">
     <BackButton onBeforeBack={handleBeforeBack} />
@@ -234,7 +234,7 @@ export default function EditProject() {
      </Button>
     </div>
    </div>
-   <div className="mb-4 flex items-center gap-3"dir="rtl">
+   <div className="mb-4 flex items-center gap-3">
     {project?.image_url ? (
      <div className="w-11 h-11 rounded-lg overflow-hidden border border-border flex-shrink-0 shadow-sm">
       <img src={project.image_url} alt="לוגו פרויקט"className="w-full h-full object-cover"/>
@@ -250,7 +250,7 @@ export default function EditProject() {
     </div>
    </div>
 
-   <form id="edit-project-form"onSubmit={handleSubmit} className="space-y-4"dir="rtl">
+   <form id="edit-project-form"onSubmit={handleSubmit} className="space-y-4">
     <div className="space-y-4">
       <Card className="border-border shadow-sm">
        <CardContent className="p-4 space-y-3">
@@ -270,20 +270,20 @@ export default function EditProject() {
          )}
          <div className="flex-1 space-y-1">
           <Label className="text-[11px] font-medium text-muted-foreground">שם הלקוח *</Label>
-          <Input value={form.client_name} onChange={(e) => update('client_name', e.target.value)} placeholder="שם החברה / הגוף"className="h-10 rounded-lg text-base font-semibold"dir="rtl"/>
+          <Input value={form.client_name} onChange={(e) => update('client_name', e.target.value)} placeholder="שם החברה / הגוף"className="h-10 rounded-lg text-base font-semibold"/>
          </div>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
          <div className="space-y-1">
           <Label className="text-[11px] font-medium text-muted-foreground">שווי חוזה (₪)</Label>
-          <Input type="number"inputMode="decimal"value={form.contract_value} onChange={(e) => update('contract_value', e.target.value)} placeholder="0"className="h-9 rounded-lg text-sm"dir="rtl"/>
+          <Input type="number"inputMode="decimal"value={form.contract_value} onChange={(e) => update('contract_value', e.target.value)} placeholder="0"className="h-9 rounded-lg text-sm"/>
          </div>
         </div>
        </CardContent>
       </Card>
 
       <Card className="border-border shadow-sm">
-       <CardContent className="p-4"dir="rtl">
+       <CardContent className="p-4">
         <div className="flex items-center gap-2.5 mb-2"><div className="w-8 h-8 rounded-lg bg-accent flex items-center justify-center"><SlidersHorizontal className="w-4 h-4 text-primary"/></div><h3 className="text-sm font-bold text-foreground">שדות מותאמים אישית</h3></div>
         <CustomFieldsSection projectId={projectId} canEdit={canEdit} embedded />
        </CardContent>

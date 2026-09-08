@@ -46,7 +46,7 @@ export default function BoardView({
                 <button
                   key={item.id}
                   onClick={() => openRecord(item)}
-                  className="w-full text-right bg-card border border-border rounded-lg px-2.5 py-2 hover:border-primary/30 transition-colors"
+                  className="w-full text-start bg-card border border-border rounded-lg px-2.5 py-2 hover:border-primary/30 transition-colors"
                 >
                   <p className="text-xs font-medium truncate">{item[schema.titleField]}</p>
                   {subtitleOf && (

@@ -72,7 +72,7 @@ function SettingRow({ settingKey, settings, onSave }) {
       <Field label={cfg.label}>
         <Select value={localValue} onValueChange={(v) => { setLocalValue(v); handleSave(v); }}>
           <SelectTrigger className="h-9"><SelectValue /></SelectTrigger>
-          <SelectContent dir="rtl">
+          <SelectContent>
             {cfg.options.map(o => <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>)}
           </SelectContent>
         </Select>
@@ -293,7 +293,7 @@ export default function OutlookCalendarSection() {
                               <MoreVertical className="w-3.5 h-3.5" />
                             </Button>
                           </DropdownMenuTrigger>
-                          <DropdownMenuContent align="start" dir="rtl">
+                          <DropdownMenuContent align="start">
                             <DropdownMenuItem onClick={() => handleAdminAction('force_sync', u.email)}>
                               <RefreshCw className="w-3.5 h-3.5" /> סנכרן עכשיו
                             </DropdownMenuItem>
@@ -317,7 +317,7 @@ export default function OutlookCalendarSection() {
       </div>
 
       <AlertDialog open={liveSwitchOpen} onOpenChange={setLiveSwitchOpen}>
-        <AlertDialogContent dir="rtl">
+        <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>מעבר למצב Live</AlertDialogTitle>
             <AlertDialogDescription>
@@ -339,7 +339,7 @@ export default function OutlookCalendarSection() {
       </AlertDialog>
 
       <AlertDialog open={!!disconnectTarget} onOpenChange={(open) => !open && setDisconnectTarget(null)}>
-        <AlertDialogContent dir="rtl">
+        <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>ניתוק משתמש</AlertDialogTitle>
             <AlertDialogDescription>

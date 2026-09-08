@@ -24,12 +24,12 @@ export default function SectionStepperNav({
  const hasChildren = !!activeSection?.children?.length && activeChildKey !== undefined && !!onSelectChild;
 
  return (
-  <div dir="rtl"className="space-y-3">
+  <div className="space-y-3">
    {/* Mobile: Select dropdowns */}
    <div className="lg:hidden space-y-2">
     <Select value={activeKey} onValueChange={onSelect}>
      <SelectTrigger className="h-9 rounded-lg text-sm"><SelectValue /></SelectTrigger>
-     <SelectContent dir="rtl">
+     <SelectContent>
       {sections.map(s => (
        <SelectItem key={s.key} value={s.key}>{s.label}</SelectItem>
       ))}
@@ -38,7 +38,7 @@ export default function SectionStepperNav({
     {hasChildren && (
      <Select value={activeChildKey} onValueChange={onSelectChild}>
       <SelectTrigger className="h-8 rounded-lg text-xs"><SelectValue /></SelectTrigger>
-      <SelectContent dir="rtl">
+      <SelectContent>
        {activeSection.children.map(c => (
         <SelectItem key={c.key} value={c.key}>{c.label}</SelectItem>
        ))}
@@ -59,7 +59,6 @@ export default function SectionStepperNav({
        onChange={(e) => setQuery(e.target.value)}
        placeholder={searchPlaceholder}
        className="w-full h-8 rounded-lg bg-muted/40 border border-transparent px-8 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-input focus:bg-background transition-colors"
-       dir="rtl"
       />
      </div>
     )}

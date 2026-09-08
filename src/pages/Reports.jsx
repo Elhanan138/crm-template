@@ -111,7 +111,7 @@ export default function Reports() {
 
   if (loadingProjects) {
     return (
-      <div dir="rtl">
+      <div>
         <PageHeader icon={BarChart3} title="מחולל דוחות" subtitle="ניתוח נתונים מקיף מכל המערכת" back />
         <div className="flex items-center justify-center h-64">
           <div className="w-6 h-6 border-2 border-accent border-t-primary rounded-full animate-spin" />
@@ -122,7 +122,7 @@ export default function Reports() {
 
   if (selectableSources.length === 0) {
     return (
-      <div dir="rtl">
+      <div>
         <PageHeader icon={BarChart3} title="מחולל דוחות" subtitle="ניתוח נתונים מקיף מכל המערכת" back />
         <EmptyState icon={BarChart3} title="אין מקורות נתונים" description="לא נכלל בבנייה הזו מודול שניתן להפיק ממנו דוח." />
       </div>
@@ -130,7 +130,7 @@ export default function Reports() {
   }
 
   return (
-    <div dir="rtl">
+    <div>
       <PageHeader
         icon={BarChart3}
         title="מחולל דוחות"
@@ -145,7 +145,7 @@ export default function Reports() {
           <SelectTrigger className="h-9 rounded-lg text-sm w-full sm:w-64">
             <SelectValue placeholder="בחר מקור נתונים" />
           </SelectTrigger>
-          <SelectContent dir="rtl" className="max-h-[60vh]">
+          <SelectContent className="max-h-[60vh]">
             {grouped.map(({ key, sources }) => (
               <SelectGroup key={key}>
                 <SelectLabel className="text-[10px] text-muted-foreground">
@@ -171,7 +171,7 @@ export default function Reports() {
               <SelectTrigger className="h-9 rounded-lg text-sm w-full sm:w-56">
                 <SelectValue placeholder="כל הפרויקטים" />
               </SelectTrigger>
-              <SelectContent dir="rtl">
+              <SelectContent>
                 <SelectItem value="all">כל הפרויקטים</SelectItem>
                 {accessibleProjects.map((p) => (
                   <SelectItem key={p.id} value={p.id}>{p.client_name || p.name}</SelectItem>

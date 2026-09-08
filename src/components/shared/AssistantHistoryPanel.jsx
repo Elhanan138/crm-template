@@ -11,7 +11,6 @@ export default function AssistantHistoryPanel({ sessions, activeSessionId, onSel
         animate={{ height: 'auto', opacity: 1 }}
         exit={{ height: 0, opacity: 0 }}
         transition={{ duration: 0.2 }}
-        dir="rtl"
         style={{ overflow: 'hidden', borderBottom: '1px solid hsl(var(--border))', background: 'hsl(var(--muted))' }}
       >
         <div style={{ padding: '8px', display: 'flex', flexDirection: 'column', gap: '6px', maxHeight: '208px', overflowY: 'auto' }}>

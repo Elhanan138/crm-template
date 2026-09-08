@@ -46,7 +46,7 @@ const Block = ({ icon: Icon, title, hint, children, onAdd, addLabel }) => (
 const Picker = ({ value, onChange, options, placeholder, className = '' }) => (
   <Select value={value === '' || value === undefined ? undefined : String(value)} onValueChange={onChange}>
     <SelectTrigger className={`${CONTROL} ${className}`}><SelectValue placeholder={placeholder} /></SelectTrigger>
-    <SelectContent dir="rtl">
+    <SelectContent>
       {options.map((o) => <SelectItem key={String(o.value)} value={String(o.value)}>{o.label}</SelectItem>)}
     </SelectContent>
   </Select>
@@ -91,8 +91,8 @@ export default function AutomationBuilder({ open, onOpenChange, rule, onSave, sa
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="left" dir="rtl" className="w-full sm:max-w-xl flex flex-col p-0">
-        <SheetHeader className="px-5 pt-5 pb-3 border-b border-border text-right">
+      <SheetContent side="left" className="w-full sm:max-w-xl flex flex-col p-0">
+        <SheetHeader className="px-5 pt-5 pb-3 border-b border-border text-start">
           <SheetTitle>{rule?.id ? 'עריכת כלל' : 'כלל חדש'}</SheetTitle>
           <SheetDescription>מתי הכלל רץ, על מה הוא מסתכל, ומה הוא עושה.</SheetDescription>
         </SheetHeader>

@@ -115,7 +115,7 @@ export default function SupabasePanel() {
   }
 
   return (
-    <div dir="rtl" className="space-y-4">
+    <div className="space-y-4">
       <Card
         icon={Database}
         title="חיבור ל-Supabase"

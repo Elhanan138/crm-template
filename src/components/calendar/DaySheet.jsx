@@ -32,7 +32,7 @@ export default function DaySheet({ open, onOpenChange, date, events, renderEvent
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="bottom" dir="rtl" className="max-h-[80vh] flex flex-col p-0">
+      <SheetContent side="bottom" className="max-h-[80vh] flex flex-col p-0">
         <SheetHeader className="px-5 py-3.5 border-b border-border text-right">
           <SheetTitle className="text-card-title text-right">
             {date ? formatDate(date, 'day-full') : ''}

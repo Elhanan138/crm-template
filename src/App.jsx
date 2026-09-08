@@ -10,6 +10,7 @@ import { LogoProvider } from '@/lib/LogoContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 import AppLayout from '@/components/layout/AppLayout';
 import CapabilityGate from '@/components/layout/CapabilityGate';
+import { LanguageProvider, useI18n } from '@/lib/i18n';
 import ErrorBoundary from '@/components/shared/ErrorBoundary';
 import { ALL_ROUTES, FirstTimeSetupComponent } from '@/lib/moduleRegistry';
 import BrandMark from '@/components/shared/BrandMark';
@@ -21,6 +22,13 @@ const BootSplash = () => (
     <BrandMark className="w-12 h-12 rounded-lg animate-pulse" />
   </div>
 );
+
+// The toast stack has to sit on the reading-start side and be read in the
+// current direction; both come from the language.
+const AppToaster = () => {
+  const { dir } = useI18n();
+  return <Toaster dir={dir} position={dir === 'rtl' ? 'bottom-left' : 'bottom-right'} />;
+};
 
 const Shell = ({ children }) =>
   FirstTimeSetupComponent ? <FirstTimeSetupComponent>{children}</FirstTimeSetupComponent> : children;
@@ -68,15 +76,17 @@ const AuthenticatedApp = () => {
 
 export default function App() {
   return (
+    <LanguageProvider>
     <LogoProvider>
       <AuthProvider>
         <QueryClientProvider client={queryClientInstance}>
           <Router>
             <AuthenticatedApp />
           </Router>
-          <Toaster dir="rtl" position="bottom-left" />
+          <AppToaster />
         </QueryClientProvider>
       </AuthProvider>
     </LogoProvider>
+    </LanguageProvider>
   );
 }

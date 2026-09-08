@@ -20,7 +20,7 @@ export default function FormPreview({ title, description, fields, fillable = fal
  const disabled = !fillable;
 
  return (
-  <div dir="rtl"className="bg-card rounded-lg border border-border shadow-sm p-5 sm:p-6 space-y-4">
+  <div className="bg-card rounded-lg border border-border shadow-sm p-5 sm:p-6 space-y-4">
    <div>
     <h2 className="text-lg font-bold text-foreground break-words">{title || 'טופס ללא כותרת'}</h2>
     {description && <p className="text-sm text-muted-foreground mt-1 break-words">{description}</p>}
@@ -37,15 +37,15 @@ export default function FormPreview({ title, description, fields, fillable = fal
         </Label>
        )}
        {f.type === 'text' && (
-        <Input placeholder={f.placeholder} className="h-9 rounded-md text-sm"dir="rtl"disabled={disabled}
+        <Input placeholder={f.placeholder} className="h-9 rounded-md text-sm"disabled={disabled}
          value={values[f.id] || ''} onChange={(e) => set(f.id, e.target.value)} />
        )}
        {f.type === 'textarea' && (
-        <Textarea placeholder={f.placeholder} className="rounded-md text-sm min-h-[72px]"dir="rtl"disabled={disabled}
+        <Textarea placeholder={f.placeholder} className="rounded-md text-sm min-h-[72px]"disabled={disabled}
          value={values[f.id] || ''} onChange={(e) => set(f.id, e.target.value)} />
        )}
        {f.type === 'number' && (
-        <Input type="number"placeholder={f.placeholder} className="h-9 rounded-md text-sm"dir="rtl"disabled={disabled}
+        <Input type="number"placeholder={f.placeholder} className="h-9 rounded-md text-sm"disabled={disabled}
          value={values[f.id] || ''} onChange={(e) => set(f.id, e.target.value)} />
        )}
        {f.type === 'date' && (
@@ -55,7 +55,7 @@ export default function FormPreview({ title, description, fields, fillable = fal
        {f.type === 'select' && (
         <Select disabled={disabled} value={values[f.id] || ''} onValueChange={(v) => set(f.id, v)}>
          <SelectTrigger className="h-9 rounded-md text-sm"><SelectValue placeholder={f.placeholder || 'בחר...'} /></SelectTrigger>
-         <SelectContent dir="rtl">
+         <SelectContent>
           {(f.options || []).map((o, i) => <SelectItem key={i} value={o || `opt-${i}`}>{o || `אפשרות ${i + 1}`}</SelectItem>)}
          </SelectContent>
         </Select>
@@ -170,7 +170,6 @@ function TableField({ field, disabled, value, onChange }) {
             value={row[`col${colIdx}`] || ''}
             onChange={(e) => updateCell(rowIdx, colIdx, e.target.value)}
             className="h-8 rounded-md text-xs border-transparent focus:border-border"
-            dir="rtl"
            />
           </td>
          ))}

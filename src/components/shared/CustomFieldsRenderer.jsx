@@ -23,7 +23,7 @@ export default function CustomFieldsRenderer({ fields, values = {}, onChange, co
   const set = (key, value) => onChange({ ...values, [key]: value });
 
   return (
-    <div className={`grid grid-cols-1 ${columns === 2 ? 'sm:grid-cols-2' : ''} gap-3`} dir="rtl">
+    <div className={`grid grid-cols-1 ${columns === 2 ? 'sm:grid-cols-2' : ''} gap-3`}>
       {list.map((field) => {
         const value = values[field.key] ?? (field.type === 'checkbox' ? false : '');
         const wide = field.type === 'textarea';
@@ -71,7 +71,7 @@ export default function CustomFieldsRenderer({ fields, values = {}, onChange, co
                 <SelectTrigger className={INPUT_CLASS}>
                   <SelectValue placeholder={field.placeholder || 'בחר...'} />
                 </SelectTrigger>
-                <SelectContent dir="rtl">
+                <SelectContent>
                   {(field.options || []).map((opt) => (
                     <SelectItem key={opt} value={opt}>{opt}</SelectItem>
                   ))}

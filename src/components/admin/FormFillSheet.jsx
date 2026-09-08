@@ -207,7 +207,7 @@ export default function FormFillSheet({ open, onOpenChange, form, existingSubmis
  if (!open || !form) return null;
 
  return (
-  <div dir="rtl"className="min-h-[calc(100dvh-8rem)] flex flex-col">
+  <div className="min-h-[calc(100dvh-8rem)] flex flex-col">
    {/* Top bar — back button at top of screen, system-wide pattern */}
    <div className="sticky top-0 z-30 -mx-4 px-4 py-2.5 bg-background/90 backdrop-blur-sm border-b border-border">
     <button
@@ -252,7 +252,7 @@ export default function FormFillSheet({ open, onOpenChange, form, existingSubmis
       <Label className="text-xs font-medium text-muted-foreground">ממלא הטופס</Label>
       <Select value={submitterEmail} onValueChange={setSubmitterEmail}>
        <SelectTrigger className="h-9 rounded-md text-sm"><SelectValue placeholder="בחר משתמש"/></SelectTrigger>
-       <SelectContent dir="rtl">
+       <SelectContent>
         {teamMembers.map(m => <SelectItem key={m.id} value={m.email?.toLowerCase()}>{m.name}</SelectItem>)}
        </SelectContent>
       </Select>
@@ -261,7 +261,7 @@ export default function FormFillSheet({ open, onOpenChange, form, existingSubmis
       <Label className="text-xs font-medium text-muted-foreground">שיוך לפרויקט (אופציונלי)</Label>
       <Select value={projectId} onValueChange={setProjectId}>
        <SelectTrigger className="h-9 rounded-md text-sm"><SelectValue placeholder="ללא פרויקט"/></SelectTrigger>
-       <SelectContent dir="rtl">
+       <SelectContent>
         {projects.map(p => <SelectItem key={p.id} value={p.id}>{p.client_name || p.name}</SelectItem>)}
        </SelectContent>
       </Select>

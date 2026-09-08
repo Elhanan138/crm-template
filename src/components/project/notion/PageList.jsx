@@ -34,7 +34,7 @@ function PageItemRow({ page, depth, isActive, onClick, onMenu }) {
       <MoreHorizontal className="w-3.5 h-3.5"/>
      </button>
     </DropdownMenuTrigger>
-    <DropdownMenuContent align="end"dir="rtl">
+    <DropdownMenuContent align="end">
      <DropdownMenuItem onClick={() => onMenu('rename', page)}>
       <span className="text-sm">שנה שם</span>
      </DropdownMenuItem>
@@ -88,7 +88,7 @@ function SectionHeader({ section, isCollapsed, onToggle, onSelect, onMenu, onNew
       <MoreHorizontal className="w-3.5 h-3.5"/>
      </button>
     </DropdownMenuTrigger>
-    <DropdownMenuContent align="end"dir="rtl">
+    <DropdownMenuContent align="end">
      <DropdownMenuItem onClick={() => onMenu('rename', section)}>
       <span className="text-sm">שנה שם נושא</span>
      </DropdownMenuItem>
@@ -135,7 +135,7 @@ function PageListContent({ pages, activePageId, onSelect, onMenu, onReorder, onN
  };
 
  return (
-  <div className="flex flex-col h-full"dir="rtl">
+  <div className="flex flex-col h-full">
    <div className="flex items-center justify-between gap-2 px-3 py-2.5 border-b border-border">
     <span className="text-sm font-bold text-foreground">פתקים</span>
     <div className="flex items-center gap-1">
@@ -232,7 +232,7 @@ export default function PageList({ pages, activePageId, onSelect, onMenu, onReor
  if (isMobile) {
   return (
    <Sheet open={mobileOpen} onOpenChange={onMobileClose}>
-    <SheetContent side="right"dir="rtl"className="w-full sm:max-w-xs p-0">
+    <SheetContent side="right"className="w-full sm:max-w-xs p-0">
      <SheetHeader className="px-3 py-2.5 border-b border-border text-right shrink-0">
       <SheetTitle className="text-sm font-bold">פתקי פרויקט</SheetTitle>
      </SheetHeader>

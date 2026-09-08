@@ -228,7 +228,7 @@ export default function NotionTab({ projectId, project }) {
 
  if (pages.length === 0) {
   return (
-   <div dir="rtl"className="bg-card rounded-lg border border-border shadow-sm p-8">
+   <div className="bg-card rounded-lg border border-border shadow-sm p-8">
     <EmptyState
      icon={Plus}
      title={projectId ? "אין פתקים בפרויקט" : "אין פתקים עדיין"}
@@ -244,7 +244,7 @@ export default function NotionTab({ projectId, project }) {
  }
 
  return (
-  <div dir="rtl"className="flex gap-4 items-start"style={{ minHeight: 'calc(100dvh - 200px)' }}>
+  <div className="flex gap-4 items-start"style={{ minHeight: 'calc(100dvh - 200px)' }}>
    <PageList
     pages={pages}
     activePageId={activePageId}
@@ -278,7 +278,7 @@ export default function NotionTab({ projectId, project }) {
           {activePage.icon || '📄'}
          </button>
         </PopoverTrigger>
-        <PopoverContent align="start"className="w-64 p-2"dir="rtl">
+        <PopoverContent align="start"className="w-64 p-2">
          <div className="grid grid-cols-8 gap-1">
           {EMOJIS.map(emoji => (
            <button
@@ -330,7 +330,7 @@ export default function NotionTab({ projectId, project }) {
    {/* Rename dialog */}
    {menuAction?.type === 'rename' && (
     <AlertDialog open onOpenChange={(v) => !v && setMenuAction(null)}>
-     <AlertDialogContent className="rounded-lg"dir="rtl">
+     <AlertDialogContent className="rounded-lg">
       <AlertDialogHeader className="text-right">
        <AlertDialogTitle className="text-right">שינוי שם עמוד</AlertDialogTitle>
       </AlertDialogHeader>

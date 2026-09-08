@@ -118,7 +118,6 @@ export default function NotificationBell({ userEmail }) {
   <div
    id="notification-panel"
    className="fixed z-[9999] bg-card rounded-lg border border-border shadow-lg overflow-hidden"
-   dir="rtl"
    style={{
     top: panelPos.top,
     right: panelPos.right,
@@ -173,7 +172,7 @@ export default function NotificationBell({ userEmail }) {
       >
        <button
         onClick={() => handleOpenNotification(n)}
-        className="text-right flex items-start gap-3 flex-1 min-w-0 cursor-pointer"
+        className="text-start flex items-start gap-3 flex-1 min-w-0 cursor-pointer"
        >
         {n.type === 'reminder' ? (
          <BellRing className="w-4 h-4 text-primary mt-0.5 flex-shrink-0"/>

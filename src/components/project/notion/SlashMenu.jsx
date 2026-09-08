@@ -48,7 +48,7 @@ export default function SlashMenu({ items, command, clientRect, onClose }) {
     if (isMobile) {
       return (
         <Sheet open onOpenChange={(v) => !v && onClose()}>
-          <SheetContent side="bottom" dir="rtl" className="p-0">
+          <SheetContent side="bottom" className="p-0">
             <div className="py-6 text-center text-sm text-muted-foreground">לא נמצאה פקודה</div>
           </SheetContent>
         </Sheet>
@@ -66,7 +66,7 @@ export default function SlashMenu({ items, command, clientRect, onClose }) {
   if (isMobile) {
     return (
       <Sheet open onOpenChange={(v) => !v && onClose()}>
-        <SheetContent side="bottom" dir="rtl" className="p-0">
+        <SheetContent side="bottom" className="p-0">
           <Command className="bg-popover">
             <CommandList>
               <CommandGroup>

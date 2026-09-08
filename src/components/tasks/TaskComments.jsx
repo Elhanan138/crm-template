@@ -242,7 +242,7 @@ export default function TaskComments({ task }) {
  };
 
  return (
-  <div className="space-y-3"dir="rtl">
+  <div className="space-y-3">
    <h4 className="flex items-center gap-2 text-sm font-bold text-foreground">
     <MessageCircle className="w-4 h-4 text-muted-foreground"/>
     תגובות <span className="text-muted-foreground font-normal">({comments.length})</span>

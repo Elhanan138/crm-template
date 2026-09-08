@@ -173,7 +173,7 @@ export default function OutboxTab() {
 
       {/* Detail sheet */}
       <Sheet open={!!selectedEmail} onOpenChange={(open) => { if (!open) setSelectedEmail(null); }}>
-        <SheetContent side="left" dir="rtl" className="w-full sm:max-w-md overflow-y-auto">
+        <SheetContent side="left" className="w-full sm:max-w-md overflow-y-auto">
           {selectedEmail && (
             <>
               <SheetHeader>
@@ -233,11 +233,10 @@ export default function OutboxTab() {
                   {selectedEmail.html ? (
                     <div
                       className="prose prose-sm max-w-none text-foreground"
-                      dir="rtl"
                       dangerouslySetInnerHTML={{ __html: sanitizeHtml(selectedEmail.html) }}
                     />
                   ) : selectedEmail.body ? (
-                    <pre className="text-sm text-foreground whitespace-pre-wrap font-sans" dir="rtl">
+                    <pre className="text-sm text-foreground whitespace-pre-wrap font-sans">
                       {selectedEmail.body}
                     </pre>
                   ) : (

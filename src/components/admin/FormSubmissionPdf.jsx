@@ -20,7 +20,7 @@ const FormSubmissionPdf = React.forwardRef(function FormSubmissionPdf({ submissi
 
   return (
     <div style={{ position: 'fixed', top: 0, left: '-9999px', width: '794px' }}>
-      <div ref={ref} dir="rtl" style={{
+      <div ref={ref} style={{
         width: '794px',
         padding: '40px',
         background: '#ffffff',

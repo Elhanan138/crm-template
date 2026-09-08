@@ -28,7 +28,7 @@ export const AVAILABLE_ADMIN_SECTIONS = Object.keys(resolved);
 export default function AdminPanel({ activeSub = 'system-features' }) {
   const Panel = resolved[activeSub] || resolved[AVAILABLE_ADMIN_SECTIONS[0]];
   return (
-    <div dir="rtl" className="space-y-5">
+    <div className="space-y-5">
       <Suspense fallback={null}>{Panel ? <Panel /> : null}</Suspense>
     </div>
   );

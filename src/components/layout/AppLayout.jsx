@@ -112,7 +112,7 @@ function AppLayoutInner() {
   }
 
   return (
-    <div className="min-h-screen bg-background" dir="rtl">
+    <div className="min-h-screen bg-background">
       <Sidebar collapsed={collapsed} onToggle={() => setCollapsed(c => !c)} />
       <main className={`min-h-screen pt-16 md:pt-0 transition-all duration-300 ${collapsed ? 'md:ms-16' : 'md:ms-[174px]'}`}>
         <TopBar collapsed={collapsed} onToggle={() => setCollapsed(c => !c)} />

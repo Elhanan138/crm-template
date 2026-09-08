@@ -151,7 +151,7 @@ export default function Projects() {
 
   if (isLoading || aclLoading) {
    return (
-    <div dir="rtl">
+    <div>
      <PageHeader icon={CubeIcon} title="פרויקטים"subtitle="טוען פרויקטים..."/>
      <CardSkeleton count={6} />
     </div>
@@ -159,7 +159,7 @@ export default function Projects() {
   }
 
   return (
-   <div dir="rtl">
+   <div>
     {/* Header */}
     <PageHeader
      icon={CubeIcon}

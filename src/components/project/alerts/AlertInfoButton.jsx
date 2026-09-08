@@ -56,7 +56,6 @@ export default function AlertInfoButton({ alert }) {
     <div
      id="alert-info-popover"
      className="fixed z-[10000] bg-card rounded-lg border border-border shadow-lg p-3 space-y-2.5"
-     dir="rtl"
      style={{
       top: position.top,
       right: position.right,

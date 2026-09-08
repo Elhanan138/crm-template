@@ -43,7 +43,7 @@ export default function RecentErrors() {
   if (!errors.length) return null;
 
   return (
-    <Collapsible open={open} onOpenChange={setOpen} dir="rtl" className="w-full">
+    <Collapsible open={open} onOpenChange={setOpen} className="w-full">
       <div className="bg-card rounded-lg border border-border shadow-sm overflow-hidden">
         <CollapsibleTrigger asChild>
           <button className="w-full flex items-center justify-between p-4 hover:bg-muted/50 transition-colors">

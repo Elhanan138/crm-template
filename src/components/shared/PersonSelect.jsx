@@ -42,7 +42,7 @@ export default function PersonSelect({
       <SelectTrigger className={`h-9 rounded-lg border-border bg-background text-sm ${className}`}>
         <SelectValue placeholder={placeholder} />
       </SelectTrigger>
-      <SelectContent dir="rtl">
+      <SelectContent>
         {allowNone && <SelectItem value={NONE}>ללא</SelectItem>}
         {orphan && <SelectItem value={current}>{current} (לא במערכת)</SelectItem>}
         {people.map((m) => (

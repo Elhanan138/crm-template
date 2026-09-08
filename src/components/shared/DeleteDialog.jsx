@@ -27,7 +27,7 @@ export default function DeleteDialog({
 
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
-      <AlertDialogContent className="max-w-sm p-0 overflow-hidden gap-0 block" dir="rtl">
+      <AlertDialogContent className="max-w-sm p-0 overflow-hidden gap-0 block">
         {/* X close button — top left */}
         <button
           type="button"
@@ -40,11 +40,11 @@ export default function DeleteDialog({
 
         {/* Title — flush right */}
         <div className="px-5 pt-5 pb-1">
-          <h2 className="text-base font-bold text-right text-foreground leading-tight">{title}</h2>
+          <h2 className="text-base font-bold text-start text-foreground leading-tight">{title}</h2>
         </div>
 
         {/* Body — flush right */}
-        <div className="px-5 pb-4 pt-1 text-right">
+        <div className="px-5 pb-4 pt-1 text-start">
           {children || (
             <p className="text-sm text-muted-foreground [overflow-wrap:anywhere] break-words">
               {body}

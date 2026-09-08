@@ -114,11 +114,13 @@ function createEntityHandler(name) {
     },
     create: async (data) => {
       const items = getCollection(name);
+      // An id in the payload means the record already HAS an identity — this is
+      // a restore, not a new row. Anything id-linked to it survives the undo.
       const newItem = {
-        ...data,
-        id: genId(),
         created_date: new Date().toISOString(),
         created_by_id: ADMIN_USER.id,
+        ...data,
+        id: data.id || genId(),
       };
       items.push(newItem);
       setCollection(name, items);
@@ -151,10 +153,10 @@ function createEntityHandler(name) {
     bulkCreate: async (itemsData) => {
       const items = getCollection(name);
       const created = itemsData.map(data => ({
-        ...data,
-        id: genId(),
         created_date: new Date().toISOString(),
         created_by_id: ADMIN_USER.id,
+        ...data,
+        id: data.id || genId(),
       }));
       items.push(...created);
       setCollection(name, items);

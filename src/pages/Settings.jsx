@@ -59,7 +59,7 @@ export default function Settings() {
   );
 
   return (
-    <div dir="rtl">
+    <div>
       <PageHeader
         icon={NAV_ICONS.settings}
         title="הגדרות"
@@ -76,7 +76,7 @@ export default function Settings() {
         }
       />
 
-      <div className="flex flex-col lg:flex-row gap-6" dir="rtl">
+      <div className="flex flex-col lg:flex-row gap-6">
         <aside className="lg:w-56 lg:flex-shrink-0">
           <div className="sticky top-20">
             <SectionStepperNav

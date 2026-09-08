@@ -14,16 +14,23 @@ import {
 } from '@/components/ui/alert-dialog';
 import {
   Plus, Search, Pencil, Trash2, Lock, ShieldOff, ArrowUpDown, ArrowUp, ArrowDown,
-  Download, LayoutGrid, List, Layers, X, AlertTriangle, ChevronDown, UserCheck,
+  Download, LayoutGrid, List, Layers, X, AlertTriangle, ChevronDown, UserCheck, CopyCheck,
 } from 'lucide-react';
 import PageHeader from '@/components/shared/PageHeader';
 import EmptyState from '@/components/shared/EmptyState';
 import CardSkeleton from '@/components/shared/CardSkeleton';
+import Pagination from '@/components/shared/Pagination';
 import CrmRecordSheet from './CrmRecordSheet';
 import BoardView, { StatStrip } from './BoardView';
+import ColumnPicker from './ColumnPicker';
+import DuplicatesDialog from './DuplicatesDialog';
+import InlineEditCell, { canEditInline } from './InlineEditCell';
 import { useCrmRecords, filterRecords, formatValue, currency } from '@/lib/crm/useCrmRecords';
 import { TONE_CLASS } from '@/lib/crm/schemas';
 import { readField } from '@/lib/crm/derived';
+import { useI18n, translateSchema } from '@/lib/i18n';
+import { useTablePrefs, PAGE_SIZES } from '@/lib/crm/tablePrefs';
+import { findDuplicates } from '@/lib/crm/duplicates';
 import {
   statsFor, segmentsFor, groupOptionsFor, boardConfigFor, sortRecords,
   groupRecords, toCsv, isOverdue, statusFieldOf, moneyFieldOf,
@@ -45,8 +52,9 @@ const NO_GROUP = '__none__';
  * the form; this component decides nothing about a specific entity.
  *
  * It is also where a flat table becomes a place to work: headline numbers,
- * saved segments, sorting, grouping with subtotals, a board, bulk edits and a
- * CSV export — all derived in src/lib/crm/insights.js from fields the schema
+ * saved segments, sorting, grouping with subtotals, a board, inline editing,
+ * chosen columns, paging, bulk edits with an undo, duplicate detection and a
+ * CSV export — derived in src/lib/crm/insights.js from fields the schema
  * already declares. Written once here, every module gets it.
  *
  * `renderAbove` lets a module add its own view (an aging table, an MRR strip)
@@ -54,8 +62,12 @@ const NO_GROUP = '__none__';
  * numbers are not repeated by the generic ones.
  */
 export default function CrmModulePage({
-  schema, moduleId, renderAbove, extraActions, onOpenRecord, EditorComponent, stats = true,
+  schema: rawSchema, moduleId, renderAbove, extraActions, onOpenRecord, EditorComponent, stats = true,
 }) {
+  const { t, dir, lang } = useI18n();
+  // Labels are translated, keys and stored values are never touched.
+  const schema = useMemo(() => translateSchema(rawSchema, t), [rawSchema, lang, t]);
+
   const {
     records, isLoading, relations, lookups, customFields,
     save, remove, bulkSave, bulkRemove,
@@ -72,13 +84,17 @@ export default function CrmModulePage({
   const [sort, setSort] = useState({ key: null, dir: 'asc' });
   const [groupKey, setGroupKey] = useState('');
   const [view, setView] = useState('table');
+  const [page, setPage] = useState(1);
   const [selected, setSelected] = useState(() => new Set());
+  const [editing, setEditing] = useState(null); // { id, key }
   const [sheetRecord, setSheetRecord] = useState(null);
   const [sheetOpen, setSheetOpen] = useState(false);
   const [pendingDelete, setPendingDelete] = useState(null);
   const [bulkDeleteOpen, setBulkDeleteOpen] = useState(false);
+  const [duplicatesOpen, setDuplicatesOpen] = useState(false);
 
-  const columns = schema.fields.filter((f) => f.list);
+  const { columns, pageSize, toggleColumn, resetColumns, setPageSize } = useTablePrefs(moduleId, schema);
+
   const Icon = schema.icon;
   const statusField = statusFieldOf(schema);
   const moneyField = moneyFieldOf(schema);
@@ -101,14 +117,31 @@ export default function CrmModulePage({
     [records, segment, schema, search, filters, sort]
   );
 
+  const duplicateCount = useMemo(
+    () => findDuplicates(schema, records).length,
+    [schema, records]
+  );
+
+  // Paging applies to the flat table only. A board shows its columns whole, and
+  // a grouped table paged mid-group would cut a subtotal in half.
+  const paged = useMemo(() => {
+    if (groupKey || view === 'board') return visible;
+    const start = (page - 1) * pageSize;
+    return visible.slice(start, start + pageSize);
+  }, [visible, page, pageSize, groupKey, view]);
+
   const grouped = useMemo(
     () => groupRecords(visible, groupKey, schema, (field, value) => formatValue(field, value, lookups)),
     [visible, groupKey, schema, lookups]
   );
 
-  // A selection that survives a filter change would act on rows you can no
-  // longer see. It is cleared whenever the visible set changes shape.
-  useEffect(() => { setSelected(new Set()); }, [segmentId, search, filters, groupKey]);
+  // A selection or a page number that survives a filter change would act on, or
+  // point at, rows you can no longer see.
+  useEffect(() => { setSelected(new Set()); setPage(1); }, [segmentId, search, filters, groupKey, pageSize]);
+  useEffect(() => {
+    const lastPage = Math.max(1, Math.ceil(visible.length / pageSize));
+    if (page > lastPage) setPage(lastPage);
+  }, [visible.length, pageSize, page]);
 
   const openNew = () => { setSheetRecord(null); setSheetOpen(true); };
   const openRecord = (record) => {
@@ -132,6 +165,18 @@ export default function CrmModulePage({
 
   const handleSave = (form) => save.mutate(form, { onSuccess: () => setSheetOpen(false) });
 
+  const commitInline = (record, field, value) => {
+    setEditing(null);
+    if (String(value ?? '') === String(record[field.key] ?? '')) return;
+    save.mutate({ ...record, [field.key]: value });
+  };
+
+  const mergeDuplicates = ({ merged, removeIds }) => {
+    save.mutate(merged, {
+      onSuccess: () => bulkRemove.mutate(removeIds),
+    });
+  };
+
   const toggleSort = (key) =>
     setSort((prev) => (prev.key === key
       ? { key, dir: prev.dir === 'asc' ? 'desc' : 'asc' }
@@ -144,8 +189,9 @@ export default function CrmModulePage({
       return next;
     });
 
-  const allVisibleSelected = visible.length > 0 && visible.every((r) => selected.has(r.id));
-  const toggleAll = () => setSelected(allVisibleSelected ? new Set() : new Set(visible.map((r) => r.id)));
+  const pageRows = groupKey ? visible : paged;
+  const allVisibleSelected = pageRows.length > 0 && pageRows.every((r) => selected.has(r.id));
+  const toggleAll = () => setSelected(allVisibleSelected ? new Set() : new Set(pageRows.map((r) => r.id)));
   const selectedIds = [...selected];
 
   const exportCsv = () => {
@@ -181,7 +227,11 @@ export default function CrmModulePage({
     const active = sort.key === field.key;
     const SortIcon = !active ? ArrowUpDown : sort.dir === 'asc' ? ArrowUp : ArrowDown;
     return (
-      <th key={field.key} className="text-right font-semibold text-xs text-muted-foreground px-3 py-2.5">
+      <th
+        key={field.key}
+        aria-sort={active ? (sort.dir === 'asc' ? 'ascending' : 'descending') : 'none'}
+        className="text-start font-semibold text-xs text-muted-foreground px-3 py-2.5"
+      >
         <button
           onClick={() => toggleSort(field.key)}
           className={`inline-flex items-center gap-1 max-w-full hover:text-foreground transition-colors ${active ? 'text-foreground' : ''}`}
@@ -195,6 +245,7 @@ export default function CrmModulePage({
 
   const rowsOf = (items) => items.map((record) => {
     const late = isOverdue(schema, record);
+    const editable = canEdit(record);
     return (
       <tr
         key={record.id}
@@ -202,29 +253,52 @@ export default function CrmModulePage({
         className={`border-b border-border last:border-0 hover:bg-muted/30 cursor-pointer transition-colors ${selected.has(record.id) ? 'bg-accent' : ''}`}
       >
         <td className="px-3 py-2.5" onClick={(e) => e.stopPropagation()}>
-          <Checkbox checked={selected.has(record.id)} onCheckedChange={() => toggleRow(record.id)} aria-label="בחירת שורה" />
+          <Checkbox checked={selected.has(record.id)} onCheckedChange={() => toggleRow(record.id)} aria-label={t('בחירת שורה')} />
         </td>
-        {columns.map((f, i) => (
-          <td key={f.key} className="px-3 py-2.5 truncate">
-            <span className="inline-flex items-center gap-1.5 min-w-0 max-w-full">
-              {i === 0 && late && <AlertTriangle className="w-3.5 h-3.5 text-destructive flex-shrink-0" />}
-              <span className="truncate">{cell(f, record)}</span>
-            </span>
-          </td>
-        ))}
+        {columns.map((f, i) => {
+          const isEditing = editing?.id === record.id && editing?.key === f.key;
+          const inlineable = canEditInline(f, editable);
+          return (
+            <td
+              key={f.key}
+              className="px-3 py-2.5 truncate"
+              onDoubleClick={(e) => {
+                if (!inlineable) return;
+                e.stopPropagation();
+                setEditing({ id: record.id, key: f.key });
+              }}
+              title={inlineable && !isEditing ? t('לחיצה כפולה לעריכה מהירה') : undefined}
+            >
+              {isEditing ? (
+                <InlineEditCell
+                  field={f}
+                  value={record[f.key]}
+                  saving={save.isPending}
+                  onCommit={(value) => commitInline(record, f, value)}
+                  onCancel={() => setEditing(null)}
+                />
+              ) : (
+                <span className="inline-flex items-center gap-1.5 min-w-0 max-w-full">
+                  {i === 0 && late && <AlertTriangle className="w-3.5 h-3.5 text-destructive flex-shrink-0" />}
+                  <span className="truncate">{cell(f, record)}</span>
+                </span>
+              )}
+            </td>
+          );
+        })}
         <td className="px-3 py-2.5" onClick={(e) => e.stopPropagation()}>
           <div className="flex items-center justify-end gap-0.5">
-            {canEdit(record) ? (
-              <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => openEditor(record)} aria-label="עריכה">
+            {editable ? (
+              <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => openEditor(record)} aria-label={t('עריכה')}>
                 <Pencil className="w-3.5 h-3.5" />
               </Button>
             ) : (
-              <span className="inline-flex w-7 h-7 items-center justify-center text-muted-foreground" title="אין הרשאת עריכה">
+              <span className="inline-flex w-7 h-7 items-center justify-center text-muted-foreground" title={t('אין הרשאת עריכה')}>
                 <Lock className="w-3.5 h-3.5" />
               </span>
             )}
             {canDelete(record) && (
-              <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={() => setPendingDelete(record)} aria-label="מחיקה">
+              <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={() => setPendingDelete(record)} aria-label={t('מחיקה')}>
                 <Trash2 className="w-3.5 h-3.5" />
               </Button>
             )}
@@ -239,7 +313,7 @@ export default function CrmModulePage({
       <thead>
         <tr className="border-b border-border bg-muted/40">
           <th className="w-10 px-3 py-2.5">
-            <Checkbox checked={allVisibleSelected} onCheckedChange={toggleAll} aria-label="בחירת הכל" />
+            <Checkbox checked={allVisibleSelected} onCheckedChange={toggleAll} aria-label={t('בחירת הכל')} />
           </th>
           {columns.map(headerCell)}
           <th className="w-24 px-3 py-2.5" />
@@ -253,7 +327,7 @@ export default function CrmModulePage({
     moneyField ? items.reduce((s, r) => s + Number(readField(moneyField, r) || 0), 0) : 0;
 
   return (
-    <div dir="rtl" className="pb-10">
+    <div dir={dir} className="pb-10">
       <PageHeader
         icon={Icon}
         title={schema.title}
@@ -262,14 +336,32 @@ export default function CrmModulePage({
           restricted ? null : (
             <div className="flex items-center gap-2">
               {extraActions}
+              {duplicateCount > 0 && (
+                <Button
+                  variant="outline"
+                  onClick={() => setDuplicatesOpen(true)}
+                  className="rounded-full h-9 px-3.5 text-sm gap-1.5"
+                  title={t('כפילויות')}
+                >
+                  <CopyCheck className="w-4 h-4 flex-shrink-0" />
+                  <span className="hidden sm:inline">{t('כפילויות')}</span>
+                  <span className="text-[10px] tabular-nums opacity-70">{duplicateCount}</span>
+                </Button>
+              )}
+              <ColumnPicker
+                schema={schema}
+                visibleKeys={columns.map((f) => f.key)}
+                onToggle={toggleColumn}
+                onReset={resetColumns}
+              />
               {visible.length > 0 && (
-                <Button variant="outline" onClick={exportCsv} className="rounded-full h-9 px-3.5 text-sm gap-1.5" title="ייצוא התצוגה הנוכחית ל-CSV">
+                <Button variant="outline" onClick={exportCsv} className="rounded-full h-9 px-3.5 text-sm gap-1.5" title={t('ייצוא התצוגה הנוכחית ל-CSV')}>
                   <Download className="w-4 h-4 flex-shrink-0" />
-                  <span className="hidden sm:inline">ייצוא</span>
+                  <span className="hidden sm:inline">{t('ייצוא')}</span>
                 </Button>
               )}
               <Button onClick={openNew} className="rounded-full h-9 px-4 text-sm gap-1.5">
-                <Plus className="w-4 h-4 flex-shrink-0" /> {schema.singular} חדש
+                <Plus className="w-4 h-4 flex-shrink-0" /> {schema.singular}
               </Button>
             </div>
           )
@@ -279,8 +371,8 @@ export default function CrmModulePage({
       {restricted && (
         <EmptyState
           icon={ShieldOff}
-          title="אין לך גישה למודול הזה"
-          description={`${schema.title} זמינים למנהלי מערכת בלבד. פנה למנהל אם נדרשת לך גישה.`}
+          title={t('אין לך גישה למודול הזה')}
+          description={`${schema.title} — ${t('זמין למנהלי מערכת בלבד')}`}
         />
       )}
 
@@ -305,7 +397,7 @@ export default function CrmModulePage({
                       : 'bg-card border-border text-muted-foreground font-medium hover:text-foreground'
                   }`}
                 >
-                  {s.label}
+                  {t(s.label)}
                   <span className="text-[10px] tabular-nums opacity-70">{count}</span>
                 </button>
               );
@@ -316,12 +408,12 @@ export default function CrmModulePage({
         {/* Search, filters, grouping and the view switch */}
         <div className="flex flex-col sm:flex-row gap-2 mb-4">
           <div className="relative flex-1">
-            <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
+            <Search className="absolute end-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
             <Input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder={`חיפוש ב${schema.title}...`}
-              className="h-9 rounded-lg pr-9 text-sm"
+              placeholder={`${t('חיפוש')} — ${schema.title}`}
+              className="h-9 rounded-lg pe-9 text-sm"
             />
           </div>
 
@@ -332,8 +424,8 @@ export default function CrmModulePage({
               onValueChange={(v) => setFilters((prev) => ({ ...prev, [f.key]: v === 'all' ? 'all' : f.options.find((o) => String(o.value) === v)?.value ?? v }))}
             >
               <SelectTrigger className="h-9 rounded-lg text-sm w-full sm:w-44"><SelectValue placeholder={f.label} /></SelectTrigger>
-              <SelectContent dir="rtl">
-                <SelectItem value="all">כל ה{f.label}</SelectItem>
+              <SelectContent dir={dir}>
+                <SelectItem value="all">{`${t('הכל')} — ${f.label}`}</SelectItem>
                 {f.options.map((o) => <SelectItem key={String(o.value)} value={String(o.value)}>{o.label}</SelectItem>)}
               </SelectContent>
             </Select>
@@ -343,11 +435,11 @@ export default function CrmModulePage({
             <Select value={groupKey || NO_GROUP} onValueChange={(v) => setGroupKey(v === NO_GROUP ? '' : v)}>
               <SelectTrigger className="h-9 rounded-lg text-sm w-full sm:w-44 gap-1.5">
                 <Layers className="w-3.5 h-3.5 flex-shrink-0 opacity-70" />
-                <SelectValue placeholder="קיבוץ" />
+                <SelectValue placeholder={t('קיבוץ')} />
               </SelectTrigger>
-              <SelectContent dir="rtl">
-                <SelectItem value={NO_GROUP}>ללא קיבוץ</SelectItem>
-                {groupOptions.map((o) => <SelectItem key={o.key} value={o.key}>לפי {o.label}</SelectItem>)}
+              <SelectContent dir={dir}>
+                <SelectItem value={NO_GROUP}>{t('ללא קיבוץ')}</SelectItem>
+                {groupOptions.map((o) => <SelectItem key={o.key} value={o.key}>{o.label}</SelectItem>)}
               </SelectContent>
             </Select>
           )}
@@ -357,14 +449,14 @@ export default function CrmModulePage({
               <Button
                 variant="ghost" size="icon"
                 className={`h-8 w-8 rounded-full ${view === 'table' ? 'bg-card shadow-sm' : ''}`}
-                onClick={() => setView('table')} aria-label="תצוגת רשימה"
+                onClick={() => setView('table')} aria-label={t('תצוגת רשימה')}
               >
                 <List className="w-4 h-4" />
               </Button>
               <Button
                 variant="ghost" size="icon"
                 className={`h-8 w-8 rounded-full ${view === 'board' ? 'bg-card shadow-sm' : ''}`}
-                onClick={() => setView('board')} aria-label="תצוגת לוח"
+                onClick={() => setView('board')} aria-label={t('תצוגת לוח')}
               >
                 <LayoutGrid className="w-4 h-4" />
               </Button>
@@ -375,17 +467,17 @@ export default function CrmModulePage({
         {/* Bulk bar — appears only with a selection, and says what it will act on */}
         {selectedIds.length > 0 && (
           <div className="flex items-center gap-2 mb-3 rounded-xl border border-primary/30 bg-accent px-3 py-2 flex-wrap">
-            <span className="text-xs font-semibold">{selectedIds.length} נבחרו</span>
+            <span className="text-xs font-semibold">{selectedIds.length} {t('נבחרו')}</span>
 
             {statusField && (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="outline" size="sm" className="h-7 rounded-full text-xs gap-1 bg-card">
-                    שינוי {statusField.label} <ChevronDown className="w-3 h-3 flex-shrink-0" />
+                    {statusField.label} <ChevronDown className="w-3 h-3 flex-shrink-0" />
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent dir="rtl" align="end">
-                  <DropdownMenuLabel className="text-xs">{statusField.label} חדש</DropdownMenuLabel>
+                <DropdownMenuContent dir={dir} align="end">
+                  <DropdownMenuLabel className="text-xs">{statusField.label}</DropdownMenuLabel>
                   <DropdownMenuSeparator />
                   {statusField.options.map((o) => (
                     <DropdownMenuItem
@@ -404,7 +496,7 @@ export default function CrmModulePage({
                 variant="outline" size="sm" className="h-7 rounded-full text-xs gap-1 bg-card"
                 onClick={() => bulkSave.mutate({ ids: selectedIds, patch: { owner_email: myEmail } })}
               >
-                <UserCheck className="w-3 h-3 flex-shrink-0" /> שייך אליי
+                <UserCheck className="w-3 h-3 flex-shrink-0" /> {t('שייך אליי')}
               </Button>
             )}
 
@@ -413,12 +505,12 @@ export default function CrmModulePage({
               className="h-7 rounded-full text-xs gap-1 bg-card text-destructive hover:text-destructive"
               onClick={() => setBulkDeleteOpen(true)}
             >
-              <Trash2 className="w-3 h-3 flex-shrink-0" /> מחיקה
+              <Trash2 className="w-3 h-3 flex-shrink-0" /> {t('מחיקה')}
             </Button>
 
             <Button
-              variant="ghost" size="icon" className="h-7 w-7 me-auto"
-              onClick={() => setSelected(new Set())} aria-label="ביטול הבחירה"
+              variant="ghost" size="icon" className="h-7 w-7 ms-auto"
+              onClick={() => setSelected(new Set())} aria-label={t('ביטול הבחירה')}
             >
               <X className="w-3.5 h-3.5" />
             </Button>
@@ -430,10 +522,10 @@ export default function CrmModulePage({
         ) : visible.length === 0 ? (
           <EmptyState
             icon={Icon}
-            title={records.length === 0 ? `אין עדיין ${schema.title}` : 'לא נמצאו תוצאות'}
-            description={records.length === 0 ? `צור ${schema.singular} ראשון כדי להתחיל.` : 'נסה לשנות את החיפוש, את הסינון או את הפלח.'}
+            title={records.length === 0 ? `${t('אין עדיין')} ${schema.title}` : t('לא נמצאו תוצאות')}
+            description={records.length === 0 ? t('צור רשומה ראשונה כדי להתחיל.') : t('נסה לשנות את החיפוש, את הסינון או את הפלח.')}
             action={records.length === 0 ? (
-              <Button onClick={openNew} className="rounded-full gap-1.5"><Plus className="w-4 h-4" /> {schema.singular} חדש</Button>
+              <Button onClick={openNew} className="rounded-full gap-1.5"><Plus className="w-4 h-4" /> {schema.singular}</Button>
             ) : null}
           />
         ) : view === 'board' && board ? (
@@ -464,13 +556,13 @@ export default function CrmModulePage({
                   {table(group.items)}
                 </div>
               )) : (
-                <div className="bg-card border border-border rounded-xl overflow-hidden">{table(visible)}</div>
+                <div className="bg-card border border-border rounded-xl overflow-hidden">{table(paged)}</div>
               )}
             </div>
 
             {/* Mobile: cards */}
             <div className="md:hidden space-y-2">
-              {visible.map((record) => {
+              {(groupKey ? visible : paged).map((record) => {
                 const late = isOverdue(schema, record);
                 return (
                   <div
@@ -483,9 +575,9 @@ export default function CrmModulePage({
                       checked={selected.has(record.id)}
                       onCheckedChange={() => toggleRow(record.id)}
                       className="mt-0.5 flex-shrink-0"
-                      aria-label="בחירת שורה"
+                      aria-label={t('בחירת שורה')}
                     />
-                    <button onClick={() => openRecord(record)} className="flex-1 min-w-0 text-right">
+                    <button onClick={() => openRecord(record)} className="flex-1 min-w-0 text-start">
                       <div className="flex items-start justify-between gap-2 mb-1.5">
                         <p className="text-sm font-bold truncate min-w-0 inline-flex items-center gap-1.5">
                           {late && <AlertTriangle className="w-3.5 h-3.5 text-destructive flex-shrink-0" />}
@@ -509,10 +601,32 @@ export default function CrmModulePage({
               })}
             </div>
 
-            <p className="text-[11px] text-muted-foreground mt-3">
-              {visible.length} מתוך {records.length}
-              {hiddenCount > 0 && ` · ${hiddenCount} רשומות מוסתרות לפי הרשאות`}
-            </p>
+            {!groupKey && (
+              <Pagination
+                total={visible.length}
+                page={page}
+                pageSize={pageSize}
+                onPageChange={setPage}
+                className="mt-4"
+              />
+            )}
+
+            <div className="flex items-center justify-between gap-3 mt-3 flex-wrap">
+              <p className="text-[11px] text-muted-foreground">
+                {visible.length} / {records.length}
+                {hiddenCount > 0 && ` · ${hiddenCount} ${t('רשומות מוסתרות לפי הרשאות')}`}
+              </p>
+              {!groupKey && visible.length > PAGE_SIZES[0] && (
+                <Select value={String(pageSize)} onValueChange={(v) => setPageSize(Number(v))}>
+                  <SelectTrigger className="h-7 rounded-lg text-[11px] w-28"><SelectValue /></SelectTrigger>
+                  <SelectContent dir={dir}>
+                    {PAGE_SIZES.map((size) => (
+                      <SelectItem key={size} value={String(size)}>{size} {t('בעמוד')}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
+            </div>
           </>
         )}
       </>)}
@@ -543,41 +657,51 @@ export default function CrmModulePage({
         />
       )}
 
+      <DuplicatesDialog
+        open={duplicatesOpen}
+        onOpenChange={setDuplicatesOpen}
+        schema={schema}
+        records={records}
+        lookups={lookups}
+        onMerge={mergeDuplicates}
+        merging={save.isPending || bulkRemove.isPending}
+      />
+
       <AlertDialog open={!!pendingDelete} onOpenChange={(v) => !v && setPendingDelete(null)}>
-        <AlertDialogContent dir="rtl">
+        <AlertDialogContent dir={dir}>
           <AlertDialogHeader>
-            <AlertDialogTitle>למחוק את הרשומה?</AlertDialogTitle>
+            <AlertDialogTitle>{t('למחוק את הרשומה?')}</AlertDialogTitle>
             <AlertDialogDescription>
-              {pendingDelete?.[schema.titleField] || schema.singular} יימחק לצמיתות. אי אפשר לבטל את הפעולה.
+              {pendingDelete?.[schema.titleField] || schema.singular} — {t('אפשר לבטל מיד אחרי המחיקה.')}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="flex-row-reverse gap-2">
-            <AlertDialogCancel>ביטול</AlertDialogCancel>
+            <AlertDialogCancel>{t('ביטול')}</AlertDialogCancel>
             <AlertDialogAction
               className="bg-destructive hover:bg-destructive/90"
               onClick={() => { remove.mutate(pendingDelete.id); setPendingDelete(null); }}
             >
-              מחיקה
+              {t('מחיקה')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
 
       <AlertDialog open={bulkDeleteOpen} onOpenChange={setBulkDeleteOpen}>
-        <AlertDialogContent dir="rtl">
+        <AlertDialogContent dir={dir}>
           <AlertDialogHeader>
-            <AlertDialogTitle>למחוק {selectedIds.length} רשומות?</AlertDialogTitle>
+            <AlertDialogTitle>{`${t('מחיקה')} — ${selectedIds.length}`}</AlertDialogTitle>
             <AlertDialogDescription>
-              הפעולה לצמיתות ואי אפשר לבטל אותה. רשומות שאין לך הרשאת מחיקה עליהן ידולגו.
+              {t('רשומות שאין לך הרשאת מחיקה עליהן ידולגו. אפשר לבטל מיד אחרי המחיקה.')}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="flex-row-reverse gap-2">
-            <AlertDialogCancel>ביטול</AlertDialogCancel>
+            <AlertDialogCancel>{t('ביטול')}</AlertDialogCancel>
             <AlertDialogAction
               className="bg-destructive hover:bg-destructive/90"
               onClick={() => { bulkRemove.mutate(selectedIds); setSelected(new Set()); setBulkDeleteOpen(false); }}
             >
-              מחיקה
+              {t('מחיקה')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

@@ -21,7 +21,7 @@ export default function InlineStatusCell({ value, onChange }) {
           <StatusBadge status={value || 'in_progress'} />
         </button>
       </PopoverTrigger>
-      <PopoverContent align="center" dir="rtl" className="w-36 p-1.5" onClick={e => e.stopPropagation()}>
+      <PopoverContent align="center" className="w-36 p-1.5" onClick={e => e.stopPropagation()}>
         <div className="space-y-0.5">
           {STATUS_OPTIONS.map(s => (
             <button

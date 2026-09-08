@@ -60,7 +60,7 @@ export default function QuickTaskForm({ projects, defaultProjectId, onOpenFullFo
   };
 
   return (
-    <div className="bg-card rounded-lg border border-border shadow-sm p-3.5 space-y-3 transition-all" dir="rtl">
+    <div className="bg-card rounded-lg border border-border shadow-sm p-3.5 space-y-3 transition-all">
       {/* Layer 1 — quick create (secondary shortcut) + full-form button (primary) */}
       <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap">
         <div className="relative flex-1 min-w-[180px]">
@@ -72,7 +72,6 @@ export default function QuickTaskForm({ projects, defaultProjectId, onOpenFullFo
             onBlur={() => setFocused(false)}
             placeholder="הוסף משימה מהירה…"
             className="h-10 rounded-xl text-right border-input bg-card focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/20"
-            dir="rtl"
           />
           {focused && (
             <p className="absolute -bottom-4 right-1 text-[10px] text-muted-foreground">Enter ליצירה מהירה</p>
@@ -81,7 +80,7 @@ export default function QuickTaskForm({ projects, defaultProjectId, onOpenFullFo
         {!defaultProjectId && (
           <Select value={form.project_id || '__none__'} onValueChange={v => set('project_id', v === '__none__' ? '' : v)}>
             <SelectTrigger className="h-10 rounded-xl text-sm w-full sm:w-48 text-right [&>span]:text-right"><SelectValue placeholder="פרויקט" /></SelectTrigger>
-            <SelectContent dir="rtl">
+            <SelectContent>
               <SelectItem value="__none__">שוטף (ללא פרויקט)</SelectItem>
               {projects.map(p => <SelectItem key={p.id} value={p.id}>{p.client_name || p.name}</SelectItem>)}
             </SelectContent>
@@ -119,7 +118,7 @@ export default function QuickTaskForm({ projects, defaultProjectId, onOpenFullFo
             <User className="w-3 h-3" />
             <SelectValue />
           </SelectTrigger>
-          <SelectContent dir="rtl">
+          <SelectContent>
             <SelectItem value="__me__">{myName ? `אני (${myName})` : 'אני'}</SelectItem>
             {teamMembers.filter(m => m.name !== myName).map(m => <SelectItem key={m.id} value={m.name}>{m.name}</SelectItem>)}
           </SelectContent>

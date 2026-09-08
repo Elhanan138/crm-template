@@ -3,7 +3,7 @@
 
 export const TABLE = "w-full text-sm";
 export const THEAD_ROW = "border-b border-border";
-export const TH = "text-right text-xs font-semibold text-muted-foreground py-3 px-4";
+export const TH = "text-start text-xs font-semibold text-muted-foreground py-3 px-4";
 export const TH_CENTER = "text-center text-xs font-semibold text-muted-foreground py-3 px-4";
 
 // Row: same height, same border, same hover everywhere.

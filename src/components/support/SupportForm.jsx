@@ -139,7 +139,7 @@ export default function SupportForm({ user, compact = false, onSuccess }) {
   };
 
   return (
-    <div className="bg-card rounded-xl border border-border shadow-sm overflow-hidden" dir="rtl">
+    <div className="bg-card rounded-xl border border-border shadow-sm overflow-hidden">
       {/* Header */}
       <div className="px-5 sm:px-6 py-5 border-b border-border">
         <div className="flex items-center gap-3">

@@ -157,7 +157,6 @@ export default function TicketConversation({ ticket, isAdmin, userEmail, userDis
           placeholder="כתוב הודעה... (ניתן להדביק צילומי מסך)"
           rows={2}
           className="resize-none text-sm min-h-[40px] flex-1"
-          dir="rtl"
           onKeyDown={(e) => {
             if (e.key === 'Enter' && !e.shiftKey) {
               e.preventDefault();

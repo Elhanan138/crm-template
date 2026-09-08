@@ -76,7 +76,7 @@ export default function AnnouncementPopupModal() {
 
   return (
     <Dialog open={!!activePopup} onOpenChange={(open) => { if (!open) handleClose(); }}>
-      <DialogContent className="max-w-md p-0 gap-0 overflow-hidden" dir="rtl">
+      <DialogContent className="max-w-md p-0 gap-0 overflow-hidden">
         <DialogTitle className="sr-only">{activePopup.title}</DialogTitle>
         <PopupContent
           popup={activePopup}

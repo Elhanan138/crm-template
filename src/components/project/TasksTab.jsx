@@ -310,7 +310,7 @@ export default function TasksTab({ projectId, project, focusItemId, onFocusHandl
 
    {/* Reminder Dialog */}
    <Dialog open={reminderDialog.open} onOpenChange={open => !open && setReminderDialog({ open: false, task: null })}>
-    <DialogContent className="sm:max-w-sm rounded-lg"dir="rtl">
+    <DialogContent className="sm:max-w-sm rounded-lg">
      <DialogHeader>
       <DialogTitle className="text-base font-bold text-right flex items-center gap-2"><Bell className="w-4 h-4 text-warning"/> תזכורת למשימה</DialogTitle>
      </DialogHeader>

@@ -67,11 +67,11 @@ export default function ProjectAlertForm({
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4" dir="rtl">
+    <form onSubmit={handleSubmit} className="space-y-4">
       <Field label="נמען" htmlFor="recipient_email" required>
         <Select value={form.recipient_email} onValueChange={(v) => setForm(prev => ({ ...prev, recipient_email: v }))}>
           <SelectTrigger id="recipient_email"><SelectValue placeholder="בחר נמען" /></SelectTrigger>
-          <SelectContent dir="rtl">
+          <SelectContent>
             {recipients.map(r => (
               <SelectItem key={r.email} value={r.email}>{r.label}</SelectItem>
             ))}
@@ -85,7 +85,7 @@ export default function ProjectAlertForm({
           onValueChange={(v) => setForm(prev => ({ ...prev, trigger: v, config: {} }))}
         >
           <SelectTrigger id="trigger"><SelectValue placeholder="בחר טריגר" /></SelectTrigger>
-          <SelectContent dir="rtl">
+          <SelectContent>
             {TRIGGER_CATALOG.map(t => (
               <SelectItem key={t.id} value={t.id}>
                 <div className="flex flex-col">
@@ -103,7 +103,7 @@ export default function ProjectAlertForm({
         <Field label="עוגן תאריך" htmlFor="anchor" required>
           <Select value={form.config.anchor || ''} onValueChange={(v) => updateConfig('anchor', v)}>
             <SelectTrigger id="anchor"><SelectValue placeholder="בחר עוגן" /></SelectTrigger>
-            <SelectContent dir="rtl">
+            <SelectContent>
               {DATE_ANCHORS.map(a => (
                 <SelectItem key={a.id} value={a.id}>{a.label}</SelectItem>
               ))}
@@ -116,7 +116,7 @@ export default function ProjectAlertForm({
         <Field label="כיוון" htmlFor="direction" required>
           <Select value={form.config.direction || ''} onValueChange={(v) => updateConfig('direction', v)}>
             <SelectTrigger id="direction"><SelectValue placeholder="בחר כיוון" /></SelectTrigger>
-            <SelectContent dir="rtl">
+            <SelectContent>
               {DIRECTIONS.map(d => (
                 <SelectItem key={d.id} value={d.id}>{d.label}</SelectItem>
               ))}
@@ -142,7 +142,7 @@ export default function ProjectAlertForm({
         <Field label="בנק שעות" htmlFor="bank" required>
           <Select value={form.config.bank || ''} onValueChange={(v) => updateConfig('bank', v)}>
             <SelectTrigger id="bank"><SelectValue placeholder="בחר בנק" /></SelectTrigger>
-            <SelectContent dir="rtl">
+            <SelectContent>
               {HOURS_BANKS.map(b => (
                 <SelectItem key={b.id} value={b.id}>{b.label}</SelectItem>
               ))}
@@ -180,7 +180,7 @@ export default function ProjectAlertForm({
         <Field label="תדירות" htmlFor="frequency" required>
           <Select value={form.config.frequency || ''} onValueChange={(v) => updateConfig('frequency', v)}>
             <SelectTrigger id="frequency"><SelectValue placeholder="בחר תדירות" /></SelectTrigger>
-            <SelectContent dir="rtl">
+            <SelectContent>
               {RECURRING_FREQUENCIES.map(f => (
                 <SelectItem key={f.id} value={f.id}>{f.label}</SelectItem>
               ))}
@@ -204,7 +204,7 @@ export default function ProjectAlertForm({
           ) : (
             <Select value={form.config.day !== undefined ? String(form.config.day) : ''} onValueChange={(v) => updateConfig('day', Number(v))}>
               <SelectTrigger id="day"><SelectValue placeholder="בחר יום" /></SelectTrigger>
-              <SelectContent dir="rtl">
+              <SelectContent>
                 {WEEK_DAYS.map(d => (
                   <SelectItem key={d.id} value={String(d.id)}>{d.label}</SelectItem>
                 ))}

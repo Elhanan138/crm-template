@@ -58,7 +58,7 @@ export default function Support() {
     : 'מרכז ניהול פניות, תקלות ושיפורים';
 
   return (
-     <div dir="rtl">
+     <div>
        {/* Header */}
        <PageHeader
          icon={NAV_ICONS.support}
@@ -72,7 +72,7 @@ export default function Support() {
                 <SelectTrigger className="h-10 w-full" aria-label="בחירת תצוגה">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent dir="rtl">
+                <SelectContent>
                   {ADMIN_VIEWS.map(t => {
                     const Icon = t.icon;
                     return (

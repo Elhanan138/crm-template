@@ -20,7 +20,6 @@ export default function AgentTraceCard() {
       initial={{ opacity: 0, y: 6 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.28, ease: 'easeOut' }}
-      dir="rtl"
       style={{
         border: '1px solid hsl(var(--border))',
         borderRadius: '16px',

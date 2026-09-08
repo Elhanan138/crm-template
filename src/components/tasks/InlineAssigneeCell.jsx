@@ -11,7 +11,7 @@ export default function InlineAssigneeCell({ value, onChange, teamMembers = [] }
           <User className="w-3 h-3 text-muted-foreground flex-shrink-0" />
           <SelectValue placeholder="לא שויך" />
         </SelectTrigger>
-        <SelectContent dir="rtl">
+        <SelectContent>
           <SelectItem value="__none__">— ללא אחראי —</SelectItem>
           {teamMembers.map(m => <SelectItem key={m.id} value={m.name}>{m.name}</SelectItem>)}
         </SelectContent>

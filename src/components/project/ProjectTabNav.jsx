@@ -94,7 +94,7 @@ export default function ProjectTabNav({ tabs, activeId, onChange, onReorder }) {
               <ChevronDown className="w-4 h-4 text-muted-foreground" />
             </button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-[var(--radix-dropdown-menu-trigger-width)] rounded-lg" dir="rtl">
+          <DropdownMenuContent align="end" className="w-[var(--radix-dropdown-menu-trigger-width)] rounded-lg">
             {items.map((tab) => {
               const Icon = tab.icon;
               const isActive = tab.id === activeId;

@@ -42,7 +42,7 @@ export default class ErrorBoundary extends React.Component {
     const { error, componentStack } = this.state;
 
     return (
-      <div dir="rtl" className="min-h-[60vh] flex items-center justify-center p-6">
+      <div className="min-h-[60vh] flex items-center justify-center p-6">
         <div className="bg-card rounded-lg border border-border shadow-sm p-8 max-w-md w-full text-center">
           <div className="w-14 h-14 rounded-full bg-destructive/10 flex items-center justify-center mx-auto mb-4">
             <AlertTriangle className="w-7 h-7 text-destructive" />
@@ -51,7 +51,7 @@ export default class ErrorBoundary extends React.Component {
           <p className="text-sm text-muted-foreground mb-4">
             אירעה שגיאה בלתי צפויה בעת טעינת התצוגה. אפשר לרענן את הדף או לחזור לדף הבית.
           </p>
-          <div className="mb-4 text-right">
+          <div className="mb-4 text-start">
             <ErrorDisplay
               code={code}
               compact

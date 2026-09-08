@@ -69,7 +69,7 @@ export default function TicketListPane({ tickets, teamMembers = [], activeId, on
       <div className="flex items-center gap-1.5 flex-wrap">
         <Select value={sourceFilter} onValueChange={setSourceFilter}>
           <SelectTrigger className="h-8 text-xs w-auto gap-1"><SelectValue /></SelectTrigger>
-          <SelectContent dir="rtl">
+          <SelectContent>
             <SelectItem value="all">כל המקורות</SelectItem>
             <SelectItem value="users">פניות משתמשים</SelectItem>
             <SelectItem value="internal">יזום</SelectItem>
@@ -77,14 +77,14 @@ export default function TicketListPane({ tickets, teamMembers = [], activeId, on
         </Select>
         <Select value={typeFilter} onValueChange={setTypeFilter}>
           <SelectTrigger className="h-8 text-xs w-auto gap-1"><SelectValue /></SelectTrigger>
-          <SelectContent dir="rtl">
+          <SelectContent>
             <SelectItem value="all">כל הסוגים</SelectItem>
             {Object.entries(TYPE_CONFIG).map(([k, v]) => <SelectItem key={k} value={k}>{v.label}</SelectItem>)}
           </SelectContent>
         </Select>
         <Select value={priorityFilter} onValueChange={setPriorityFilter}>
           <SelectTrigger className="h-8 text-xs w-auto gap-1"><SelectValue /></SelectTrigger>
-          <SelectContent dir="rtl">
+          <SelectContent>
             <SelectItem value="all">כל העדיפויות</SelectItem>
             <SelectItem value="high">גבוהה</SelectItem>
             <SelectItem value="medium">בינונית</SelectItem>
@@ -104,7 +104,7 @@ export default function TicketListPane({ tickets, teamMembers = [], activeId, on
           <span className="text-xs font-semibold text-foreground">{selectedIds.length} נבחרו</span>
           <Select onValueChange={(v) => applyBatch({ status: v })} disabled={batchPending}>
             <SelectTrigger className="h-7 text-xs w-auto gap-1"><SelectValue placeholder="שנה סטטוס" /></SelectTrigger>
-            <SelectContent dir="rtl">
+            <SelectContent>
               <SelectItem value="open">פתוח</SelectItem>
               <SelectItem value="in_review">בבדיקה</SelectItem>
               <SelectItem value="in_progress">בטיפול</SelectItem>
@@ -114,7 +114,7 @@ export default function TicketListPane({ tickets, teamMembers = [], activeId, on
           </Select>
           <Select onValueChange={(v) => applyBatch({ priority: v })} disabled={batchPending}>
             <SelectTrigger className="h-7 text-xs w-auto gap-1"><SelectValue placeholder="שנה עדיפות" /></SelectTrigger>
-            <SelectContent dir="rtl">
+            <SelectContent>
               <SelectItem value="high">גבוהה</SelectItem>
               <SelectItem value="medium">בינונית</SelectItem>
               <SelectItem value="low">נמוכה</SelectItem>

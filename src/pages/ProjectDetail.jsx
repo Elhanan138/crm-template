@@ -221,7 +221,7 @@ export default function ProjectDetail() {
 
  if (loadingProject) {
   return (
-   <div dir="rtl"className="animate-pulse space-y-6">
+   <div className="animate-pulse space-y-6">
     <div className="h-4 w-24 bg-muted rounded-full"/>
     <div className="space-y-2">
      <div className="h-7 w-64 bg-muted rounded-lg"/>
@@ -241,7 +241,7 @@ export default function ProjectDetail() {
  if (!project && projectErrorType) {
   if (projectErrorType === 'forbidden') {
    return (
-    <div dir="rtl"className="max-w-lg mx-auto py-16">
+    <div className="max-w-lg mx-auto py-16">
      <div className="text-center mb-5">
       <div className="w-14 h-14 rounded-full bg-muted flex items-center justify-center mx-auto mb-4">
        <Lock className="w-6 h-6 text-muted-foreground"/>
@@ -259,7 +259,7 @@ export default function ProjectDetail() {
    );
   }
   return (
-   <div dir="rtl"className="max-w-lg mx-auto py-16">
+   <div className="max-w-lg mx-auto py-16">
     <div className="text-center mb-5">
      <div className="w-14 h-14 rounded-lg bg-muted flex items-center justify-center mx-auto mb-4">
       <AlertOctagon className="w-6 h-6 text-muted-foreground"/>
@@ -282,7 +282,7 @@ export default function ProjectDetail() {
 
  if (!aclLoading && !canAccess) {
   return (
-   <div dir="rtl"className="max-w-lg mx-auto py-16">
+   <div className="max-w-lg mx-auto py-16">
     <div className="text-center mb-5">
      <div className="w-14 h-14 rounded-full bg-muted flex items-center justify-center mx-auto mb-4">
       <Lock className="w-6 h-6 text-muted-foreground"/>
@@ -302,7 +302,7 @@ export default function ProjectDetail() {
 
  if (!project && !loadingProject) {
   return (
-   <div dir="rtl"className="max-w-lg mx-auto py-16">
+   <div className="max-w-lg mx-auto py-16">
     <div className="text-center">
      <div className="w-14 h-14 rounded-full bg-muted flex items-center justify-center mx-auto mb-4">
       <AlertOctagon className="w-6 h-6 text-muted-foreground"/>
@@ -316,7 +316,7 @@ export default function ProjectDetail() {
  }
 
  return (
-  <div dir="rtl">
+  <div>
    {/* Back */}
    <BackButton className="mb-6"/>
 

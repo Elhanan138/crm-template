@@ -116,7 +116,7 @@ export default function DateField({
         >
           <CalendarIcon className="w-4 h-4 text-muted-foreground flex-shrink-0" />
           {date && withTime ? (
-            <span className="flex-1 text-start truncate" dir="rtl">
+            <span className="flex-1 text-start truncate">
               <span dir="ltr">{displayDate}</span>
               <span className="text-muted-foreground mx-1">·</span>
               <span dir="ltr">{displayTime}</span>
@@ -137,14 +137,14 @@ export default function DateField({
           )}
         </Button>
       </PopoverTrigger>
-      <PopoverContent align="start" sideOffset={4} className="w-auto p-2 max-h-[85vh] overflow-y-auto" dir="rtl">
+      <PopoverContent align="start" sideOffset={4} className="w-auto p-2 max-h-[85vh] overflow-y-auto">
         {withTime && (
           <div className="grid grid-cols-2 gap-2 px-1 pb-2 mb-2 border-b border-border" dir="ltr">
             <div className="flex flex-col gap-1">
               <span className="text-[11px] font-semibold text-muted-foreground">שעה</span>
               <Select value={String(date ? date.getHours() : 9)} onValueChange={handleHour}>
                 <SelectTrigger className="h-9"><SelectValue /></SelectTrigger>
-                <SelectContent dir="rtl" className="max-h-48">
+                <SelectContent className="max-h-48">
                   {HOURS.map(hour => (
                     <SelectItem key={hour} value={String(hour)}>{String(hour).padStart(2, '0')}</SelectItem>
                   ))}
@@ -155,7 +155,7 @@ export default function DateField({
               <span className="text-[11px] font-semibold text-muted-foreground">דקות</span>
               <Select value={String(date ? date.getMinutes() : 0)} onValueChange={handleMinute}>
                 <SelectTrigger className="h-9"><SelectValue /></SelectTrigger>
-                <SelectContent dir="rtl" className="max-h-48">
+                <SelectContent className="max-h-48">
                   {MINUTES.map(min => (
                     <SelectItem key={min} value={String(min)}>{String(min).padStart(2, '0')}</SelectItem>
                   ))}

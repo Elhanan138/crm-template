@@ -444,7 +444,7 @@ export default function GlobalSearch() {
   // ── Desktop: input in TopBar center + absolute results panel ──
   if (!isMobile) {
     return (
-      <div ref={containerRef} className="relative w-full max-w-md mx-auto" dir="rtl">
+      <div ref={containerRef} className="relative w-full max-w-md mx-auto">
         <Command shouldFilter={false} className="relative w-full h-auto bg-transparent overflow-visible rounded-none">
           {/* Input */}
           <div className="flex items-center h-9 px-3 rounded-lg border border-input bg-card hover:border-primary/30 transition-colors gap-2">
@@ -476,7 +476,7 @@ export default function GlobalSearch() {
   // ── Mobile: top-anchored overlay via portal ──
   if (!mobileOpen) return null;
   return createPortal(
-    <div className="fixed top-0 inset-x-0 z-50 animate-slide-in" dir="rtl">
+    <div className="fixed top-0 inset-x-0 z-50 animate-slide-in">
       <Command shouldFilter={false} className="w-full h-auto rounded-none bg-popover shadow-lg">
         {/* Input row — stays visible when keyboard is open */}
         <div className="flex items-center gap-2 px-3 h-14 border-b border-border">

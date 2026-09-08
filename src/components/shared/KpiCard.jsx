@@ -43,7 +43,7 @@ export default function KpiCard({
  const Comp = isLink ? Link : isButton ? 'button' : 'div';
 
  const containerClass = cn(
-  'relative block h-full w-full bg-card border border-border shadow-sm rounded-lg text-right overflow-hidden',
+  'relative block h-full w-full bg-card border border-border shadow-sm rounded-lg text-start overflow-hidden',
   isCompact ? 'p-3.5' : 'p-5',
   isClickable && 'hover:border-primary/40 active:scale-[0.98] transition-all cursor-pointer',
  );
@@ -106,7 +106,6 @@ export default function KpiCard({
     to={isLink ? to : undefined}
     onClick={isButton ? onClick : undefined}
     className={containerClass}
-    dir="rtl"
     title={title}
     type={isButton ? 'button' : undefined}
    >

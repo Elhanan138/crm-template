@@ -16,6 +16,8 @@ import { useLogo } from '@/lib/LogoContext';
 import BrandMark from '@/components/shared/BrandMark';
 import { APP_IDENTITY, FALLBACK_APP_NAME } from '@/lib/appIdentity';
 import { isFeatureEnabled } from '@/lib/features';
+import { useI18n } from '@/lib/i18n';
+import LanguageSwitcher from './LanguageSwitcher';
 
 const AGENT_LABEL = APP_IDENTITY.name ? `${APP_IDENTITY.name} Agent` : 'עוזר חכם';
 
@@ -24,6 +26,7 @@ export default function Sidebar({ collapsed, onToggle }) {
  const [mobileOpen, setMobileOpen] = useState(false);
  const { systemName, systemSubtitle } = useLogo();
  const isMobile = useIsMobile();
+ const { t } = useI18n();
 
  const { data: user } = useQuery({
   queryKey: ['currentUser'],
@@ -108,7 +111,7 @@ export default function Sidebar({ collapsed, onToggle }) {
     key={item.path}
     to={item.path}
     onClick={closeMobile}
-    title={isCollapsed ? item.label : undefined}
+    title={isCollapsed ? t(item.label) : undefined}
     className={`relative flex items-center gap-3 rounded-xl text-sm transition-all duration-150 ${
      isCollapsed ? 'justify-center px-2 py-2.5' : 'px-3 py-2.5'
     } ${
@@ -121,7 +124,7 @@ export default function Sidebar({ collapsed, onToggle }) {
      <span className="absolute start-0 top-1/2 -translate-y-1/2 w-1 h-5 rounded-e-full bg-primary"/>
     )}
     <Icon className={`w-[18px] h-[18px] flex-shrink-0 ${active ? 'text-primary' : 'text-muted-foreground'}`} />
-    {!isCollapsed && <span>{item.label}</span>}
+    {!isCollapsed && <span>{t(item.label)}</span>}
    </Link>
   );
  };
@@ -156,7 +159,7 @@ export default function Sidebar({ collapsed, onToggle }) {
        <div className="w-8 h-8 rounded-lg overflow-hidden flex-shrink-0 flex items-center justify-center">
         <BrandMark className="w-full h-full rounded-lg"/>
        </div>
-       <div className="text-right min-w-0">
+       <div className="text-start min-w-0">
         <div className="text-base font-bold text-primary tracking-tight leading-none">{systemName || FALLBACK_APP_NAME}</div>
         {systemSubtitle && (
           <p className="text-[9px] text-muted-foreground font-medium tracking-widest uppercase mt-0.5">{systemSubtitle}</p>
@@ -190,15 +193,16 @@ export default function Sidebar({ collapsed, onToggle }) {
     {/* Logout — destructive color from design system */}
     <button
      onClick={() => { api.auth.logout(); closeMobile(); }}
-     title={isCollapsed ? 'התנתקות' : undefined}
+     title={isCollapsed ? t('התנתקות') : undefined}
      className={`flex items-center gap-3 rounded-xl text-sm font-medium text-destructive hover:bg-destructive/8 transition-all duration-150 w-full ${
       isCollapsed ? 'justify-center px-2 py-2.5' : 'px-3 py-2.5'
      }`}
     >
      <ExitIcon className="w-[18px] h-[18px] flex-shrink-0"/>
-     {!isCollapsed && <span>התנתקות</span>}
+     {!isCollapsed && <span>{t('התנתקות')}</span>}
     </button>
 
+    <LanguageSwitcher isCollapsed={isCollapsed} />
    </div>
   </div>
  );
@@ -207,7 +211,7 @@ export default function Sidebar({ collapsed, onToggle }) {
   <>
    {/* Mobile top bar — only rendered on mobile to avoid invisible focusable elements on desktop */}
    {isMobile && (
-   <div className="fixed top-0 right-0 left-0 z-40 bg-card border-b border-sidebar-border px-3 py-2.5 flex items-center justify-between shadow-sm"dir="rtl">
+   <div className="fixed top-0 right-0 left-0 z-40 bg-card border-b border-sidebar-border px-3 py-2.5 flex items-center justify-between shadow-sm">
     <button
      onClick={() => setMobileOpen(true)}
      aria-label="פתח תפריט"

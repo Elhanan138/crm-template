@@ -132,18 +132,18 @@ export default function QAManagementSection({ projectId }) {
       )}
 
       <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
-        <SheetContent side="left" className="w-full sm:max-w-md p-0" dir="rtl">
+        <SheetContent side="left" className="w-full sm:max-w-md p-0">
           <SheetHeader className="px-5 py-4 border-b border-border">
             <SheetTitle>{editing ? 'עריכת שאלה' : 'שאלה חדשה'}</SheetTitle>
           </SheetHeader>
           <div className="px-5 py-4 space-y-3 flex-1 overflow-y-auto">
             <div className="space-y-1">
               <label className="text-[11px] font-medium text-muted-foreground">שאלה</label>
-              <Input value={question} onChange={e => setQuestion(e.target.value)} placeholder="הקלד שאלה..." className="h-9 rounded-lg text-sm" dir="rtl" />
+              <Input value={question} onChange={e => setQuestion(e.target.value)} placeholder="הקלד שאלה..." className="h-9 rounded-lg text-sm" />
             </div>
             <div className="space-y-1">
               <label className="text-[11px] font-medium text-muted-foreground">תשובה</label>
-              <Textarea value={answer} onChange={e => setAnswer(e.target.value)} placeholder="הקלד תשובה (תומך ב-Markdown)..." className="rounded-lg text-sm min-h-[160px]" dir="rtl" />
+              <Textarea value={answer} onChange={e => setAnswer(e.target.value)} placeholder="הקלד תשובה (תומך ב-Markdown)..." className="rounded-lg text-sm min-h-[160px]" />
             </div>
           </div>
           <SheetFooter className="px-5 py-3 border-t border-border flex-row gap-2 justify-start">

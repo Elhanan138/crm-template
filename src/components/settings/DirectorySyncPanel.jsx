@@ -149,7 +149,7 @@ export default function DirectorySyncPanel() {
       </div>
 
       <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
-        <SheetContent side="left" dir="rtl" className="w-full sm:max-w-xl p-0 overflow-hidden flex flex-col">
+        <SheetContent side="left" className="w-full sm:max-w-xl p-0 overflow-hidden flex flex-col">
           <SheetHeader className="px-5 sm:px-6 py-4 border-b border-border text-right shrink-0">
             <SheetTitle className="text-base font-bold">סנכרון דירקטורי</SheetTitle>
             {lastSync && (

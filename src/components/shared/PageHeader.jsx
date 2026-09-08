@@ -12,7 +12,6 @@ export default function PageHeader({ title, subtitle, icon: Icon, actions, bread
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.2, ease: 'easeOut' }}
-      dir="rtl"
       className="mb-6 sm:mb-8"
     >
       {back && (

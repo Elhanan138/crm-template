@@ -37,7 +37,7 @@ export default function GlobalTabVisibilityPanel() {
  const visibleTabs = PROJECT_TABS.filter(t => !t.hidden);
 
  return (
-  <div className="bg-card rounded-xl border border-border shadow-sm p-5"dir="rtl">
+  <div className="bg-card rounded-xl border border-border shadow-sm p-5">
    <div className="flex items-center gap-2.5 mb-4">
     <div className="w-8 h-8 rounded-lg bg-accent flex items-center justify-center flex-shrink-0">
      <Eye className="w-4 h-4 text-primary"/>
@@ -67,7 +67,7 @@ export default function GlobalTabVisibilityPanel() {
             <span className="text-[11px] text-muted-foreground whitespace-nowrap">תמיד מוצג</span>
            </div>
           </TooltipTrigger>
-          <TooltipContent dir="rtl">
+          <TooltipContent>
            <p>טאב הסקירה אינו ניתן להסתרה</p>
           </TooltipContent>
          </Tooltip>

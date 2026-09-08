@@ -37,7 +37,7 @@ export default function BlockTypeSelect({ editor }) {
      <ChevronDown className="w-3.5 h-3.5 text-muted-foreground"/>
     </Button>
    </PopoverTrigger>
-   <PopoverContent align="start"className="w-48 p-1"dir="rtl">
+   <PopoverContent align="start"className="w-48 p-1">
     {BLOCK_OPTIONS.map(opt => (
      <button
       key={opt.id}

@@ -43,9 +43,9 @@ export default function OverviewTab({ project, meetings, tasks, canEditCustom = 
   const completedStages = projectStages.filter(s => s.status === 'completed').length;
 
   return (
-    <div className="space-y-4" dir="rtl">
+    <div className="space-y-4">
       {/* Compact KPI strip - clickable BI-style */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3" dir="rtl">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         <KpiCard
           label="חיי פרויקט"
           value={projectStages.length > 0 ? formatKpi(overallPercentage, 'percent') : '—'}

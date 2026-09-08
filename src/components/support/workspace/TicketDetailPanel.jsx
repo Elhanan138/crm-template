@@ -59,7 +59,7 @@ export default function TicketDetailPanel({ ticket, projects = [], teamMembers =
   };
 
   return (
-    <div className="space-y-5" dir="rtl">
+    <div className="space-y-5">
       {/* Decision row — the core flow */}
       <div className="grid grid-cols-3 gap-2">
         <Button
@@ -141,7 +141,7 @@ export default function TicketDetailPanel({ ticket, projects = [], teamMembers =
         <Field label="פרויקט">
           <Select value={ticket.project_id || 'none'} onValueChange={v => onUpdate(ticket.id, { project_id: v === 'none' ? '' : v })}>
             <SelectTrigger className="h-9 text-sm"><SelectValue /></SelectTrigger>
-            <SelectContent dir="rtl">
+            <SelectContent>
               <SelectItem value="none">ללא שיוך</SelectItem>
               {projects.map(p => <SelectItem key={p.id} value={p.id}>{p.client_name || p.name}</SelectItem>)}
             </SelectContent>
@@ -150,7 +150,7 @@ export default function TicketDetailPanel({ ticket, projects = [], teamMembers =
         <Field label="סוג">
           <Select value={ticket.type} onValueChange={v => onUpdate(ticket.id, { type: v })}>
             <SelectTrigger className="h-9 text-sm"><SelectValue /></SelectTrigger>
-            <SelectContent dir="rtl">
+            <SelectContent>
               {Object.entries(TYPE_CONFIG).map(([k, v]) => <SelectItem key={k} value={k}>{v.label}</SelectItem>)}
             </SelectContent>
           </Select>
@@ -158,7 +158,7 @@ export default function TicketDetailPanel({ ticket, projects = [], teamMembers =
         <Field label="עדיפות">
           <Select value={ticket.priority || 'medium'} onValueChange={v => onUpdate(ticket.id, { priority: v })}>
             <SelectTrigger className="h-9 text-sm"><SelectValue /></SelectTrigger>
-            <SelectContent dir="rtl">
+            <SelectContent>
               <SelectItem value="high">גבוהה</SelectItem>
               <SelectItem value="medium">בינונית</SelectItem>
               <SelectItem value="low">נמוכה</SelectItem>

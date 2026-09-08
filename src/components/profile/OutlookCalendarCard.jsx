@@ -135,7 +135,7 @@ export default function OutlookCalendarCard() {
    </div>
 
    <AlertDialog open={showDisconnectDialog} onOpenChange={setShowDisconnectDialog}>
-    <AlertDialogContent dir="rtl">
+    <AlertDialogContent>
      <AlertDialogHeader>
       <AlertDialogTitle>ניתוק יומן Outlook</AlertDialogTitle>
       <AlertDialogDescription>

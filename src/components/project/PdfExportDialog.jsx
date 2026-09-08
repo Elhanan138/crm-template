@@ -52,7 +52,7 @@ export default function PdfExportDialog({ open, onClose, onExport }) {
 
  return (
   <Dialog open={open} onOpenChange={o => !o && onClose()}>
-   <DialogContent className="sm:max-w-md rounded-lg"dir="rtl">
+   <DialogContent className="sm:max-w-md rounded-lg">
     <DialogHeader>
      <DialogTitle className="text-base font-bold text-right flex items-center gap-2">
       <FileDown className="w-4 h-4 text-primary"/>

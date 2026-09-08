@@ -143,7 +143,7 @@ export default function AlertHeartbeatSection() {
               disabled={!config.enabled}
             >
               <SelectTrigger className="h-8 text-sm"><SelectValue /></SelectTrigger>
-              <SelectContent dir="rtl">
+              <SelectContent>
                 {Array.from({ length: 24 }, (_, i) => (
                   <SelectItem key={i} value={String(i)}>{String(i).padStart(2, '0')}:00</SelectItem>
                 ))}
@@ -158,7 +158,7 @@ export default function AlertHeartbeatSection() {
               disabled={!config.enabled}
             >
               <SelectTrigger className="h-8 text-sm"><SelectValue /></SelectTrigger>
-              <SelectContent dir="rtl">
+              <SelectContent>
                 {Array.from({ length: 24 }, (_, i) => (
                   <SelectItem key={i} value={String(i)}>{String(i).padStart(2, '0')}:00</SelectItem>
                 ))}

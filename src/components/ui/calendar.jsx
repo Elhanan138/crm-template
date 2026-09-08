@@ -84,7 +84,6 @@ function Calendar({
   (<DayPicker
    showOutsideDays={showOutsideDays}
    locale={he}
-   dir="rtl"
    weekStartsOn={0}
    fromYear={2020}
    toYear={new Date().getFullYear() + 5}

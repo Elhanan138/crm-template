@@ -137,7 +137,6 @@ export default function AssistantMessage({ msg, onFollowUp, isNew = false, onFee
         initial={{ opacity: 0, y: 6 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.28, ease: 'easeOut' }}
-        dir="rtl"
         style={{ display: 'flex', justifyContent: 'flex-end' }}
       >
         <div style={{
@@ -161,7 +160,6 @@ export default function AssistantMessage({ msg, onFollowUp, isNew = false, onFee
       initial={{ opacity: 0, y: 6 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.28, ease: 'easeOut' }}
-      dir="rtl"
       style={{ width: '100%' }}
     >
       <div style={{ position: 'relative' }}>

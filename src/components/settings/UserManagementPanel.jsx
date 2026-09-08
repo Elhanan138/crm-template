@@ -75,7 +75,7 @@ export default function UserManagementPanel() {
  const closeDialog = () => setDialog({ open: false, member: null });
 
  return (
-  <div dir="rtl"className="space-y-5">
+  <div className="space-y-5">
    {/* Section 1: Team Members Table */}
    <div className="bg-card rounded-lg border border-border shadow-sm overflow-hidden">
     {/* Header */}
@@ -149,7 +149,7 @@ export default function UserManagementPanel() {
 
    {/* Edit / Create Drawer */}
    <Sheet open={dialog.open} onOpenChange={(open) => { if (!open) closeDialog(); }}>
-    <SheetContent side="left"dir="rtl"className="w-full sm:max-w-md overflow-y-auto p-0">
+    <SheetContent side="left"className="w-full sm:max-w-md overflow-y-auto p-0">
      <MemberEditDrawer
       member={dialog.member}
       members={members}
@@ -280,7 +280,7 @@ function MemberEditDrawer({ member, members = [], onClose, onDelete }) {
       <SelectTrigger className="h-9 rounded-lg">
        <SelectValue placeholder="ללא"/>
       </SelectTrigger>
-      <SelectContent dir="rtl">
+      <SelectContent>
        <SelectItem value="none">ללא</SelectItem>
        {members
         .filter(m => cleanEmail(m.email) !== cleanEmail(member?.email))
@@ -422,7 +422,7 @@ function MemberEditDrawer({ member, members = [], onClose, onDelete }) {
 
    {/* Admin confirmation dialog */}
    <AlertDialog open={adminConfirm} onOpenChange={setAdminConfirm}>
-    <AlertDialogContent className="rounded-lg"dir="rtl">
+    <AlertDialogContent className="rounded-lg">
      <AlertDialogHeader>
       <AlertDialogTitle>הפיכת משתמש לאדמין</AlertDialogTitle>
       <AlertDialogDescription>המשתמש יקבל גישה מלאה לכל הפרויקטים והנתונים במערכת</AlertDialogDescription>

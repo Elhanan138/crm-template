@@ -43,7 +43,7 @@ export default function DashboardCustomizer({ open, onClose, widgets, order, hid
 
  return (
   <Sheet open={open} onOpenChange={(v) => !v && onClose()}>
-   <SheetContent side="left"className="w-full sm:max-w-md p-0"dir="rtl">
+   <SheetContent side="left"className="w-full sm:max-w-md p-0">
     <SheetHeader className="px-5 pt-5 pb-3 border-b border-border">
      <SheetTitle className="text-right text-lg flex items-center gap-2 ps-10">
       <SlidersHorizontal className="w-5 h-5 text-primary"/> התאמת דף הבית

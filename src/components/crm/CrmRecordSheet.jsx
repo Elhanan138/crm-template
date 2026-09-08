@@ -13,6 +13,8 @@ import CustomFieldsRenderer from '@/components/shared/CustomFieldsRenderer';
 import RelatedRecords from '@/components/crm/RelatedRecords';
 import { recordActionsFor } from '@/lib/crm/recordActions';
 import { readField, isDerived } from '@/lib/crm/derived';
+import { useI18n } from '@/lib/i18n';
+import RecordTrail from '@/components/crm/RecordTrail';
 import { formatValue } from '@/lib/crm/useCrmRecords';
 import PersonSelect from '@/components/shared/PersonSelect';
 import DateField from '@/components/ui/date-field';
@@ -32,6 +34,7 @@ const defaultsFor = (schema) =>
 export default function CrmRecordSheet({
   open, onOpenChange, schema, record, relations, customFields = [], onSave, saving, readOnly, moduleId,
 }) {
+  const { t, dir } = useI18n();
   const [form, setForm] = useState(() => ({ ...defaultsFor(schema), ...(record || {}) }));
   const [errors, setErrors] = useState({});
   const handOffs = recordActionsFor(moduleId, record);
@@ -86,7 +89,7 @@ export default function CrmRecordSheet({
               </span>
             )}
           </div>
-          <p className="text-[11px] text-muted-foreground">מחושב אוטומטית</p>
+          <p className="text-[11px] text-muted-foreground">{t('מחושב אוטומטית')}</p>
         </div>
       );
     }
@@ -118,7 +121,7 @@ export default function CrmRecordSheet({
     } else if (field.type === 'textarea') {
       control = (
         <Textarea
-          value={value} rows={3} dir="rtl" disabled={readOnly}
+          value={value} rows={3} disabled={readOnly}
           onChange={(e) => set(field.key, e.target.value)}
           className="rounded-lg border-border bg-background text-sm"
         />
@@ -128,7 +131,7 @@ export default function CrmRecordSheet({
         <Select value={value === '' ? undefined : String(value)} disabled={readOnly}
           onValueChange={(v) => set(field.key, field.options.find((o) => String(o.value) === v)?.value ?? v)}>
           <SelectTrigger className={CONTROL}><SelectValue placeholder="בחר..." /></SelectTrigger>
-          <SelectContent dir="rtl">
+          <SelectContent>
             {field.options.map((o) => <SelectItem key={String(o.value)} value={String(o.value)}>{o.label}</SelectItem>)}
           </SelectContent>
         </Select>
@@ -139,7 +142,7 @@ export default function CrmRecordSheet({
         <Select value={value === '' ? undefined : String(value)} disabled={readOnly}
           onValueChange={(v) => set(field.key, v === NONE ? '' : v)}>
           <SelectTrigger className={CONTROL}><SelectValue placeholder="בחר..." /></SelectTrigger>
-          <SelectContent dir="rtl">
+          <SelectContent>
             <SelectItem value={NONE}>ללא</SelectItem>
             {items.map((r) => (
               <SelectItem key={r.id} value={r.id}>{r[field.labelField] || r.name || r.id}</SelectItem>
@@ -176,8 +179,8 @@ export default function CrmRecordSheet({
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="left" dir="rtl" className="w-full sm:max-w-lg flex flex-col p-0">
-        <SheetHeader className="px-5 pt-5 pb-3 border-b border-border text-right">
+      <SheetContent side={dir === 'rtl' ? 'left' : 'right'} dir={dir} className="w-full sm:max-w-lg flex flex-col p-0">
+        <SheetHeader className="px-5 pt-5 pb-3 border-b border-border text-start">
           <SheetTitle>
             {readOnly ? schema.singular : record?.id ? `עריכת ${schema.singular}` : `${schema.singular} חדש`}
           </SheetTitle>
@@ -194,16 +197,16 @@ export default function CrmRecordSheet({
           {/* Hand-offs to another module — only those this build can serve. */}
           {record?.id && moduleId && handOffs.length > 0 && (
             <div className="pt-3 mt-3 border-t border-border space-y-2">
-              <p className="text-xs font-semibold text-muted-foreground">המשך תהליך</p>
+              <p className="text-xs font-semibold text-muted-foreground">{t('המשך תהליך')}</p>
               {handOffs.map((action) => (
                 <div key={action.key} className="space-y-1">
                   <Button asChild variant="outline" size="sm" className="rounded-full h-8 px-3.5 text-xs gap-1.5">
                     <Link to={action.to(record)}>
                       <action.icon className="w-3.5 h-3.5 flex-shrink-0" />
-                      {action.label}
+                      {t(action.label)}
                     </Link>
                   </Button>
-                  {action.hint && <p className="text-[10px] text-muted-foreground">{action.hint}</p>}
+                  {action.hint && <p className="text-[10px] text-muted-foreground">{t(action.hint)}</p>}
                 </div>
               ))}
             </div>
@@ -211,6 +214,9 @@ export default function CrmRecordSheet({
 
           {/* Links out to related records — never merged into this form. */}
           {record?.id && moduleId && <RelatedRecords moduleId={moduleId} record={record} />}
+
+          {/* What changed, what people did, what is attached. */}
+          {record?.id && <RecordTrail schema={schema} entity={schema.entity} record={record} />}
 
           {customFields.length > 0 && (
             <div className="mt-4 pt-4 border-t border-border space-y-3">

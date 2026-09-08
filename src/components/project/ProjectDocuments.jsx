@@ -157,7 +157,7 @@ export default function ProjectDocuments({ project, bare = false }) {
  };
 
  return (
-  <div className={bare ? '' : 'bg-card rounded-lg border border-border overflow-hidden shadow-sm'} dir="rtl">
+  <div className={bare ? '' : 'bg-card rounded-lg border border-border overflow-hidden shadow-sm'}>
    {/* Header */}
    <div className={`flex items-center justify-between ${bare ? 'pb-3' : 'px-4 py-3 border-b border-border'}`}>
     <div className="flex items-center gap-2">

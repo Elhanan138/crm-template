@@ -163,7 +163,7 @@ export default function ProjectWizard() {
   };
 
   return (
-    <div dir="rtl" className="max-w-3xl mx-auto">
+    <div className="max-w-3xl mx-auto">
       {/* Sticky save bar */}
       <div className="sticky top-0 z-30 -mx-4 px-4 py-2.5 mb-3 bg-background/90 backdrop-blur-sm border-b border-border flex items-center justify-between gap-3">
         <BackButton />

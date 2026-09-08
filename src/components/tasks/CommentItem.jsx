@@ -108,7 +108,7 @@ export default function CommentItem({ comment: c, name, avatarUrl, canManage, on
               <MoreHorizontal className="w-4 h-4" />
             </button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="start" dir="rtl" className="w-32">
+          <DropdownMenuContent align="start" className="w-32">
             <DropdownMenuItem onClick={() => { setDraft(c.content); setEditing(true); }} className="gap-2 text-xs">
               <Pencil className="w-3.5 h-3.5" /> עריכה
             </DropdownMenuItem>

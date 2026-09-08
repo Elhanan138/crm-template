@@ -98,7 +98,7 @@ const ProjectPdfExport = forwardRef(({ project, meetings = [] }, ref) => {
 
   return (
     <div style={{ position: 'fixed', top: 0, left: '-9999px', width: '794px' }}>
-      <div ref={reportRef} dir="rtl" style={{ width: '794px', padding: '40px', background: 'hsl(0, 0%, 100%)', fontFamily: 'Heebo, sans-serif', color: '#222' }}>
+      <div ref={reportRef} style={{ width: '794px', padding: '40px', background: 'hsl(0, 0%, 100%)', fontFamily: 'Heebo, sans-serif', color: '#222' }}>
         {/* Header */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '16px', borderBottom: '3px solid hsl(150 88% 28%)', paddingBottom: '16px', marginBottom: '20px' }}>
           {project.image_url && (

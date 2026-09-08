@@ -131,7 +131,7 @@ export default function Tasks() {
 
 
   return (
-  <div dir="rtl">
+  <div>
    <PageHeader
     icon={NAV_ICONS.tasks}
     title="משימות"
@@ -165,15 +165,14 @@ export default function Tasks() {
       onChange={e => setSearch(e.target.value)}
       placeholder="חיפוש משימה..."
       className="h-9 rounded-full text-sm w-full sm:w-56"
-      dir="rtl"
      />
      <Select value={statusFilter} onValueChange={setStatusFilter}>
       <SelectTrigger className="h-9 rounded-full text-xs w-32"><SelectValue /></SelectTrigger>
-      <SelectContent dir="rtl">{STATUS_OPTIONS.map(o => <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>)}</SelectContent>
+      <SelectContent>{STATUS_OPTIONS.map(o => <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>)}</SelectContent>
      </Select>
      <Select value={projectFilter} onValueChange={setProjectFilter}>
       <SelectTrigger className="h-9 rounded-full text-xs w-40 text-right [&>span]:text-right"><SelectValue /></SelectTrigger>
-      <SelectContent dir="rtl">
+      <SelectContent>
        <SelectItem value="all">כל הפרויקטים</SelectItem>
        {visibleProjects.map(p => <SelectItem key={p.id} value={p.id}>{p.client_name || p.name}</SelectItem>)}
       </SelectContent>
@@ -308,7 +307,7 @@ export default function Tasks() {
 
       {/* Reminder Dialog */}
    <Dialog open={reminderDialog.open} onOpenChange={open => !open && setReminderDialog({ open: false, task: null })}>
-    <DialogContent className="sm:max-w-sm rounded-lg"dir="rtl">
+    <DialogContent className="sm:max-w-sm rounded-lg">
      <DialogHeader>
       <DialogTitle className="text-base font-bold text-right flex items-center gap-2"><Bell className="w-4 h-4 text-warning"/> תזכורת למשימה</DialogTitle>
      </DialogHeader>

@@ -84,7 +84,7 @@ export default function CapabilitiesPanel() {
   }
 
   return (
-    <div dir="rtl" className="space-y-4">
+    <div className="space-y-4">
       <div className="bg-card rounded-xl border border-border shadow-sm p-5">
         <div className="flex items-start justify-between gap-3">
           <div className="flex items-center gap-2.5 min-w-0">

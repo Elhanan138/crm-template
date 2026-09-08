@@ -173,7 +173,7 @@ export default function AdminWorkspace({ tickets, isLoading, initialTicketId }) 
 
       {/* Mobile / kanban detail sheet */}
       <Sheet open={sheetOpen && !!selected} onOpenChange={o => !o && setSheetOpen(false)}>
-        <SheetContent side="left" className="w-full sm:max-w-md overflow-y-auto p-5" dir="rtl">
+        <SheetContent side="left" className="w-full sm:max-w-md overflow-y-auto p-5">
           <SheetHeader className="text-start">
             <SheetTitle>פרטי פנייה</SheetTitle>
           </SheetHeader>

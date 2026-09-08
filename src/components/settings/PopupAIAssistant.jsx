@@ -52,7 +52,6 @@ Requirements:
         onKeyDown={(e) => { if (e.key === 'Enter' && !loading) handleGenerate(); }}
         placeholder="תאר את הפופאפ שתרצה ליצור..."
         className="h-9 rounded-lg flex-1"
-        dir="rtl"
       />
       <Button
         onClick={handleGenerate}

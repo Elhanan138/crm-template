@@ -6,6 +6,7 @@ import { cleanEmail } from '@/lib/permissions';
 import { toast } from 'sonner';
 import { sortFields } from '@/lib/customFields';
 import { useRecordViewer, visibleRecords, scopeOf } from '@/lib/crm/visibility';
+import { HISTORY_ENTITY, historyEntryFor } from '@/lib/crm/recordTrail';
 
 export const currency = (v) =>
   v === null || v === undefined || v === '' ? '—' : `₪${Number(v).toLocaleString()}`;
@@ -89,16 +90,52 @@ export function useCrmRecords(schema) {
 
   const invalidate = () => queryClient.invalidateQueries({ queryKey: ['crm', entity] });
 
+  // Every save leaves a trail entry. It is written after the record, and a
+  // failure to log is never allowed to fail the save — losing the history of an
+  // edit is bad, losing the edit is worse.
+  const logHistory = async (before, after) => {
+    const entry = historyEntryFor({ schema, entity, before, after, actor: myEmail });
+    if (!entry) return;
+    try {
+      await api.entities[HISTORY_ENTITY].create(entry);
+      queryClient.invalidateQueries({ queryKey: ['record-trail', HISTORY_ENTITY, entity, entry.record_id] });
+    } catch { /* the record is saved; the log is not worth an error toast */ }
+  };
+
   const save = useMutation({
-    mutationFn: ({ id, ...data }) =>
-      id ? api.entities[entity].update(id, data) : api.entities[entity].create({ ...data, owner_email: data.owner_email || myEmail }),
+    mutationFn: async ({ id, ...data }) => {
+      const before = id ? allRecords.find((r) => r.id === id) : null;
+      const saved = id
+        ? await api.entities[entity].update(id, data)
+        : await api.entities[entity].create({ ...data, owner_email: data.owner_email || myEmail });
+      await logHistory(before, saved);
+      return saved;
+    },
     onSuccess: (_r, vars) => { invalidate(); toast.success(vars.id ? 'הרשומה עודכנה' : `נוצר ${schema.singular} חדש`); },
     onError: (e) => toast.error(e?.message || 'השמירה נכשלה'),
   });
 
+  // A delete hands back what it removed, so the caller can offer to put it
+  // back. The record keeps its id on restore, which is what makes every
+  // id-based link to it survive the round trip.
+  const restore = useMutation({
+    mutationFn: (deleted) => api.entities[entity].bulkCreate(deleted),
+    onSuccess: (rows) => { invalidate(); toast.success(`${rows.length} רשומות שוחזרו`); },
+    onError: (e) => toast.error(e?.message || 'השחזור נכשל'),
+  });
+
   const remove = useMutation({
-    mutationFn: (id) => api.entities[entity].delete(id),
-    onSuccess: () => { invalidate(); toast.success('הרשומה נמחקה'); },
+    mutationFn: async (id) => {
+      const deleted = allRecords.find((r) => r.id === id);
+      await api.entities[entity].delete(id);
+      return deleted ? [deleted] : [];
+    },
+    onSuccess: (deleted) => {
+      invalidate();
+      toast.success('הרשומה נמחקה', deleted.length ? {
+        action: { label: 'ביטול', onClick: () => restore.mutate(deleted) },
+      } : undefined);
+    },
     onError: (e) => toast.error(e?.message || 'המחיקה נכשלה'),
   });
 
@@ -122,11 +159,15 @@ export function useCrmRecords(schema) {
     mutationFn: async (ids) => {
       const deletable = records.filter((r) => ids.includes(r.id) && canDelete(r));
       await api.entities[entity].deleteMany(deletable.map((r) => r.id));
-      return { deleted: deletable.length, skipped: ids.length - deletable.length };
+      return { rows: deletable, deleted: deletable.length, skipped: ids.length - deletable.length };
     },
-    onSuccess: ({ deleted, skipped }) => {
+    onSuccess: ({ rows, deleted, skipped }) => {
       invalidate();
-      toast.success(skipped ? `${deleted} נמחקו · ${skipped} דולגו (אין הרשאה)` : `${deleted} רשומות נמחקו`);
+      // Fifty rows removed in one click is exactly where an undo has to exist.
+      toast.success(
+        skipped ? `${deleted} נמחקו · ${skipped} דולגו (אין הרשאה)` : `${deleted} רשומות נמחקו`,
+        rows.length ? { duration: 10000, action: { label: 'ביטול', onClick: () => restore.mutate(rows) } } : undefined
+      );
     },
     onError: (e) => toast.error(e?.message || 'המחיקה נכשלה'),
   });
@@ -137,7 +178,8 @@ export function useCrmRecords(schema) {
 
   return {
     records, isLoading, relations, lookups, customFields,
-    save, remove, bulkSave, bulkRemove, canEdit, canDelete, isRealAdmin, myEmail,
+    save, remove, bulkSave, bulkRemove, restore, canEdit, canDelete, isRealAdmin, myEmail,
+    allRecords,
     viewer, hiddenCount, scope: scopeOf(schema),
   };
 }

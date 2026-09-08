@@ -122,7 +122,6 @@ export default function ReportsAIChat() {
     exit={{ opacity: 0, y: 20, scale: 0.95 }}
     transition={{ duration: 0.2 }}
     className="fixed z-50 bottom-4 left-3 right-3 top-auto h-[560px] max-h-[calc(100dvh-2rem)] sm:left-4 sm:right-auto sm:w-[400px] bg-card rounded-xl shadow-xl border border-border flex flex-col overflow-hidden"
-    dir="rtl"
    >
     <div className="flex items-center justify-between px-3 py-2.5 border-b border-border bg-accent flex-shrink-0">
      <div className="flex items-center gap-2">
@@ -225,7 +224,6 @@ export default function ReportsAIChat() {
        placeholder="בקש דוח מותאם..."
        className="flex-1 rounded-full text-xs h-9"
        disabled={loading}
-       dir="rtl"
       />
       <Button
        onClick={() => send(input)}

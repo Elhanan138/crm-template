@@ -208,7 +208,7 @@ export default function ProjectAlertsSheet({ open, onOpenChange, project, teamMe
 
  return (
   <Sheet open={open} onOpenChange={onOpenChange}>
-   <SheetContent side="left"dir="rtl"className="w-full sm:max-w-lg p-0 flex flex-col">
+   <SheetContent side="left"className="w-full sm:max-w-lg p-0 flex flex-col">
     <SheetHeader className="px-5 pt-5 pb-3 border-b border-border">
      <SheetTitle className="text-right">
       התראות — {project?.client_name || project?.name}

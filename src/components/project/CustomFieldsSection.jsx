@@ -113,10 +113,10 @@ function CustomFieldForm({ field, projectId, onClose }) {
  const busy = isSubmitting || createMutation.isPending || updateMutation.isPending;
 
  return (
-  <div className="space-y-4"dir="rtl">
+  <div className="space-y-4">
    <div className="space-y-1.5">
     <Label className="text-xs font-medium text-muted-foreground text-right">שם השדה *</Label>
-    <Input value={form.label} onChange={e => update('label', e.target.value)} onKeyDown={e => { if (e.key === 'Enter') e.preventDefault(); }} placeholder="לדוגמה: מספר פרויקט, איש קשר טכני..."className="h-10 rounded-lg text-sm"dir="rtl"autoFocus />
+    <Input value={form.label} onChange={e => update('label', e.target.value)} onKeyDown={e => { if (e.key === 'Enter') e.preventDefault(); }} placeholder="לדוגמה: מספר פרויקט, איש קשר טכני..."className="h-10 rounded-lg text-sm"autoFocus />
    </div>
 
    <div className="space-y-1.5">
@@ -150,7 +150,6 @@ function CustomFieldForm({ field, projectId, onClose }) {
        onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addOption(); } }}
        placeholder="הוסף אפשרות ולחץ Enter"
        className="h-9 rounded-lg text-sm flex-1"
-       dir="rtl"
       />
       <Button type="button"variant="outline"onClick={addOption} className="rounded-lg h-9 px-3">הוסף</Button>
      </div>
@@ -174,7 +173,7 @@ function CustomFieldForm({ field, projectId, onClose }) {
     {form.field_type === 'select' ? (
      <Select value={form.value || 'none'} onValueChange={v => update('value', v === 'none' ? '' : v)}>
       <SelectTrigger className="h-10 rounded-lg text-sm"><SelectValue placeholder="בחר ערך"/></SelectTrigger>
-      <SelectContent dir="rtl">
+      <SelectContent>
        <SelectItem value="none">ללא</SelectItem>
        {form.options.map(o => <SelectItem key={o} value={o}>{o}</SelectItem>)}
       </SelectContent>
@@ -246,7 +245,7 @@ export default function CustomFieldsSection({ projectId, canEdit = true, embedde
   if (fields.length === 0) return null;
   return (
    <>
-    <div className="flex flex-wrap gap-2"dir="rtl">
+    <div className="flex flex-wrap gap-2">
      {fields.map(field => {
       const cfg = TYPE_CONFIG[field.field_type] || TYPE_CONFIG.text;
       const Icon = cfg.icon;
@@ -270,7 +269,7 @@ export default function CustomFieldsSection({ projectId, canEdit = true, embedde
     </div>
 
     <Sheet open={dialog.open} onOpenChange={open => !open && setDialog({ open: false, field: null })}>
-     <SheetContent side="left"dir="rtl"className="w-full sm:max-w-md p-0 flex flex-col">
+     <SheetContent side="left"className="w-full sm:max-w-md p-0 flex flex-col">
       <SheetHeader className="px-5 py-3.5 border-b border-border text-right shrink-0">
        <SheetTitle className="text-base font-bold">
         {dialog.field ? 'עריכת שדה' : 'הוספת שדה מותאם אישית'}
@@ -297,7 +296,7 @@ export default function CustomFieldsSection({ projectId, canEdit = true, embedde
  const wrapperClass = embedded ? '' : 'bg-card rounded-lg border border-border p-5 shadow-sm';
 
  return (
-  <Wrapper className={wrapperClass} dir="rtl">
+  <Wrapper className={wrapperClass}>
    {!embedded && (
     <div className="flex items-center justify-between mb-4">
      <h3 className="text-base font-bold text-foreground flex items-center gap-2">
@@ -391,7 +390,7 @@ export default function CustomFieldsSection({ projectId, canEdit = true, embedde
    )}
 
    <Sheet open={dialog.open} onOpenChange={open => !open && setDialog({ open: false, field: null })}>
-    <SheetContent side="left"dir="rtl"className="w-full sm:max-w-md p-0 flex flex-col">
+    <SheetContent side="left"className="w-full sm:max-w-md p-0 flex flex-col">
      <SheetHeader className="px-5 py-3.5 border-b border-border text-right shrink-0">
       <SheetTitle className="text-base font-bold">
        {dialog.field ? 'עריכת שדה' : 'הוספת שדה מותאם אישית'}

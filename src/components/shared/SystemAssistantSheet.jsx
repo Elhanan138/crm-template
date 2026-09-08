@@ -396,7 +396,6 @@ export default function SystemAssistantSheet() {
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -24 }}
             transition={{ type: 'spring', damping: 28, stiffness: 320 }}
-            dir="rtl"
             className={`fixed z-50 top-0 left-0 right-0 h-[100dvh] sm:top-auto sm:right-auto bg-card sm:rounded-[22px] border-0 sm:border flex flex-col overflow-hidden transition-[width,height] duration-300 ${panelSizeClass} ${expanded ? 'sm:bottom-0 sm:left-0 sm:rounded-none agent-expanded-text' : 'sm:bottom-4 sm:left-4 sm:max-h-[calc(100dvh-2rem)]'}`}
             style={{ boxShadow: '0 34px 74px -30px rgba(11,44,27,.45)', borderColor: 'hsl(var(--border))' }}
           >
@@ -782,7 +781,6 @@ export default function SystemAssistantSheet() {
                       placeholder={actionInProgress ? 'מבצע פעולה… המתן' : 'תאר מה צריך לקרות…'}
                       rows={1}
                       disabled={loading || actionInProgress}
-                      dir="rtl"
                       style={{
                         flex: 1,
                         resize: 'none',

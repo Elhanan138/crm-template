@@ -146,7 +146,7 @@ export default function ProjectInfoCards({ project, teamMembers = [] }) {
       <Eye className="w-3.5 h-3.5"/>
      </button>
     </PopoverTrigger>
-    <PopoverContent dir="rtl"align="start"className="w-56 p-2 rounded-lg">
+    <PopoverContent align="start"className="w-56 p-2 rounded-lg">
      <p className="text-xs font-bold text-foreground px-1.5 pb-1.5 border-b border-border mb-1">נתונים מוצגים</p>
      <div className="max-h-64 overflow-y-auto space-y-0.5">
       {items.map(i => {

@@ -55,8 +55,8 @@ export default function AddMemberCombobox({ members, excludedEmails, onAdd, onAd
           <span className="flex-1 truncate">הוסף חבר צוות...</span>
         </button>
       </PopoverTrigger>
-      <PopoverContent className="p-0 w-[var(--radix-popover-trigger-width)] min-w-[280px]" align="start" sideOffset={4} dir="rtl">
-        <Command shouldFilter={false} dir="rtl">
+      <PopoverContent className="p-0 w-[var(--radix-popover-trigger-width)] min-w-[280px]" align="start" sideOffset={4}>
+        <Command shouldFilter={false}>
           <CommandInput
             value={search}
             onValueChange={setSearch}

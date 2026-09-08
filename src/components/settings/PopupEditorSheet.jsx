@@ -91,7 +91,7 @@ export default function PopupEditorSheet({ open, popup, onClose }) {
 
  return (
   <Sheet open={open} onOpenChange={(o) => { if (!o) onClose(); }}>
-   <SheetContent side="left"dir="rtl"className="w-full sm:max-w-4xl overflow-y-auto p-0">
+   <SheetContent side="left"className="w-full sm:max-w-4xl overflow-y-auto p-0">
     <SheetHeader className="px-6 py-5 border-b border-border text-right">
      <SheetTitle className="text-base font-bold">{isEdit ? 'עריכת פופאפ' : 'יצירת פופאפ חדש'}</SheetTitle>
     </SheetHeader>
@@ -111,7 +111,7 @@ export default function PopupEditorSheet({ open, popup, onClose }) {
 
       <div className="space-y-1.5">
        <Label className="text-xs font-medium text-muted-foreground">תוכן (Markdown)</Label>
-       <Textarea value={form.content} onChange={(e) => set('content', e.target.value)} placeholder="תוכן ההודעה..."rows={5} className="rounded-lg text-sm"dir="rtl"/>
+       <Textarea value={form.content} onChange={(e) => set('content', e.target.value)} placeholder="תוכן ההודעה..."rows={5} className="rounded-lg text-sm"/>
       </div>
 
       <div className="grid grid-cols-2 gap-3">
@@ -119,7 +119,7 @@ export default function PopupEditorSheet({ open, popup, onClose }) {
         <Label className="text-xs font-medium text-muted-foreground">סוג עיצוב</Label>
         <Select value={form.layoutType} onValueChange={(v) => set('layoutType', v)}>
          <SelectTrigger className="h-9 rounded-lg"><SelectValue /></SelectTrigger>
-         <SelectContent dir="rtl">
+         <SelectContent>
           <SelectItem value="announcement">הכרזה</SelectItem>
           <SelectItem value="changelog">מה חדש</SelectItem>
           <SelectItem value="alert">התראה</SelectItem>
@@ -130,7 +130,7 @@ export default function PopupEditorSheet({ open, popup, onClose }) {
         <Label className="text-xs font-medium text-muted-foreground">סטטוס</Label>
         <Select value={form.status} onValueChange={(v) => set('status', v)}>
          <SelectTrigger className="h-9 rounded-lg"><SelectValue /></SelectTrigger>
-         <SelectContent dir="rtl">
+         <SelectContent>
           <SelectItem value="draft">טיוטה</SelectItem>
           <SelectItem value="scheduled">מתוזמן</SelectItem>
           <SelectItem value="active">פעיל</SelectItem>
@@ -172,7 +172,7 @@ export default function PopupEditorSheet({ open, popup, onClose }) {
         <Label className="text-xs font-medium text-muted-foreground">תדירות הצגה</Label>
         <Select value={form.frequency} onValueChange={(v) => set('frequency', v)}>
          <SelectTrigger className="h-9 rounded-lg"><SelectValue /></SelectTrigger>
-         <SelectContent dir="rtl">
+         <SelectContent>
           <SelectItem value="once_ever">פעם אחת לעולם</SelectItem>
           <SelectItem value="once_per_session">פעם אחת לסשן</SelectItem>
           <SelectItem value="every_login">בכל כניסה</SelectItem>
@@ -183,7 +183,7 @@ export default function PopupEditorSheet({ open, popup, onClose }) {
         <Label className="text-xs font-medium text-muted-foreground">קהל יעד</Label>
         <Select value={form.targetRole} onValueChange={(v) => set('targetRole', v)}>
          <SelectTrigger className="h-9 rounded-lg"><SelectValue /></SelectTrigger>
-         <SelectContent dir="rtl">
+         <SelectContent>
           <SelectItem value="all">כולם</SelectItem>
           <SelectItem value="admin">אדמינים בלבד</SelectItem>
           <SelectItem value="user">משתמשים בלבד</SelectItem>

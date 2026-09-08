@@ -80,10 +80,10 @@ export default function TestQuestionSection({ projectId }) {
           <span className="text-[10px] font-medium text-muted-foreground">מודל לבדיקה</span>
         </div>
         <Select value={selectedModel} onValueChange={setSelectedModel}>
-          <SelectTrigger className="h-9 rounded-lg text-xs" dir="rtl">
+          <SelectTrigger className="h-9 rounded-lg text-xs">
             <SelectValue />
           </SelectTrigger>
-          <SelectContent dir="rtl">
+          <SelectContent>
             {MODEL_OPTIONS.map(opt => (
               <SelectItem key={opt.value} value={opt.value} className="text-xs">
                 {opt.label}
@@ -100,7 +100,6 @@ export default function TestQuestionSection({ projectId }) {
           onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleAsk(); } }}
           placeholder="בדוק שאלה על המסמך..."
           className="h-9 rounded-lg text-sm"
-          dir="rtl"
           disabled={loading}
         />
         <Button onClick={handleAsk} disabled={loading || !question.trim()} className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-full h-9 w-9 p-0 flex-shrink-0">

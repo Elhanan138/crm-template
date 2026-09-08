@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 
 export default function AccessDenied() {
  return (
-  <div className="fixed inset-0 bg-background flex items-center justify-center z-50"dir="rtl">
+  <div className="fixed inset-0 bg-background flex items-center justify-center z-50">
    <div className="text-center max-w-sm px-6">
     <div className="w-16 h-16 rounded-lg bg-destructive/10 flex items-center justify-center mx-auto mb-5">
      <ShieldOff className="w-8 h-8 text-destructive"/>

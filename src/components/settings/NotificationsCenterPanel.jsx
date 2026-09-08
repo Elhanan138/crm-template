@@ -143,7 +143,7 @@ export default function NotificationsCenterPanel() {
   };
 
   return (
-    <div className="space-y-5" dir="rtl">
+    <div className="space-y-5">
       {/* ═══ Card A: Master switches ═══ */}
       <div className="bg-card rounded-xl border border-border shadow-sm p-5">
         <div className="flex items-center gap-2.5 mb-4">
@@ -314,7 +314,7 @@ export default function NotificationsCenterPanel() {
             <label className="text-[11px] text-muted-foreground">נמענים</label>
             <Select value={um.recipients_mode} onValueChange={(v) => setUmDraft({ ...um, recipients_mode: v })}>
               <SelectTrigger className="h-8 text-sm"><SelectValue /></SelectTrigger>
-              <SelectContent dir="rtl">
+              <SelectContent>
                 <SelectItem value="owner">בעלי היומן</SelectItem>
                 <SelectItem value="admins">אדמינים</SelectItem>
                 <SelectItem value="custom">כתובות מותאמות</SelectItem>

@@ -90,7 +90,7 @@ export default function NotionEditor({ page, onChange }) {
   }
 
   return (
-    <div className="notion-editor bg-card border border-border rounded-lg shadow-sm flex flex-col min-h-0" dir="rtl">
+    <div className="notion-editor bg-card border border-border rounded-lg shadow-sm flex flex-col min-h-0">
       {!isMobile && <EditorToolbar editor={editor} />}
       <div className="flex-1 min-h-0 overflow-y-auto">
         <EditorContent editor={editor} />

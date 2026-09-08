@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { ChevronDown } from 'lucide-react';
 import { prefetchPath } from '@/lib/moduleRegistry';
+import { useI18n } from '@/lib/i18n';
 
 const ORDER_KEY = 'sidebarNavOrder';
 const EXPANDED_KEY = 'sidebarNavExpanded';
@@ -10,6 +11,7 @@ const GROUP_ORDER = ['core', 'operations'];
 
 export default function SidebarNav({ items, isCollapsed, onNavigate }) {
   const location = useLocation();
+  const { t } = useI18n();
   const [orderedItems, setOrderedItems] = useState(items);
 
   useEffect(() => {
@@ -102,7 +104,7 @@ export default function SidebarNav({ items, isCollapsed, onNavigate }) {
                     onClick={() => onNavigate?.()}
                     onMouseEnter={() => prefetchPath(item.path)}
                     onFocus={() => prefetchPath(item.path)}
-                    title={isCollapsed ? item.label : undefined}
+                    title={isCollapsed ? t(item.label) : undefined}
                     className={`relative flex flex-1 min-w-0 items-center gap-3 rounded-xl text-sm transition-all duration-150 ${
                       isCollapsed ? 'justify-center px-2 py-2.5' : 'px-3 py-2.5'
                     } ${
@@ -116,7 +118,7 @@ export default function SidebarNav({ items, isCollapsed, onNavigate }) {
                       <span className="absolute start-0 top-1/2 -translate-y-1/2 w-1 h-5 rounded-e-full bg-primary" />
                     )}
                     <Icon className={`w-[18px] h-[18px] flex-shrink-0 ${active ? 'text-primary' : 'text-muted-foreground'}`} />
-                    {!isCollapsed && <span className="truncate">{item.label}</span>}
+                    {!isCollapsed && <span className="truncate">{t(item.label)}</span>}
                   </Link>
 
                   {/* Expand toggle — sub-pages are reachable without first
@@ -126,7 +128,7 @@ export default function SidebarNav({ items, isCollapsed, onNavigate }) {
                       type="button"
                       onClick={() => toggle(item, active)}
                       aria-expanded={open}
-                      aria-label={`${open ? 'סגור' : 'פתח'} ${item.label}`}
+                      aria-label={`${open ? t('סגירה') : t('פתיחה')} ${t(item.label)}`}
                       className="p-2 md:p-1 -ms-1 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted/70 transition-colors flex-shrink-0"
                     >
                       <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-150 ${open ? '' : 'rotate-90'}`} />
@@ -156,7 +158,7 @@ export default function SidebarNav({ items, isCollapsed, onNavigate }) {
                           {childActive && (
                             <span className="absolute -start-px top-1/2 -translate-y-1/2 w-0.5 h-5 rounded-full bg-primary" />
                           )}
-                          <span className="truncate block">{child.label}</span>
+                          <span className="truncate block">{t(child.label)}</span>
                         </Link>
                       );
                     })}

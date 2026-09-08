@@ -42,7 +42,7 @@ function FieldDialog({ open, onOpenChange, field, entity, existingKeys, onSave }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent dir="rtl" className="max-w-md">
+      <DialogContent className="max-w-md">
         <DialogHeader>
           <DialogTitle>{field ? 'עריכת שדה' : 'שדה חדש'}</DialogTitle>
           <DialogDescription>השדה יופיע בטופס היצירה והעריכה של הישות שנבחרה.</DialogDescription>
@@ -58,7 +58,7 @@ function FieldDialog({ open, onOpenChange, field, entity, existingKeys, onSave }
             <Label className="text-xs text-muted-foreground">סוג</Label>
             <Select value={draft.type} onValueChange={(v) => set({ type: v })}>
               <SelectTrigger className={INPUT}><SelectValue /></SelectTrigger>
-              <SelectContent dir="rtl">
+              <SelectContent>
                 {FIELD_TYPES.map((t) => <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>)}
               </SelectContent>
             </Select>
@@ -71,7 +71,6 @@ function FieldDialog({ open, onOpenChange, field, entity, existingKeys, onSave }
                 value={optionsText}
                 onChange={(e) => setOptionsText(e.target.value)}
                 rows={4}
-                dir="rtl"
                 className="w-full rounded-lg border border-border bg-background p-2 text-sm"
                 placeholder={'נמוך\nבינוני\nגבוה'}
               />
@@ -142,7 +141,7 @@ export default function CustomFieldsPanel() {
   };
 
   return (
-    <div dir="rtl" className="space-y-4">
+    <div className="space-y-4">
       <div className="bg-card rounded-xl border border-border shadow-sm p-5">
         <div className="flex items-start justify-between gap-3 mb-4">
           <div className="flex items-center gap-2.5">

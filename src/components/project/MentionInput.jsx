@@ -116,7 +116,6 @@ export default function MentionInput({ value, onChange, placeholder, className, 
       <div
         ref={overlayRef}
         className={`${className} absolute inset-0 pointer-events-none overflow-hidden whitespace-pre-wrap break-words`}
-        dir="rtl"
         dangerouslySetInnerHTML={{ __html: renderHighlighted() }}
       />
       <textarea
@@ -129,7 +128,6 @@ export default function MentionInput({ value, onChange, placeholder, className, 
         className={`${className} relative bg-transparent`}
         style={{ color: 'transparent', caretColor: 'hsl(var(--foreground))' }}
         rows={3}
-        dir="rtl"
       />
       {showDropdown && (
         <div className="absolute z-50 bottom-full mb-1 start-0 bg-card border border-border rounded-lg shadow-lg overflow-hidden min-w-[200px] max-h-[240px] overflow-y-auto">

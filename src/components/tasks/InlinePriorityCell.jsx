@@ -16,7 +16,7 @@ export default function InlinePriorityCell({ value, onChange }) {
           <StatusBadge status={value || 'medium'} />
         </button>
       </PopoverTrigger>
-      <PopoverContent align="center" dir="rtl" className="w-44 p-1.5" onClick={e => e.stopPropagation()}>
+      <PopoverContent align="center" className="w-44 p-1.5" onClick={e => e.stopPropagation()}>
         <div className="flex items-center justify-center gap-1.5 flex-wrap">
           {PRIORITY_OPTIONS.map(p => (
             <button

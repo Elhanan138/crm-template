@@ -57,7 +57,7 @@ export default function Notifications() {
   const unreadCount = notifications.filter(n => !n.is_read).length;
 
   return (
-    <div dir="rtl" className="max-w-3xl mx-auto px-4">
+    <div className="max-w-3xl mx-auto px-4">
       <PageHeader
         icon={Bell}
         title="היסטוריית התראות"

@@ -56,7 +56,7 @@ export default function Forecast() {
   const maxGross = Math.max(...model.byStage.map((r) => r.gross), 1);
 
   return (
-    <div dir="rtl" className="pb-10">
+    <div className="pb-10">
       <PageHeader
         icon={FORECAST_META.icon}
         title={FORECAST_META.title}
@@ -64,7 +64,7 @@ export default function Forecast() {
         actions={
           <Select value={period} onValueChange={setPeriod}>
             <SelectTrigger className="h-9 rounded-lg text-sm w-40"><SelectValue /></SelectTrigger>
-            <SelectContent dir="rtl">
+            <SelectContent>
               {PERIODS.map((p) => <SelectItem key={p.value} value={p.value}>{p.label}</SelectItem>)}
             </SelectContent>
           </Select>

@@ -37,13 +37,13 @@ export default function Step1General({ form, updateField, people, uploadingImage
       )}
       <div className="flex-1 space-y-1">
        <Label className="text-xs font-medium text-muted-foreground">שם הלקוח <span className="text-destructive">*</span></Label>
-       <Input value={form.client_name} onChange={(e) => updateField('client_name', e.target.value)} placeholder="שם החברה / הגוף"className="h-9 rounded-lg border-border bg-background focus:ring-2 focus:ring-primary/30 focus:border-primary text-sm"dir="rtl"/>
+       <Input value={form.client_name} onChange={(e) => updateField('client_name', e.target.value)} placeholder="שם החברה / הגוף"className="h-9 rounded-lg border-border bg-background focus:ring-2 focus:ring-primary/30 focus:border-primary text-sm"/>
       </div>
      </div>
 
      <div className="space-y-1">
       <Label className="text-xs font-medium text-muted-foreground">שווי חוזה (₪)</Label>
-      <Input type="number"inputMode="numeric"value={form.contract_value} onChange={(e) => updateField('contract_value', e.target.value)} placeholder="0"className="h-9 rounded-lg border-border bg-background focus:ring-2 focus:ring-primary/30 focus:border-primary text-sm"dir="rtl"/>
+      <Input type="number"inputMode="numeric"value={form.contract_value} onChange={(e) => updateField('contract_value', e.target.value)} placeholder="0"className="h-9 rounded-lg border-border bg-background focus:ring-2 focus:ring-primary/30 focus:border-primary text-sm"/>
      </div>
     </div>
 

@@ -234,7 +234,7 @@ export default function Calendar() {
   const renderEvent = (e, i) => <EventChip key={i} e={e} />;
 
   return (
-    <div dir="rtl">
+    <div>
       <PageHeader
         icon={NAV_ICONS.calendar}
         title="יומן"

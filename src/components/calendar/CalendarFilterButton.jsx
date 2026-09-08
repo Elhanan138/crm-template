@@ -72,7 +72,7 @@ export default function CalendarFilterButton({
           )}
         </button>
       </PopoverTrigger>
-      <PopoverContent dir="rtl" align="start" className="w-72 p-0 rounded-lg">
+      <PopoverContent align="start" className="w-72 p-0 rounded-lg">
         <CollapsibleSection title="סוג אירוע">
           {Object.entries(CATEGORY_LABELS).map(([k, v]) => (
             <CheckRow

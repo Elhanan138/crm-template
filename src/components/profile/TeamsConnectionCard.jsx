@@ -121,7 +121,7 @@ export default function TeamsConnectionCard() {
       </div>
 
       <AlertDialog open={showDisconnectDialog} onOpenChange={setShowDisconnectDialog}>
-        <AlertDialogContent dir="rtl">
+        <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>ניתוק חיבור Teams</AlertDialogTitle>
             <AlertDialogDescription>

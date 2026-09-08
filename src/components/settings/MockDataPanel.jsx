@@ -192,7 +192,7 @@ export default function MockDataPanel({ isAdmin, isLive }) {
       />
 
       <AlertDialog open={purgeOpen} onOpenChange={setPurgeOpen}>
-        <AlertDialogContent dir="rtl">
+        <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>מחיקת נתוני בדיקה</AlertDialogTitle>
             <AlertDialogDescription>

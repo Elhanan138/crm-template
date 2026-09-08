@@ -17,14 +17,14 @@ export default function ProjectActionsMenu({
 }) {
   const editPath = project ? getProjectEditPath(project) : `/projects/${projectId}/edit`;
   return (
-    <div dir="rtl">
-      <DropdownMenu dir="rtl">
+    <div>
+      <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button variant="ghost" className="w-9 h-9 p-0 rounded-full hover:bg-accent">
             <MoreVertical className="w-4 h-4" />
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="start" className="w-56" dir="rtl">
+        <DropdownMenuContent align="start" className="w-56">
           {canEdit && (
             <DropdownMenuItem asChild>
               <Link to={editPath} className="flex items-center cursor-pointer">
