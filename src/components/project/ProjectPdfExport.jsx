@@ -6,6 +6,7 @@ import { toast } from 'sonner';
 import { parseISO, isValid } from 'date-fns';
 import { formatDate } from '@/lib/formatDate';
 import { buildPdfFilename, ALL_SECTION_IDS } from '@/lib/pdfSections';
+import { useDocumentBranding } from '@/components/shared/DocumentLetterhead';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 
@@ -25,6 +26,7 @@ const ProjectPdfExport = forwardRef(({ project }, ref) => {
   const [activeSections, setActiveSections] = useState(null);
   const [reportData, setReportData] = useState(null);
   const reportRef = useRef(null);
+  const brand = useDocumentBranding();
 
   useImperativeHandle(ref, () => ({
     export: async (sections) => {
@@ -95,13 +97,20 @@ const ProjectPdfExport = forwardRef(({ project }, ref) => {
     <div style={{ position: 'fixed', top: 0, left: '-9999px', width: '794px' }}>
       <div ref={reportRef} style={{ width: '794px', padding: '40px', background: 'hsl(0, 0%, 100%)', fontFamily: 'Heebo, sans-serif', color: '#222' }}>
         {/* Header */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '16px', borderBottom: '3px solid hsl(150 88% 28%)', paddingBottom: '16px', marginBottom: '20px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '16px', borderBottom: `3px solid ${brand.color}`, paddingBottom: '16px', marginBottom: '20px' }}>
           {project.image_url && (
             <img src={project.image_url} alt="" crossOrigin="anonymous" style={{ width: '64px', height: '64px', objectFit: 'cover', borderRadius: '10px', border: '1px solid #e0e0e0' }} />
           )}
-          <div>
+          <div style={{ flex: 1, minWidth: 0 }}>
             <div style={{ fontSize: '24px', fontWeight: 800 }}>{project.client_name || project.name}</div>
             <div style={{ fontSize: '13px', color: '#888' }}>דוח פרויקט • {fmtDate(new Date())}</div>
+          </div>
+          {/* The sender's mark, so a report forwarded on still says who wrote it. */}
+          <div style={{ textAlign: 'start', flexShrink: 0 }}>
+            {brand.logo && (
+              <img src={brand.logo} alt="" crossOrigin="anonymous" style={{ width: '52px', height: '52px', objectFit: 'contain' }} />
+            )}
+            {brand.name && <div style={{ fontSize: '12px', fontWeight: 700, color: brand.color }}>{brand.name}</div>}
           </div>
         </div>
 

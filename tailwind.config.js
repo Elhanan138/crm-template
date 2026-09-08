@@ -66,6 +66,14 @@ module.exports = {
   			neutral: {
   				muted: 'hsl(var(--neutral-muted))'
   			},
+  			doc: {
+  				DEFAULT: 'hsl(var(--doc))',
+  				foreground: 'hsl(var(--doc-foreground))',
+  				muted: 'hsl(var(--doc-muted))',
+  				rule: 'hsl(var(--doc-rule))',
+  				negative: 'hsl(var(--doc-negative))',
+  				accent: 'hsl(var(--brand))'
+  			},
   			border: 'hsl(var(--border))',
   			input: 'hsl(var(--input))',
   			ring: 'hsl(var(--ring))',

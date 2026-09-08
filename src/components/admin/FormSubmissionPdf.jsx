@@ -1,6 +1,7 @@
 /* hex מכוון — רינדור PDF, ראה DESIGN_SYSTEM §0 */
 import React from 'react';
 import { formatDate } from '@/lib/formatDate';
+import { useDocumentBranding } from '@/components/shared/DocumentLetterhead';
 
 function renderAnswer(field, value) {
   if (value === undefined || value === null || value === '') return '—';
@@ -17,6 +18,9 @@ function renderAnswer(field, value) {
 const FormSubmissionPdf = React.forwardRef(function FormSubmissionPdf({ submission }, ref) {
   const fields = submission?.fields_snapshot || [];
   const answers = submission?.answers || {};
+  // A completed form leaves the building. It carries the customer's mark, the
+  // same one the branding settings set, rather than a bare title.
+  const brand = useDocumentBranding();
 
   return (
     <div style={{ position: 'fixed', top: 0, left: '-9999px', width: '794px' }}>
@@ -27,11 +31,24 @@ const FormSubmissionPdf = React.forwardRef(function FormSubmissionPdf({ submissi
         fontFamily: 'Heebo, sans-serif',
         color: '#1a2332',
       }}>
-        <div style={{ borderBottom: '3px solid #16803c', paddingBottom: '14px', marginBottom: '22px' }}>
-          <div style={{ fontSize: '24px', fontWeight: 800, color: '#1a2332' }}>{submission?.template_title || 'טופס'}</div>
-          <div style={{ fontSize: '13px', color: '#6b7484', marginTop: '6px' }}>
-            {submission?.submitted_by_name ? `מולא ע"י ${submission.submitted_by_name}` : ''}
-            {submission?.created_date ? `${submission?.submitted_by_name ? ' · ' : ''}${formatDate(submission.created_date, 'datetime')}` : ''}
+        <div style={{ borderBottom: `3px solid ${brand.color}`, paddingBottom: '14px', marginBottom: '22px' }}>
+          <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
+            {brand.logo && (
+              <img src={brand.logo} alt="" crossOrigin="anonymous" style={{ width: '48px', height: '48px', objectFit: 'contain' }} />
+            )}
+            <div>
+              {brand.name && (
+                <div style={{ fontSize: '15px', fontWeight: 700, color: brand.color }}>{brand.name}</div>
+              )}
+              <div style={{ fontSize: '24px', fontWeight: 800, color: '#1a2332' }}>{submission?.template_title || 'טופס'}</div>
+              <div style={{ fontSize: '13px', color: '#6b7484', marginTop: '6px' }}>
+                {submission?.submitted_by_name ? `מולא ע"י ${submission.submitted_by_name}` : ''}
+                {submission?.created_date ? `${submission?.submitted_by_name ? ' · ' : ''}${formatDate(submission.created_date, 'datetime')}` : ''}
+              </div>
+              {brand.details && (
+                <div style={{ fontSize: '11px', color: '#6b7484', marginTop: '4px' }}>{brand.details}</div>
+              )}
+            </div>
           </div>
         </div>
 

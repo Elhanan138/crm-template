@@ -19,6 +19,18 @@
     --primary: 193 9% 19%;
     --primary-foreground: 0 0% 100%;
     --brand: 193 9% 19%;
+
+    /* Document surface — a quote, an invoice, a signed form. These are printed
+       on paper and rendered to PDF against white, so they are deliberately NOT
+       redefined under .dark: a proposal sent to a client cannot come out with
+       pale grey text on a white page because the sender was in dark mode.
+       Only the accent follows the brand, which is how a document inherits the
+       branding without naming a colour of its own. */
+    --doc: 0 0% 100%;
+    --doc-foreground: 0 0% 10%;
+    --doc-muted: 0 0% 40%;
+    --doc-rule: 0 0% 85%;
+    --doc-negative: 0 65% 42%;
     --secondary: 215 16% 47%;
     --secondary-foreground: 0 0% 100%;
     --muted: 210 40% 96%;

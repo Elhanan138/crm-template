@@ -9,15 +9,7 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 import BrandMark from '@/components/shared/BrandMark';
-
-const PRESETS = [
-  { name: 'ברירת מחדל', colors: ['#2d3436', '#0984e3', '#00b894'] },
-  { name: 'אוקיינוס', colors: ['#0369a1', '#0891b2', '#14b8a6'] },
-  { name: 'שקיעה', colors: ['#c2410c', '#db2777', '#f59e0b'] },
-  { name: 'יער', colors: ['#166534', '#4d7c0f', '#0f766e'] },
-  { name: 'סגול עמוק', colors: ['#6d28d9', '#7c3aed', '#a21caf'] },
-  { name: 'גרפיט', colors: ['#1f2937', '#374151', '#4b5563'] },
-];
+import { BRAND_PRESETS, presetForColor } from '@/lib/brandPresets';
 
 function extractColors(dataUrl, maxColors = 6) {
   return new Promise((resolve) => {
@@ -342,20 +334,28 @@ export default function BrandingPanel() {
         <div className="space-y-2">
           <p className="text-xs text-muted-foreground">ערכות מוכנות</p>
           <div className="flex flex-wrap gap-2">
-            {PRESETS.map((preset) => (
-              <button
-                key={preset.name}
-                onClick={() => { setPalette(preset.colors); setBrandColor(preset.colors[0]); toast.success(`ערכת "${preset.name}" הוחלה`); }}
-                className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg border border-border hover:border-primary/40 transition-colors"
-              >
-                <span className="flex -space-x-1">
-                  {preset.colors.map((c) => (
-                    <span key={c} className="w-3.5 h-3.5 rounded-full border border-background" style={{ backgroundColor: c }} />
-                  ))}
-                </span>
-                <span className="text-xs">{preset.name}</span>
-              </button>
-            ))}
+            {BRAND_PRESETS.map((preset) => {
+              const active = presetForColor(brandColor)?.id === preset.id;
+              return (
+                <button
+                  key={preset.id}
+                  title={preset.hint}
+                  aria-pressed={active}
+                  onClick={() => { setPalette(preset.palette); setBrandColor(preset.primary); toast.success(`ערכת "${preset.label}" הוחלה`); }}
+                  className={`flex items-center gap-2 px-2.5 py-1.5 rounded-lg border transition-colors ${
+                    active ? 'border-primary bg-accent' : 'border-border hover:border-primary/40'
+                  }`}
+                >
+                  <span className="flex -space-x-1">
+                    {preset.palette.map((c) => (
+                      <span key={c} className="w-3.5 h-3.5 rounded-full border border-background" style={{ backgroundColor: c }} />
+                    ))}
+                  </span>
+                  <span className="text-xs">{preset.label}</span>
+                  {active && <Check className="w-3 h-3 text-primary" />}
+                </button>
+              );
+            })}
           </div>
         </div>
       </Section>

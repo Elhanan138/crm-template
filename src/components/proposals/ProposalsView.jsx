@@ -18,7 +18,7 @@ import {
   COMPLEXITY_LABELS, STATUS_LABELS, STATUS_COLORS, VAT_RATE,
   computePricing, generateProposalNumber,
 } from '@/lib/proposalPricing';
-import { useLogo } from '@/lib/LogoContext';
+import DocumentLetterhead, { DocumentFooter, DocumentSheet } from '@/components/shared/DocumentLetterhead';
 
 function ProposalCard({ proposal, clientName, onEdit, onPrint, onPdf, pdfBusy }) {
   return (
@@ -272,48 +272,35 @@ function ProposalForm({ open, onOpenChange, proposal, clients, projects, existin
 
 function ProposalDocument({ proposal, client, innerRef }) {
   const pricing = computePricing(proposal);
-  const { systemName, company } = useLogo();
-  const details = [
-    company?.legalId && `ח.פ: ${company.legalId}`,
-    company?.address,
-  ].filter(Boolean).join(' | ');
-  const terms = [
-    company?.paymentTerms && `תנאי תשלום: ${company.paymentTerms}`,
-    company?.bank && `בנק: ${company.bank}`,
-  ].filter(Boolean).join(' | ');
   return (
-    <div ref={innerRef} className="bg-white text-black w-[800px] max-w-full mx-auto px-8 py-10">
+    <DocumentSheet innerRef={innerRef}>
       <div>
-        {/* Header */}
-        <div className="flex justify-between items-start mb-8 border-b-2 border-primary pb-4">
-          <div>
-            <h1 className="text-3xl font-bold text-primary">{systemName}</h1>
-            {company?.tagline && <p className="text-sm text-muted-foreground mt-1">{company.tagline}</p>}
-            {details && <p className="text-xs text-muted-foreground mt-2">{details}</p>}
-            {terms && <p className="text-xs text-muted-foreground">{terms}</p>}
-          </div>
-          <div className="text-left">
-            <h2 className="text-xl font-bold">הצעת מחיר</h2>
-            <p className="text-sm mt-1">{proposal.proposal_number}</p>
-            <p className="text-xs text-muted-foreground mt-1">תאריך: {proposal.issue_date}</p>
-            {proposal.valid_until && <p className="text-xs text-muted-foreground">בתוקף עד: {proposal.valid_until}</p>}
-          </div>
-        </div>
+        <DocumentLetterhead
+          title="הצעת מחיר"
+          className="mb-8"
+          meta={(
+            <>
+              <p className="text-sm mt-1">{proposal.proposal_number}</p>
+              <p className="text-xs text-doc-muted mt-1">תאריך: {proposal.issue_date}</p>
+              {proposal.valid_until && <p className="text-xs text-doc-muted">בתוקף עד: {proposal.valid_until}</p>}
+            </>
+          )}
+        />
 
         {/* Client info */}
         <div className="mb-8">
-          <h3 className="text-sm font-semibold text-muted-foreground mb-2">לכבוד:</h3>
+          <h3 className="text-sm font-semibold text-doc-muted mb-2">לכבוד:</h3>
           {client && (
             <div className="flex items-center gap-3">
               {client.company_logo_url && (
-                <img src={client.company_logo_url} alt={client.company_name} className="w-12 h-12 rounded-lg object-contain border border-border" />
+                <img src={client.company_logo_url} alt={client.company_name} className="w-12 h-12 rounded-lg object-contain border border-doc-rule" />
               )}
               <div>
                 <p className="text-lg font-bold">{client.company_name}</p>
-                {client.legal_id && <p className="text-sm text-muted-foreground">ח.פ: {client.legal_id}</p>}
+                {client.legal_id && <p className="text-sm text-doc-muted">ח.פ: {client.legal_id}</p>}
                 {client.primary_contact_name && <p className="text-sm">{client.primary_contact_name}</p>}
-                {client.primary_contact_email && <p className="text-sm text-muted-foreground">{client.primary_contact_email}</p>}
-                {client.primary_contact_phone && <p className="text-sm text-muted-foreground">{client.primary_contact_phone}</p>}
+                {client.primary_contact_email && <p className="text-sm text-doc-muted">{client.primary_contact_email}</p>}
+                {client.primary_contact_phone && <p className="text-sm text-doc-muted">{client.primary_contact_phone}</p>}
               </div>
             </div>
           )}
@@ -322,7 +309,7 @@ function ProposalDocument({ proposal, client, innerRef }) {
         {/* Pricing details */}
         <table className="w-full mb-6 text-sm">
           <thead>
-            <tr className="border-b-2 border-border">
+            <tr className="border-b-2 border-doc-rule">
               <th className="text-right py-2">תיאור</th>
               <th className="text-center py-2 w-24">שעות</th>
               <th className="text-center py-2 w-32">מחיר לשעה</th>
@@ -331,7 +318,7 @@ function ProposalDocument({ proposal, client, innerRef }) {
           </thead>
           <tbody>
             {pricing.lineItems.map((item, i) => (
-              <tr key={i} className="border-b border-border">
+              <tr key={i} className="border-b border-doc-rule">
                 <td className="py-2">{item.name || `שלב ${i + 1}`}</td>
                 <td className="text-center py-2">{item.hours}</td>
                 <td className="text-center py-2" dir="ltr">₪{item.adjusted_rate.toLocaleString()}</td>
@@ -343,27 +330,23 @@ function ProposalDocument({ proposal, client, innerRef }) {
 
         {/* Totals */}
         <div className="flex flex-col ms-auto w-64 space-y-1.5 text-sm">
-          <div className="flex justify-between"><span className="text-muted-foreground">סכום ביניים</span><span dir="ltr">₪{pricing.subtotal.toLocaleString()}</span></div>
+          <div className="flex justify-between"><span className="text-doc-muted">סכום ביניים</span><span dir="ltr">₪{pricing.subtotal.toLocaleString()}</span></div>
           {pricing.discountAmount > 0 && (
-            <div className="flex justify-between text-red-600"><span>הנחה ({proposal.discount_percent}%)</span><span dir="ltr">-₪{pricing.discountAmount.toLocaleString()}</span></div>
+            <div className="flex justify-between text-doc-negative"><span>הנחה ({proposal.discount_percent}%)</span><span dir="ltr">-₪{pricing.discountAmount.toLocaleString()}</span></div>
           )}
-          <div className="flex justify-between"><span className="text-muted-foreground">מע"ד ({proposal.vat_percent || VAT_RATE}%)</span><span dir="ltr">₪{pricing.vatAmount.toLocaleString()}</span></div>
-          <div className="flex justify-between text-lg font-bold pt-2 border-t-2 border-primary"><span>סה"כ לתשלום</span><span className="text-primary" dir="ltr">₪{pricing.finalTotal.toLocaleString()}</span></div>
+          <div className="flex justify-between"><span className="text-doc-muted">מע"ד ({proposal.vat_percent || VAT_RATE}%)</span><span dir="ltr">₪{pricing.vatAmount.toLocaleString()}</span></div>
+          <div className="flex justify-between text-lg font-bold pt-2 border-t-2 border-doc-accent"><span>סה"כ לתשלום</span><span className="text-doc-accent" dir="ltr">₪{pricing.finalTotal.toLocaleString()}</span></div>
         </div>
 
         {proposal.notes && (
-          <div className="mt-8 pt-4 border-t border-border">
-            <p className="text-sm text-muted-foreground whitespace-pre-wrap">{proposal.notes}</p>
+          <div className="mt-8 pt-4 border-t border-doc-rule">
+            <p className="text-sm text-doc-muted whitespace-pre-wrap">{proposal.notes}</p>
           </div>
         )}
 
-        {systemName && (
-          <div className="mt-12 text-center text-xs text-muted-foreground">
-            <p>{['תודה שבחרתם ב-' + systemName, company?.tagline].filter(Boolean).join(' | ')}</p>
-          </div>
-        )}
+        <DocumentFooter className="text-center" />
       </div>
-    </div>
+    </DocumentSheet>
   );
 }
 
