@@ -102,13 +102,42 @@ export function useCrmRecords(schema) {
     onError: (e) => toast.error(e?.message || 'המחיקה נכשלה'),
   });
 
+  // Bulk edits act only on records the viewer may edit. Silently skipping the
+  // rest would be worse than refusing: the count in the toast is what tells you
+  // the difference between "done" and "done to some of them".
+  const bulkSave = useMutation({
+    mutationFn: async ({ ids, patch }) => {
+      const editable = records.filter((r) => ids.includes(r.id) && canEdit(r));
+      await api.entities[entity].bulkUpdate(editable.map((r) => ({ id: r.id, ...patch })));
+      return { changed: editable.length, skipped: ids.length - editable.length };
+    },
+    onSuccess: ({ changed, skipped }) => {
+      invalidate();
+      toast.success(skipped ? `${changed} רשומות עודכנו · ${skipped} דולגו (אין הרשאה)` : `${changed} רשומות עודכנו`);
+    },
+    onError: (e) => toast.error(e?.message || 'העדכון נכשל'),
+  });
+
+  const bulkRemove = useMutation({
+    mutationFn: async (ids) => {
+      const deletable = records.filter((r) => ids.includes(r.id) && canDelete(r));
+      await api.entities[entity].deleteMany(deletable.map((r) => r.id));
+      return { deleted: deletable.length, skipped: ids.length - deletable.length };
+    },
+    onSuccess: ({ deleted, skipped }) => {
+      invalidate();
+      toast.success(skipped ? `${deleted} נמחקו · ${skipped} דולגו (אין הרשאה)` : `${deleted} רשומות נמחקו`);
+    },
+    onError: (e) => toast.error(e?.message || 'המחיקה נכשלה'),
+  });
+
   // Binary model, same as the rest of the system: admin, or the record owner.
   const canEdit = (record) => isRealAdmin || !record?.id || cleanEmail(record.owner_email) === myEmail;
   const canDelete = (record) => isRealAdmin || cleanEmail(record?.owner_email) === myEmail;
 
   return {
     records, isLoading, relations, lookups, customFields,
-    save, remove, canEdit, canDelete, isRealAdmin, myEmail,
+    save, remove, bulkSave, bulkRemove, canEdit, canDelete, isRealAdmin, myEmail,
     viewer, hiddenCount, scope: scopeOf(schema),
   };
 }

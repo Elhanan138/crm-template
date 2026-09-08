@@ -27,5 +27,5 @@ function RecurringSummary({ records }) {
 }
 
 export default function Subscriptions() {
-  return <CrmModulePage schema={CRM_SCHEMAS.subscriptions} moduleId="subscriptions" renderAbove={(p) => <RecurringSummary {...p} />} />;
+  return <CrmModulePage schema={CRM_SCHEMAS.subscriptions} moduleId="subscriptions" stats={false} renderAbove={(p) => <RecurringSummary {...p} />} />;
 }

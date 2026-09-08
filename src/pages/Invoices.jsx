@@ -49,5 +49,5 @@ function Aging({ records }) {
 }
 
 export default function Invoices() {
-  return <CrmModulePage schema={CRM_SCHEMAS.invoices} moduleId="invoices" renderAbove={(p) => <Aging {...p} />} />;
+  return <CrmModulePage schema={CRM_SCHEMAS.invoices} moduleId="invoices" stats={false} renderAbove={(p) => <Aging {...p} />} />;
 }

@@ -25,5 +25,5 @@ function StockSummary({ records }) {
 }
 
 export default function Inventory() {
-  return <CrmModulePage schema={CRM_SCHEMAS.inventory} moduleId="inventory" renderAbove={(p) => <StockSummary {...p} />} />;
+  return <CrmModulePage schema={CRM_SCHEMAS.inventory} moduleId="inventory" stats={false} renderAbove={(p) => <StockSummary {...p} />} />;
 }
