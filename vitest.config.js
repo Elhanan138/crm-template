@@ -12,6 +12,11 @@ export default defineConfig({
     globals: true,
     setupFiles: './src/test/setup.js',
     include: ['src/**/*.test.{js,jsx}'],
+    // The export tests import the module registry, which makes Vite transform
+    // every page in the app. On a cold, loaded machine that alone outruns the
+    // 5s default and fails a suite whose assertions all pass — a flake that
+    // teaches people to re-run rather than to read the output.
+    testTimeout: 20000,
   },
   resolve: {
     alias: {

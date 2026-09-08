@@ -37,10 +37,19 @@ export default function SidebarNav({ items, isCollapsed, onNavigate }) {
 
   const isProjectDetailPage = (path) => path.startsWith('/projects/') && path !== '/projects/new';
 
-  // Which workspaces are manually expanded. Persisted so the tree does not
-  // reset on every reload.
+  // What the user has decided about each workspace: { sales: true, finance: false }.
+  //
+  // A plain list of "open" workspaces could not express "I closed the one I am
+  // standing in": being active forced the branch open, so the chevron on the
+  // workspace you were browsing did nothing. An explicit false is what makes a
+  // deliberate close outrank the default.
   const [expanded, setExpanded] = useState(() => {
-    try { return JSON.parse(localStorage.getItem(EXPANDED_KEY)) || []; } catch { return []; }
+    try {
+      const saved = JSON.parse(localStorage.getItem(EXPANDED_KEY));
+      // Older builds stored an array of open workspace ids.
+      if (Array.isArray(saved)) return Object.fromEntries(saved.map((w) => [w, true]));
+      return saved && typeof saved === 'object' ? saved : {};
+    } catch { return {}; }
   });
 
   const persistExpanded = (next) => {
@@ -48,15 +57,12 @@ export default function SidebarNav({ items, isCollapsed, onNavigate }) {
     try { localStorage.setItem(EXPANDED_KEY, JSON.stringify(next)); } catch { /* private mode */ }
   };
 
-  const toggle = (workspace) =>
-    persistExpanded(
-      expanded.includes(workspace) ? expanded.filter((w) => w !== workspace) : [...expanded, workspace]
-    );
+  // Open by default while you are inside it; whatever you chose last wins.
+  const isOpen = (item, active) =>
+    expanded[item.workspace] === undefined ? active : expanded[item.workspace];
 
-  // Navigating into a workspace should leave it open afterwards.
-  const expand = (item) => {
-    if (item.workspace && !expanded.includes(item.workspace)) persistExpanded([...expanded, item.workspace]);
-  };
+  const toggle = (item, active) =>
+    persistExpanded({ ...expanded, [item.workspace]: !isOpen(item, active) });
 
   const matches = (paths) =>
     paths.some((p) => p !== '/' && (location.pathname === p || location.pathname.startsWith(`${p}/`))) ||
@@ -87,14 +93,13 @@ export default function SidebarNav({ items, isCollapsed, onNavigate }) {
             const active = isActive(item);
             const Icon = item.icon;
             const hasChildren = item.children?.length > 0;
-            // Open when you are inside it, or when you opened it yourself.
-            const open = hasChildren && (active || expanded.includes(item.workspace));
+            const open = hasChildren && isOpen(item, active);
             return (
               <div key={item.workspace || item.path}>
                 <div className="relative flex items-center">
                   <Link
                     to={item.path}
-                    onClick={() => { expand(item); onNavigate?.(); }}
+                    onClick={() => onNavigate?.()}
                     onMouseEnter={() => prefetchPath(item.path)}
                     onFocus={() => prefetchPath(item.path)}
                     title={isCollapsed ? item.label : undefined}
@@ -119,7 +124,7 @@ export default function SidebarNav({ items, isCollapsed, onNavigate }) {
                   {!isCollapsed && hasChildren && (
                     <button
                       type="button"
-                      onClick={() => toggle(item.workspace)}
+                      onClick={() => toggle(item, active)}
                       aria-expanded={open}
                       aria-label={`${open ? 'סגור' : 'פתח'} ${item.label}`}
                       className="p-2 md:p-1 -ms-1 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted/70 transition-colors flex-shrink-0"

@@ -14,7 +14,7 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { NAV_ITEMS as navItems } from '@/lib/navItems';
 import { useLogo } from '@/lib/LogoContext';
 import BrandMark from '@/components/shared/BrandMark';
-import { APP_IDENTITY } from '@/lib/appIdentity';
+import { APP_IDENTITY, FALLBACK_APP_NAME } from '@/lib/appIdentity';
 import { isFeatureEnabled } from '@/lib/features';
 
 const AGENT_LABEL = APP_IDENTITY.name ? `${APP_IDENTITY.name} Agent` : 'עוזר חכם';
@@ -157,7 +157,7 @@ export default function Sidebar({ collapsed, onToggle }) {
         <BrandMark className="w-full h-full rounded-lg"/>
        </div>
        <div className="text-right min-w-0">
-        <div className="text-base font-bold text-primary tracking-tight leading-none">{systemName}</div>
+        <div className="text-base font-bold text-primary tracking-tight leading-none">{systemName || FALLBACK_APP_NAME}</div>
         {systemSubtitle && (
           <p className="text-[9px] text-muted-foreground font-medium tracking-widest uppercase mt-0.5">{systemSubtitle}</p>
         )}

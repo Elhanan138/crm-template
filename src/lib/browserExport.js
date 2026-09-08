@@ -105,7 +105,7 @@ export async function publishBundleToGitHub({ options = {}, repo, token, branch,
   return { ...result, meta };
 }
 
-export function downloadBlob(blob, filename = 'oss-app.zip') {
+export function downloadBlob(blob, filename = 'app.zip') {
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;

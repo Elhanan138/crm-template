@@ -1,7 +1,7 @@
 {
-  "name": "OSS — CRM & Delivery Operations",
-  "short_name": "OSS",
-  "description": "OSS CRM & Delivery Operations",
+  "name": "מערכת ניהול",
+  "short_name": "מערכת",
+  "description": "מערכת CRM וניהול פעילות",
   "start_url": "/",
   "display": "browser",
   "dir": "rtl",

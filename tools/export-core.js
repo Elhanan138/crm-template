@@ -21,12 +21,14 @@ export const STATIC_FILES = {
   '.env.example': [
     '# Deployment owner — the account that is treated as the first admin.',
     "# Never commit a real address here; set it in .env.local or your host's env vars.",
-    'VITE_OWNER_EMAIL=admin@example.com',
-    'VITE_OWNER_NAME=מנהל המערכת',
+    // Blank on purpose: an exported bundle must not arrive pre-filled with a
+    // sample account or with someone else's product name.
+    'VITE_OWNER_EMAIL=',
+    'VITE_OWNER_NAME=',
     '',
-    '# Branding',
-    'VITE_APP_NAME=OSS',
-    'VITE_APP_LOGO_URL=/icon-192.png',
+    '# Branding. Left empty on purpose — set it here or in הגדרות → מיתוג.',
+    'VITE_APP_NAME=',
+    'VITE_APP_LOGO_URL=',
     '',
   ].join('\n'),
   '.gitignore': ['node_modules', 'dist', '.env', '.env.local', '*.zip', '.DS_Store', ''].join('\n'),

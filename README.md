@@ -1,4 +1,4 @@
-# OSS — CRM & Delivery Operations
+# CRM & Delivery Operations — תבנית
 
 מערכת CRM וניהול פעילות, עברית RTL. פרויקט Vite + React עצמאי לחלוטין —
 אין תלות ב- ואין צורך בו לבנייה, לפריסה או להמשך הפיתוח.

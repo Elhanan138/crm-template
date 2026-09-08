@@ -1,5 +1,6 @@
 import React from 'react';
 import { useLogo } from '@/lib/LogoContext';
+import { FALLBACK_APP_NAME } from '@/lib/appIdentity';
 
 /**
  * The product mark. Falls back to a monogram when no logo is configured, so a
@@ -20,7 +21,7 @@ export default function BrandMark({ className = '', size, alt }) {
     );
   }
 
-  const initial = (systemName || '').trim().charAt(0).toUpperCase();
+  const initial = (systemName || FALLBACK_APP_NAME).trim().charAt(0).toUpperCase();
   return (
     <span
       style={style}

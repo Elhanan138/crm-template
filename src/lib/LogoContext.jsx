@@ -20,9 +20,13 @@ const DEFAULT_RADIUS = 0.75;
 const read = (key, fallback = null) => {
   try { return localStorage.getItem(key) ?? fallback; } catch { return fallback; }
 };
+// An empty string is a DECISION ("this deployment has no subtitle"), not an
+// absent value. Deleting the key for it made the build default reappear on the
+// next reload, so clearing a branding field never survived a refresh.
+// Only null/undefined — an explicit reset — removes the key.
 const write = (key, value) => {
   try {
-    if (value === null || value === undefined || value === '') localStorage.removeItem(key);
+    if (value === null || value === undefined) localStorage.removeItem(key);
     else localStorage.setItem(key, value);
   } catch { /* quota or private mode — branding is non-critical */ }
 };
@@ -106,8 +110,10 @@ const LogoContext = createContext();
 
 export const LogoProvider = ({ children }) => {
   const [customLogo, setCustomLogo] = useState(() => read(LOGO_STORAGE_KEY));
-  const [systemName, setSystemNameState] = useState(() => read(SYSTEM_NAME_KEY, DEFAULT_SYSTEM_NAME) || DEFAULT_SYSTEM_NAME);
-  const [systemSubtitle, setSystemSubtitleState] = useState(() => read(SYSTEM_SUBTITLE_KEY, DEFAULT_SYSTEM_SUBTITLE) || DEFAULT_SYSTEM_SUBTITLE);
+  //  falls back only when the key is ABSENT, so a stored empty string
+  // stays empty instead of being overwritten by the build default.
+  const [systemName, setSystemNameState] = useState(() => read(SYSTEM_NAME_KEY, DEFAULT_SYSTEM_NAME));
+  const [systemSubtitle, setSystemSubtitleState] = useState(() => read(SYSTEM_SUBTITLE_KEY, DEFAULT_SYSTEM_SUBTITLE));
   const [brandColor, setBrandColorState] = useState(() => read(BRAND_COLOR_KEY));
   const [radius, setRadiusState] = useState(() => {
     const stored = parseFloat(read(RADIUS_KEY, ''));
@@ -153,14 +159,14 @@ export const LogoProvider = ({ children }) => {
   }, []);
 
   const setSystemName = useCallback((name) => {
-    const trimmed = (name || '').trim() || DEFAULT_SYSTEM_NAME;
+    const trimmed = (name || '').trim();
     write(SYSTEM_NAME_KEY, trimmed);
     setSystemNameState(trimmed);
   }, []);
 
   const setSystemSubtitle = useCallback((text) => {
     const trimmed = (text || '').trim();
-    write(SYSTEM_SUBTITLE_KEY, trimmed || null);
+    write(SYSTEM_SUBTITLE_KEY, trimmed);
     setSystemSubtitleState(trimmed);
   }, []);
 
@@ -206,8 +212,10 @@ export const LogoProvider = ({ children }) => {
 
   const resetBranding = useCallback(() => {
     resetLogo();
-    setSystemName(DEFAULT_SYSTEM_NAME);
-    setSystemSubtitle(DEFAULT_SYSTEM_SUBTITLE);
+    write(SYSTEM_NAME_KEY, null);
+    setSystemNameState(DEFAULT_SYSTEM_NAME);
+    write(SYSTEM_SUBTITLE_KEY, null);
+    setSystemSubtitleState(DEFAULT_SYSTEM_SUBTITLE);
     setBrandColor(null);
     setRadius(DEFAULT_RADIUS);
     setPalette([]);

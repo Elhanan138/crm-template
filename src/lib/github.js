@@ -121,7 +121,7 @@ export async function publishToGitHub({
   const commit = await gh(token, `${base}/git/commits`, {
     method: 'POST',
     body: JSON.stringify({
-      message: message || 'Export from OSS',
+      message: message || 'Export from the app',
       tree: tree.sha,
       ...(parentSha ? { parents: [parentSha] } : {}),
     }),

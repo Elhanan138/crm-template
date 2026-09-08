@@ -68,7 +68,7 @@ export function exportZipPlugin() {
             features: url.searchParams.has('features') ? list('features') : undefined,
           });
           res.setHeader('Content-Type', 'application/zip');
-          res.setHeader('Content-Disposition', 'attachment; filename="oss-app.zip"');
+          res.setHeader('Content-Disposition', 'attachment; filename="app.zip"');
           res.end(buffer);
         } catch (err) {
           res.statusCode = 500;

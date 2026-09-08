@@ -50,7 +50,7 @@ if (flag('help')) {
   process.exit(0);
 }
 
-const outPath = path.resolve(root, value('out') || 'oss-app.zip');
+const outPath = path.resolve(root, value('out') || 'app.zip');
 
 const exportOptions = {
     root,
