@@ -15,24 +15,16 @@ const SystemAssistantSheet = optionalComponent('agent', 'src/components/shared/S
 import { useAccessControl } from '@/hooks/useAccessControl';
 import { useAuth } from '@/lib/AuthContext';
 import { clearNavStack, handleRouteChange, consumePendingScroll } from '@/hooks/useSmartBack';
-import { useQuery } from '@tanstack/react-query';
 import { api } from '@/api/client';
 import { WideLayoutProvider, useIsWide } from '@/lib/WideLayoutContext';
 
 function AppLayoutInner() {
   const announcementsEnabled = useCapability('announcements');
+  const agentEnabled = useCapability('blossom_agent', 'agent');
   const wide = useIsWide();
   const [collapsed, setCollapsed] = useState(false);
   const { isAllowed, isLoading, currentUser, effectiveUser, isRealAdmin } = useAccessControl();
   const { navigateToLogin } = useAuth();
-  const { data: sysFeaturesRes } = useQuery({
-    queryKey: ['global-system-features'],
-    queryFn: () => api.functions.invoke('globalTabVisibility', { settingKey: 'global_system_features' }),
-    staleTime: 60000,
-  });
-  const blossomAgentAccess = sysFeaturesRes?.data?.value?.blossom_agent || 'all';
-  const blossomAgentEnabled = blossomAgentAccess === 'all' || (blossomAgentAccess === 'admin' && isRealAdmin);
-
 
   const location = useLocation();
   const scrollRef = useRef(0);
@@ -123,7 +115,7 @@ function AppLayoutInner() {
         </div>
       </main>
       {announcementsEnabled && <AnnouncementPopupModal />}
-      {blossomAgentEnabled && SystemAssistantSheet && (
+      {agentEnabled && SystemAssistantSheet && (
         <Suspense fallback={null}><SystemAssistantSheet /></Suspense>
       )}
     </div>

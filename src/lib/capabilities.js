@@ -29,10 +29,10 @@ const agentLabel = APP_IDENTITY.name ? `${APP_IDENTITY.name} Agent` : 'עוזר 
 // Feature surfaces that are not modules. `feature` names the compile-time flag
 // they need; a surface whose flag is off is not listed at all.
 const FEATURE_SURFACES = [
-  { key: 'blossom_agent', label: agentLabel, hint: 'כפתור העוזר בסרגל וחלון הצ׳אט', feature: 'agent' },
-  { key: 'project_agent', label: 'עוזר חכם בפרויקט', hint: 'לשונית הסקירה של פרויקט', feature: 'agent', module: 'projects' },
-  { key: 'reports_agent', label: 'עוזר חכם בדוחות', hint: 'שאילתות מעל נתוני הדוחות', feature: 'agent', module: 'reports' },
-  { key: 'email_tracking', label: 'מעקב מיילים', hint: 'תיבת היוצא בפרופיל', feature: 'email-tracking' },
+  { key: 'blossom_agent', label: agentLabel, hint: 'כפתור העוזר בסרגל וחלון הצ׳אט', feature: 'agent', requiresServer: true },
+  { key: 'project_agent', label: 'עוזר חכם בפרויקט', hint: 'לשונית הסקירה של פרויקט', feature: 'agent', module: 'projects', requiresServer: true },
+  { key: 'reports_agent', label: 'עוזר חכם בדוחות', hint: 'שאילתות מעל נתוני הדוחות', feature: 'agent', module: 'reports', requiresServer: true },
+  { key: 'email_tracking', label: 'מעקב מיילים', hint: 'תיבת היוצא בפרופיל', feature: 'email-tracking', requiresServer: true },
   { key: 'global_search', label: 'חיפוש גלובלי', hint: 'תיבת החיפוש בסרגל העליון' },
   { key: 'notifications', label: 'מרכז התראות', hint: 'הפעמון בסרגל העליון' },
   { key: 'announcements', label: 'הכרזות ופופאפים', hint: 'חלונות הודעה למשתמשים' },
@@ -99,6 +99,13 @@ export function buildCapabilityCatalogue() {
 
   return groups;
 }
+
+/** Surfaces that cannot work without a backend, from the same declaration. */
+export const SERVER_BACKED_KEYS = new Set(
+  FEATURE_SURFACES.filter((f) => f.requiresServer).map((f) => f.key)
+);
+
+export const requiresServer = (key) => SERVER_BACKED_KEYS.has(key);
 
 export const accessOf = (values, key) => values?.[key] || 'all';
 

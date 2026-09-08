@@ -413,6 +413,17 @@ export const EN = {
   'עברית': 'Hebrew',
   'אנגלית': 'English',
 
+  // ── Server availability ───────────────────────────────────────────────────
+  "מצב חיבור לשרת": "Server connection",
+  "לא מוגדר · דורש שרת": "Not configured · needs a server",
+  "מוגדר · לא מחובר": "Configured · not connected",
+  "מחובר": "Connected",
+  "האינטגרציות, העוזר החכם ומעקב המיילים דורשים צד שרת. עד שיוגדר — הן אינן מוצגות במערכת.": "Integrations, the assistant and mail tracking all need a backend. Until one is configured they are not shown at all.",
+  "קיימת הגדרת Supabase, אך החיבור אינו פעיל או שההגדרות אינן תקינות.": "A Supabase configuration exists, but the connection is inactive or the settings are invalid.",
+  "קיים צד שרת. האינטגרציות והיכולות שתלויות בו זמינות.": "A backend is present. Integrations and everything that depends on one are available.",
+  "סונכרן לאחרונה": "Last synced",
+  "הגדרת Supabase": "Configure Supabase",
+
   // ── Record trail, duplicates and the rest of the shared chrome ────────────
   "חיפוש": "Search",
   "נבחרו": "selected",

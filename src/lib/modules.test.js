@@ -254,13 +254,29 @@ describe('capability switchboard covers everything', () => {
     expect(isCapabilityVisible({}, 'x', false)).toBe(true);
   });
 
-  it('the agent button is gated by the build flag, not only by the setting', () => {
-    for (const file of ['src/components/layout/Sidebar.jsx', 'src/components/layout/TopBar.jsx']) {
+  it('the agent surfaces pass through all three gates, not only the setting', () => {
+    // The build flag, the server requirement and the administrator's switch are
+    // all asked by useCapability. A surface that read the setting directly would
+    // skip two of them — which is how a dead button reached the screen.
+    for (const file of ['src/components/layout/Sidebar.jsx', 'src/components/layout/AppLayout.jsx']) {
       const src = fs.readFileSync(path.resolve(process.cwd(), file), 'utf-8');
-      if (!/blossomAgentEnabled\s*=/.test(src)) continue;
-      const decl = src.slice(src.indexOf('blossomAgentEnabled ='), src.indexOf('blossomAgentEnabled =') + 260);
-      expect(decl, `${file} must check isFeatureEnabled('agent')`).toMatch(/isFeatureEnabled\('agent'\)/);
+      const at = src.search(/\w*[aA]gentEnabled\s*=/);
+      if (at === -1) continue;
+      expect(src.slice(at, at + 200), `${file} must gate the agent through useCapability with the build flag`)
+        .toMatch(/useCapability\('blossom_agent',\s*'agent'\)/);
     }
+  });
+
+  it('every surface that cannot work without a backend is declared as such', async () => {
+    const { SERVER_BACKED_KEYS } = await import('@/lib/capabilities');
+    // Forgetting one of these puts a button back on screen whose only possible
+    // answer is "requires a server".
+    for (const key of ['blossom_agent', 'project_agent', 'reports_agent', 'email_tracking']) {
+      expect(SERVER_BACKED_KEYS.has(key), `${key} must require a server`).toBe(true);
+    }
+    // And something that works perfectly well offline must NOT be gated.
+    expect(SERVER_BACKED_KEYS.has('global_search')).toBe(false);
+    expect(SERVER_BACKED_KEYS.has('notifications')).toBe(false);
   });
 });
 

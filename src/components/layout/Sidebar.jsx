@@ -15,7 +15,7 @@ import { NAV_ITEMS as navItems } from '@/lib/navItems';
 import { useLogo } from '@/lib/LogoContext';
 import BrandMark from '@/components/shared/BrandMark';
 import { APP_IDENTITY, FALLBACK_APP_NAME } from '@/lib/appIdentity';
-import { isFeatureEnabled } from '@/lib/features';
+import { useCapability } from '@/hooks/useCapability';
 import { useI18n } from '@/lib/i18n';
 import LanguageSwitcher from './LanguageSwitcher';
 
@@ -27,6 +27,7 @@ export default function Sidebar({ collapsed, onToggle }) {
  const { systemName, systemSubtitle } = useLogo();
  const isMobile = useIsMobile();
  const { t } = useI18n();
+ const blossomAgentEnabled = useCapability('blossom_agent', 'agent');
 
  const { data: user } = useQuery({
   queryKey: ['currentUser'],
@@ -49,13 +50,6 @@ export default function Sidebar({ collapsed, onToggle }) {
   staleTime: 60000,
  });
  const sysFeatures = sysFeaturesRes?.data?.value || {};
- const blossomAgentAccess = sysFeatures.blossom_agent || 'all';
- // The agent must also be part of THIS build. Without the compile-time check the
- // button kept appearing in bundles exported without the agent.
- const blossomAgentEnabled =
-  isFeatureEnabled('agent') &&
-  (blossomAgentAccess === 'all' || (blossomAgentAccess === 'admin' && isRealAdmin));
-
  const allowedByFeature = (key) => {
   const accessLevel = key && sysFeatures[key];
   if (!accessLevel) return null;

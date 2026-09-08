@@ -15,6 +15,7 @@ import IntegrationsTab from '@/components/profile/IntegrationsTab';
 import { Suspense } from 'react';
 import { optionalComponent } from '@/lib/optionalComponent';
 import { useSystemFeature } from '@/hooks/useSystemFeature';
+import { useCapability } from '@/hooks/useCapability';
 
 // Compiled out when the email-tracking feature is not part of the build.
 const OutboxTab = optionalComponent('email-tracking', 'src/components/profile/OutboxTab.jsx');
@@ -39,9 +40,15 @@ export default function Profile() {
 
   const { data: outlookConfig = {} } = useOutlookCalendarConfig();
   const outlookEnabled = outlookConfig.enabled === true;
+  // Mail tracking and the integrations tab both need a backend; the capability
+  // gate answers that once, so neither is offered when pressing it could only
+  // report that a server is missing.
+  const outboxEnabled = useCapability('email_tracking', 'email-tracking');
+
   const visibleSections = PROFILE_SECTIONS.filter(s => {
     if (s.adminOnly && !isRealAdmin) return false;
     if (s.id === 'integrations' && !outlookEnabled) return false;
+    if (s.id === 'outbox' && !outboxEnabled) return false;
     return true;
   });
 
