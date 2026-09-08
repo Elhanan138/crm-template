@@ -23,6 +23,11 @@ const day = dayString;
 
 const seedLeads = (count, extra = []) => {
   const stages = ['new', 'qualified', 'proposal', 'negotiation', 'won', 'lost'];
+  // Leads sort by newest first. Stamping every row with `new Date()` looks
+  // deterministic and is not: on a loaded machine the loop straddles a
+  // millisecond, half the rows get a later timestamp than the other half, and
+  // the order flips. A minute between rows makes "Deal 1 first" a fact.
+  const base = Date.now();
   const rows = Array.from({ length: count }, (_, i) => ({
     id: `l${i + 1}`,
     name: `Deal ${i + 1}`,
@@ -31,7 +36,7 @@ const seedLeads = (count, extra = []) => {
     value: 1000 * (i + 1),
     expected_close: day(i - 5),
     owner_email: 'admin@localhost',
-    created_date: new Date().toISOString(),
+    created_date: new Date(base - i * 60_000).toISOString(),
   }));
   localStorage.setItem(PREFIX + 'Lead', JSON.stringify([...rows, ...extra]));
 };
@@ -44,8 +49,13 @@ const rowTexts = () => screen.getAllByRole('row').slice(1).map((r) => r.textCont
 // Both layouts render in jsdom (the mobile cards are only hidden by CSS), so a
 // text query has to say which one it means.
 const inTable = (text) => within(table()).getAllByText(text)[0];
+// The largest case renders sixty rows through the real query layer; on a busy
+// machine that takes longer than the one second waitFor allows by default.
 const findInTable = async (text) => {
-  await waitFor(() => expect(within(table()).getAllByText(text).length).toBeGreaterThan(0));
+  await waitFor(
+    () => expect(within(table()).getAllByText(text).length).toBeGreaterThan(0),
+    { timeout: 5000 },
+  );
   return inTable(text);
 };
 

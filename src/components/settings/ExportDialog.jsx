@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import {
@@ -9,7 +9,9 @@ import { Input } from '@/components/ui/input';
 import { useLogo } from '@/lib/LogoContext';
 import { MODULES } from '@/lib/modules';
 import { OPTIONAL_FEATURES } from '../../../tools/export-core.js';
+import { describePlan } from '../../../tools/export-manifest.js';
 import { ACTIVE_MODULE_IDS } from '@/lib/moduleRegistry';
+import { currentBuild, advanceBuild } from '@/lib/exportBuild';
 
 const SETTINGS_SECTIONS = [
   { id: 'users', label: 'משתמשים והרשאות' },
@@ -83,7 +85,56 @@ export default function ExportDialog({ open, onOpenChange }) {
     blankTemplate,
     identity: blankTemplate ? undefined : brand,
     devTools,
+    build: currentBuild(),
   });
+
+  // ── Preview ────────────────────────────────────────────────────────────────
+  // The plan is computed by exactly the code the export runs, so what is listed
+  // here cannot drift from what ends up inside the ZIP. Nothing is built: the
+  // planner only walks the import graph.
+  const [preview, setPreview] = useState(null);
+  const [previewError, setPreviewError] = useState(null);
+  // Bumped after a bundle goes out, so the preview picks up the next build number.
+  const [buildTick, setBuildTick] = useState(0);
+
+  // A compact signature of everything that can change the plan. The logo is
+  // reduced to its length — a data URL is up to half a megabyte, and re-hashing
+  // it on every keystroke would cost more than the preview is worth.
+  const optionsKey = useMemo(() => JSON.stringify({
+    modules: [...selected].sort(),
+    sections: [...sections].sort(),
+    features: [...features].sort(),
+    devTools,
+    blankTemplate,
+    brand: { ...brand, logo: brand.logo ? brand.logo.length : 0 },
+  }), [selected, sections, features, devTools, blankTemplate, brand]);
+
+  useEffect(() => {
+    if (!open) return undefined;
+    let alive = true;
+    // Debounced: typing a client name should not re-plan on every letter.
+    const timer = setTimeout(async () => {
+      try {
+        const { planInBrowser } = await import('@/lib/browserExport');
+        const { meta } = planInBrowser(exportOptions());
+        if (!alive) return;
+        setPreview(describePlan(meta, {
+          allModules: ACTIVE_MODULE_IDS,
+          allSections: SETTINGS_SECTIONS.map((s) => s.id),
+        }));
+        setPreviewError(null);
+      } catch (e) {
+        if (!alive) return;
+        setPreview(null);
+        setPreviewError(e?.message || 'לא ניתן לחשב תצוגה מקדימה');
+      }
+    }, 250);
+    return () => { alive = false; clearTimeout(timer); };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, optionsKey, buildTick]);
+
+  const labelOf = (id) => MODULES[id]?.label || id;
+  const sectionLabelOf = (id) => SETTINGS_SECTIONS.find((s) => s.id === id)?.label || id;
 
   const publish = async () => {
     setError(null);
@@ -99,6 +150,8 @@ export default function ExportDialog({ open, onOpenChange }) {
         onProgress: setPublishing,
       });
       setPublished(result);
+      advanceBuild();
+      setBuildTick((n) => n + 1);
       setGh((g) => ({ ...g, token: '' }));
     } catch (e) {
       setError(e?.message || 'הדחיפה נכשלה');
@@ -118,6 +171,8 @@ export default function ExportDialog({ open, onOpenChange }) {
       const { blob, meta } = await buildZipInBrowser(exportOptions());
       downloadBlob(blob);
       setResult({ ...meta, size: blob.size });
+      advanceBuild();
+      setBuildTick((n) => n + 1);
     } catch (e) {
       // The planner refuses to emit a ZIP that would not build. Show why.
       setError(e?.message || 'הייצוא נכשל');
@@ -264,6 +319,49 @@ export default function ExportDialog({ open, onOpenChange }) {
           <p className="text-[11px] text-muted-foreground">
             הטוקן אינו נשמר בשום מקום — הוא נמחק ברגע שהדחיפה מסתיימת.
           </p>
+        </div>
+
+        <div className="border-t border-border pt-3 space-y-1.5">
+          <p className="text-xs font-semibold text-muted-foreground">מה ייכנס לחבילה</p>
+          {previewError && (
+            <p className="text-[11px] text-destructive">{previewError}</p>
+          )}
+          {!preview && !previewError && (
+            <p className="text-[11px] text-muted-foreground">מחשב…</p>
+          )}
+          {preview && (
+            <div className="rounded-lg bg-muted p-3 space-y-1 text-[11px]">
+              <p className="font-semibold text-foreground">
+                גרסה <span dir="ltr" className="font-mono">{preview.version}</span> · {preview.files} קבצים · {preview.modules.length} מודולים
+              </p>
+              {preview.droppedModules.length > 0 ? (
+                <p className="text-muted-foreground">
+                  מודולים שיוסרו: {preview.droppedModules.map(labelOf).join(', ')}
+                </p>
+              ) : (
+                <p className="text-muted-foreground">כל המודולים של הבניין הזה נכללים</p>
+              )}
+              {preview.droppedSections.length > 0 && (
+                <p className="text-muted-foreground">
+                  מקטעי הגדרות שיוסרו: {preview.droppedSections.map(sectionLabelOf).join(', ')}
+                </p>
+              )}
+              {preview.droppedDependencies.length > 0 && (
+                <p className="text-muted-foreground" dir="ltr">
+                  תלויות שייגזמו: {preview.droppedDependencies.join(', ')}
+                </p>
+              )}
+              <p className="text-muted-foreground">
+                כלי פיתוח: {preview.devTools ? 'נכללים' : 'מוסרים'}
+                {' · '}
+                מיתוג: {preview.blankTemplate ? 'תבנית ריקה' : (brand.name || 'ללא שם')}
+              </p>
+              <p className="text-muted-foreground">
+                החבילה תכיל גם EXPORT.json ו-CHANGELOG.md · טביעת אצבע{' '}
+                <span dir="ltr" className="font-mono">{preview.sourceHash}</span>
+              </p>
+            </div>
+          )}
         </div>
 
         {published && (

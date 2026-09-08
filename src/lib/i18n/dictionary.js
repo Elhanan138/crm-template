@@ -526,6 +526,25 @@ export const EN = {
   "רשומות שנראות כמו אותו דבר — לפי שם מנורמל, אימייל או טלפון. המיזוג שומר את הרשומה שנבחרה ומשלים אליה רק שדות ריקים.": "Records that look like the same thing — by normalised name, email or phone. A merge keeps the record you pick and only fills in the fields it left empty.",
   "כן": "Yes",
   "לא": "No",
+
+  // ── Export preview ────────────────────────────────────────────────────────
+  "מה ייכנס לחבילה": "What goes into the bundle",
+  "מחשב…": "Calculating…",
+  "לא ניתן לחשב תצוגה מקדימה": "The preview could not be calculated",
+  "גרסה": "Version",
+  "קבצים": "files",
+  "מודולים": "modules",
+  "מודולים שיוסרו": "Modules that will be removed",
+  "כל המודולים של הבניין הזה נכללים": "Every module in this build is included",
+  "מקטעי הגדרות שיוסרו": "Settings sections that will be removed",
+  "תלויות שייגזמו": "Dependencies that will be pruned",
+  "כלי פיתוח": "Dev tools",
+  "נכללים": "included",
+  "מוסרים": "removed",
+  "מיתוג": "Branding",
+  "תבנית ריקה": "Blank template",
+  "ללא שם": "unnamed",
+  "טביעת אצבע": "Fingerprint",
 };
 
 /** Every language the switcher offers. */

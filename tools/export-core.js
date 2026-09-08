@@ -7,6 +7,8 @@
 //   • src/lib/browserExport.js — browser adapter, reads from import.meta.glob
 // ─────────────────────────────────────────────────────────────────────────────
 
+import { hashFiles, exportVersion, changelogFor } from './export-manifest.js';
+
 export const ROOT_FILE_ALLOWLIST = [
   'index.html', 'package.json', 'jsconfig.json', 'components.json',
   'postcss.config.js', 'tailwind.config.js', 'vite.config.js', 'vitest.config.js',
@@ -412,9 +414,17 @@ export function planExport({ has, read, allPaths, options = {} }) {
 
   const originalPkg = JSON.parse(read('package.json'));
   const { pkg, dropped } = prunePackageJson(originalPkg, packages, devTools);
-  textFiles.set('package.json', JSON.stringify(pkg, null, 2) + '\n');
+
+  // Identity for the bundle: which version it is, and a fingerprint of the
+  // exact source it was cut from. package.json carries the same version, so a
+  // bundle and its manifest can never disagree about what they are.
+  const version = exportVersion(originalPkg.version, options.build);
+  textFiles.set('package.json', JSON.stringify({ ...pkg, version }, null, 2) + '\n');
+  const sourceHash = hashFiles(textFiles, copyPaths);
 
   const meta = {
+    version,
+    sourceHash,
     modules,
     availableModules,
     features,
@@ -427,6 +437,9 @@ export function planExport({ has, read, allPaths, options = {} }) {
     exportedAt: new Date().toISOString(),
   };
   textFiles.set('selected_modules.json', JSON.stringify(meta, null, 2));
+  // The bundle describes itself: what it is, and what went into it.
+  textFiles.set('EXPORT.json', JSON.stringify(meta, null, 2) + '\n');
+  textFiles.set('CHANGELOG.md', changelogFor(meta));
 
   return { textFiles, copyPaths, meta };
 }
