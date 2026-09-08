@@ -7,7 +7,9 @@ import { ACTIVE_WORKSPACES, STANDALONE_MODULE_IDS } from '@/lib/moduleRegistry';
 // can neither leave an orphan link nor go missing from navigation.
 //
 // A workspace links to its first available module, and stays highlighted for any
-// path inside it — see WorkspaceTabs for the second level.
+// path inside it. Its modules are the indented list under it in the sidebar —
+// that IS the second level, and it is the only one. A tab strip inside the page
+// would say the same thing twice.
 
 const workspaceItems = ACTIVE_WORKSPACES.map((w) => ({
   label: w.label,
