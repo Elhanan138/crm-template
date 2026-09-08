@@ -56,7 +56,7 @@ export default function FirstTimeSetup({ children }) {
   return (
     <div dir="rtl" className="fixed inset-0 flex items-center justify-center bg-background p-6">
       <div className="max-w-md w-full text-center space-y-6">
-        <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto">
+        <div className="w-16 h-16 rounded-2xl bg-accent flex items-center justify-center mx-auto">
           <ShieldCheck className="w-8 h-8 text-primary" />
         </div>
         <div>

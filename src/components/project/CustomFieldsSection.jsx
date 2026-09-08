@@ -128,7 +128,7 @@ function CustomFieldForm({ field, projectId, onClose }) {
         key={k}
         type="button"
         onClick={() => update('field_type', k)}
-        className={`flex items-center gap-2 px-3 py-2.5 rounded-lg border text-sm font-medium transition-all ${active ? 'bg-primary/10 border-primary/40 text-primary' : 'bg-card border-border text-muted-foreground hover:border-primary/20'}`}
+        className={`flex items-center gap-2 px-3 py-2.5 rounded-lg border text-sm font-medium transition-all ${active ? 'bg-accent border-primary/40 text-primary' : 'bg-card border-border text-muted-foreground hover:border-primary/20'}`}
        >
         <Icon className="w-4 h-4 flex-shrink-0"/>
         {cfg.label}
@@ -326,10 +326,10 @@ export default function CustomFieldsSection({ projectId, canEdit = true, embedde
         {(() => { const v = formatValue(field); return v !== null ? `${field.label}: ${v}` : field.label; })()}
         {canEdit && (
          <span className="flex items-center gap-0.5 flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity ms-0.5">
-          <button type="button"onClick={() => setDialog({ open: true, field })} className="hover:bg-primary/20 rounded-full w-3.5 h-3.5 flex items-center justify-center transition-colors">
+          <button type="button"onClick={() => setDialog({ open: true, field })} className="hover:bg-accent rounded-full w-3.5 h-3.5 flex items-center justify-center transition-colors">
            <Pencil className="w-2.5 h-2.5"/>
           </button>
-          <button type="button"onClick={() => setDeleteDialog({ open: true, field })} className="hover:bg-primary/20 rounded-full w-3.5 h-3.5 flex items-center justify-center transition-colors">
+          <button type="button"onClick={() => setDeleteDialog({ open: true, field })} className="hover:bg-accent rounded-full w-3.5 h-3.5 flex items-center justify-center transition-colors">
            <Trash2 className="w-2.5 h-2.5"/>
           </button>
          </span>
@@ -372,10 +372,10 @@ export default function CustomFieldsSection({ projectId, canEdit = true, embedde
           {(() => { const v = formatValue(field); return v !== null ? `${field.label}: ${v}` : field.label; })()}
           {canEdit && (
            <span className="flex items-center gap-0.5 flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity ms-0.5">
-            <button type="button"onClick={() => setDialog({ open: true, field })} className="hover:bg-primary/20 rounded-full w-3.5 h-3.5 flex items-center justify-center transition-colors">
+            <button type="button"onClick={() => setDialog({ open: true, field })} className="hover:bg-accent rounded-full w-3.5 h-3.5 flex items-center justify-center transition-colors">
              <Pencil className="w-2.5 h-2.5"/>
             </button>
-            <button type="button"onClick={() => setDeleteDialog({ open: true, field })} className="hover:bg-primary/20 rounded-full w-3.5 h-3.5 flex items-center justify-center transition-colors">
+            <button type="button"onClick={() => setDeleteDialog({ open: true, field })} className="hover:bg-accent rounded-full w-3.5 h-3.5 flex items-center justify-center transition-colors">
              <Trash2 className="w-2.5 h-2.5"/>
             </button>
            </span>

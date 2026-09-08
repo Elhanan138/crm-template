@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -10,6 +11,7 @@ import { Loader2, Save } from 'lucide-react';
 import { toast } from 'sonner';
 import CustomFieldsRenderer from '@/components/shared/CustomFieldsRenderer';
 import RelatedRecords from '@/components/crm/RelatedRecords';
+import { recordActionsFor } from '@/lib/crm/recordActions';
 import PersonSelect from '@/components/shared/PersonSelect';
 import DateField from '@/components/ui/date-field';
 import { validateCustomFields } from '@/lib/customFields';
@@ -30,6 +32,7 @@ export default function CrmRecordSheet({
 }) {
   const [form, setForm] = useState(() => ({ ...defaultsFor(schema), ...(record || {}) }));
   const [errors, setErrors] = useState({});
+  const handOffs = recordActionsFor(moduleId, record);
 
   const set = (key, value) => {
     setForm((f) => ({ ...f, [key]: value }));
@@ -158,6 +161,24 @@ export default function CrmRecordSheet({
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {schema.fields.map(renderField)}
           </div>
+
+          {/* Hand-offs to another module — only those this build can serve. */}
+          {record?.id && moduleId && handOffs.length > 0 && (
+            <div className="pt-3 mt-3 border-t border-border space-y-2">
+              <p className="text-xs font-semibold text-muted-foreground">המשך תהליך</p>
+              {handOffs.map((action) => (
+                <div key={action.key} className="space-y-1">
+                  <Button asChild variant="outline" size="sm" className="rounded-full h-8 px-3.5 text-xs gap-1.5">
+                    <Link to={action.to(record)}>
+                      <action.icon className="w-3.5 h-3.5 flex-shrink-0" />
+                      {action.label}
+                    </Link>
+                  </Button>
+                  {action.hint && <p className="text-[10px] text-muted-foreground">{action.hint}</p>}
+                </div>
+              ))}
+            </div>
+          )}
 
           {/* Links out to related records — never merged into this form. */}
           {record?.id && moduleId && <RelatedRecords moduleId={moduleId} record={record} />}

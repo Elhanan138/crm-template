@@ -109,7 +109,7 @@ export default function Profile() {
   if (isViewingOther) {
     if (loadingOther) {
       return (
-        <div dir="rtl" className="max-w-[1600px] mx-auto px-4 sm:px-6">
+        <div dir="rtl">
           <PageHeader icon={UserIcon} title="פרופיל עובד" back />
           <div className="mt-4">
             <ListSkeleton count={3} />
@@ -120,7 +120,7 @@ export default function Profile() {
 
     if (!otherMember) {
       return (
-        <div dir="rtl" className="max-w-[1600px] mx-auto px-4 sm:px-6">
+        <div dir="rtl">
           <PageHeader icon={UserIcon} title="פרופיל עובד" back />
           <div className="mt-4">
             <EmptyState icon={UserIcon} title="המשתמש לא נמצא" />
@@ -133,7 +133,7 @@ export default function Profile() {
     const otherEmail = cleanEmail(otherMember.email);
 
     return (
-      <div dir="rtl" className="max-w-[1600px] mx-auto px-4 sm:px-6">
+      <div dir="rtl">
         <PageHeader icon={UserIcon} title={`הפרופיל של ${otherName}`} back />
 
         <div className="mt-4">
@@ -144,7 +144,7 @@ export default function Profile() {
   }
 
   return (
-    <div dir="rtl" className="max-w-[1600px] mx-auto px-4 sm:px-6">
+    <div dir="rtl">
       <PageHeader icon={UserIcon} title="הפרופיל שלי" subtitle="פרטי החשבון, ההרשאות והדוחות האישיים שלך" back />
 
       <div className="mt-4">

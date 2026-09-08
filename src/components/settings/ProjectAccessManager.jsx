@@ -189,7 +189,7 @@ export default function ProjectAccessManager({ members }) {
    <AlertDialog open={syncDialog} onOpenChange={setSyncDialog}>
     <AlertDialogContent className="rounded-lg"dir="rtl">
      <AlertDialogHeader>
-      <AlertDialogTitle className="">סנכרון הרשאות מחדש</AlertDialogTitle>
+      <AlertDialogTitle>סנכרון הרשאות מחדש</AlertDialogTitle>
       <AlertDialogDescription>הפעולה תבנה מחדש את כל מערכי ההרשאות בכל הפרויקטים והרשומות מתוך רשומות ההרשאה הנוכחיות. להמשיך?</AlertDialogDescription>
      </AlertDialogHeader>
      <AlertDialogFooter className="flex-row-reverse gap-2">

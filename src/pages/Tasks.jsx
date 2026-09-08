@@ -130,7 +130,7 @@ export default function Tasks() {
 
 
   return (
-  <div dir="rtl" className="max-w-[1600px] mx-auto px-4 sm:px-6">
+  <div dir="rtl">
    <PageHeader
     icon={NAV_ICONS.tasks}
     title="משימות"

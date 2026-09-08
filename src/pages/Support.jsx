@@ -58,7 +58,7 @@ export default function Support() {
     : 'מרכז ניהול פניות, תקלות ושיפורים';
 
   return (
-     <div dir="rtl" className="max-w-[1600px] mx-auto px-4 sm:px-6">
+     <div dir="rtl">
        {/* Header */}
        <PageHeader
          icon={NAV_ICONS.support}

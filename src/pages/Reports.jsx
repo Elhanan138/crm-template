@@ -105,7 +105,7 @@ export default function Reports() {
 
   if (loadingProjects) {
     return (
-      <div dir="rtl" className="max-w-[1600px] mx-auto px-4 sm:px-6">
+      <div dir="rtl">
         <PageHeader icon={BarChart3} title="מחולל דוחות" subtitle="ניתוח נתונים מקיף מכל המערכת" back />
         <div className="flex items-center justify-center h-64">
           <div className="w-6 h-6 border-2 border-accent border-t-primary rounded-full animate-spin" />
@@ -116,7 +116,7 @@ export default function Reports() {
 
   if (selectableSources.length === 0) {
     return (
-      <div dir="rtl" className="max-w-[1600px] mx-auto px-4 sm:px-6">
+      <div dir="rtl">
         <PageHeader icon={BarChart3} title="מחולל דוחות" subtitle="ניתוח נתונים מקיף מכל המערכת" back />
         <EmptyState icon={BarChart3} title="אין מקורות נתונים" description="לא נכלל בבנייה הזו מודול שניתן להפיק ממנו דוח." />
       </div>
@@ -124,7 +124,7 @@ export default function Reports() {
   }
 
   return (
-    <div dir="rtl" className="max-w-[1600px] mx-auto px-4 sm:px-6">
+    <div dir="rtl">
       <PageHeader
         icon={BarChart3}
         title="מחולל דוחות"

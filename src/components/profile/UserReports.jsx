@@ -155,7 +155,7 @@ export default function UserReports() {
           visible
            ? 'bg-accent text-accent-foreground'
            : 'bg-muted border-border text-muted-foreground opacity-60'
-         } ${r.alwaysVisible ? 'cursor-default' : 'cursor-pointer hover:bg-primary/10'}`}
+         } ${r.alwaysVisible ? 'cursor-default' : 'cursor-pointer hover:bg-accent'}`}
         >
          <Icon className="w-3.5 h-3.5 flex-shrink-0"/>
          <span className="truncate">{r.label}</span>

@@ -56,7 +56,7 @@ export default function Forecast() {
   const maxGross = Math.max(...model.byStage.map((r) => r.gross), 1);
 
   return (
-    <div dir="rtl" className="max-w-[1600px] mx-auto px-4 sm:px-6 pb-10">
+    <div dir="rtl" className="pb-10">
       <PageHeader
         icon={FORECAST_META.icon}
         title={FORECAST_META.title}

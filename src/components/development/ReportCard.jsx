@@ -69,7 +69,7 @@ export default function ReportCard({ title, icon: Icon, data, chartType = 'pie',
     <>
      <button
       onClick={() => setExpanded(!expanded)}
-      className="w-full flex items-center justify-center gap-1.5 py-2 border-t border-border text-xs font-medium text-muted-foreground hover:text-primary hover:bg-primary/5 transition-colors"
+      className="w-full flex items-center justify-center gap-1.5 py-2 border-t border-border text-xs font-medium text-muted-foreground hover:text-primary hover:bg-accent transition-colors"
      >
       {expanded ? 'סגור פירוט' : 'פירוט'}
       <ChevronDown className={`w-3.5 h-3.5 transition-transform ${expanded ? 'rotate-180' : ''}`} />

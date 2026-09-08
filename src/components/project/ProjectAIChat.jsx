@@ -217,7 +217,7 @@ export default function ProjectAIChat({ project, teamMembers = [] }) {
     {/* Header */}
     <div className="flex items-center justify-between px-3 py-2.5 border-b border-border bg-accent flex-shrink-0">
      <div className="flex items-center gap-1.5">
-      <button onClick={() => setShowHistory(s => !s)} className={`w-7 h-7 rounded-full flex items-center justify-center transition-colors ${showHistory ? 'bg-primary/10 text-primary' : 'hover:bg-muted text-muted-foreground'}`} title="היסטוריית שיחות">
+      <button onClick={() => setShowHistory(s => !s)} className={`w-7 h-7 rounded-full flex items-center justify-center transition-colors ${showHistory ? 'bg-accent text-primary' : 'hover:bg-muted text-muted-foreground'}`} title="היסטוריית שיחות">
        <History className="w-4 h-4"/>
       </button>
       <div className="flex items-center gap-2">
@@ -258,7 +258,7 @@ export default function ProjectAIChat({ project, teamMembers = [] }) {
        className="overflow-hidden border-b border-border bg-muted/30"
       >
        <div className="p-2 space-y-1 max-h-52 overflow-y-auto">
-        <button onClick={startNewChat} className="flex items-center gap-2 w-full px-2.5 py-2 rounded-lg text-xs font-semibold text-primary hover:bg-primary/10 transition-colors">
+        <button onClick={startNewChat} className="flex items-center gap-2 w-full px-2.5 py-2 rounded-lg text-xs font-semibold text-primary hover:bg-accent transition-colors">
          <Plus className="w-3.5 h-3.5"/>
          שיחה חדשה
         </button>
@@ -269,7 +269,7 @@ export default function ProjectAIChat({ project, teamMembers = [] }) {
           <div
            key={c.id}
            onClick={() => selectConversation(c.id)}
-           className={`flex items-center gap-2 px-2.5 py-2 rounded-lg cursor-pointer transition-colors group ${c.id === convId ? 'bg-primary/10' : 'hover:bg-muted'}`}
+           className={`flex items-center gap-2 px-2.5 py-2 rounded-lg cursor-pointer transition-colors group ${c.id === convId ? 'bg-accent' : 'hover:bg-muted'}`}
           >
            <MessageSquare className={`w-3.5 h-3.5 flex-shrink-0 ${c.id === convId ? 'text-primary' : 'text-muted-foreground'}`} />
            <div className="flex-1 min-w-0">

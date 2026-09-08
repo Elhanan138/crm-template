@@ -9,6 +9,7 @@ import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import { LogoProvider } from '@/lib/LogoContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 import AppLayout from '@/components/layout/AppLayout';
+import CapabilityGate from '@/components/layout/CapabilityGate';
 import ErrorBoundary from '@/components/shared/ErrorBoundary';
 import { ALL_ROUTES, FirstTimeSetupComponent } from '@/lib/moduleRegistry';
 import BrandMark from '@/components/shared/BrandMark';
@@ -40,8 +41,22 @@ const AuthenticatedApp = () => {
       <Shell>
         <Routes>
           <Route element={<ErrorBoundary><AppLayout /></ErrorBoundary>}>
-            {ALL_ROUTES.map(({ path, Component }) => (
-              <Route key={path} path={path} element={<Component />} />
+            {ALL_ROUTES.map(({ path, Component, moduleId, workspaceId }) => (
+              <Route
+                key={path}
+                path={path}
+                element={
+                  // Settings is never gated: it is where the switches live, and
+                  // closing it would leave no way to reopen anything.
+                  moduleId && moduleId !== 'settings' ? (
+                    <CapabilityGate moduleId={moduleId} workspaceId={workspaceId}>
+                      <Component />
+                    </CapabilityGate>
+                  ) : (
+                    <Component />
+                  )
+                }
+              />
             ))}
           </Route>
           <Route path="*" element={<PageNotFound />} />

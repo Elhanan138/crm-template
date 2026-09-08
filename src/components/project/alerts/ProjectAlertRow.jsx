@@ -63,7 +63,7 @@ export default function ProjectAlertRow({ alert, recipientLabel, onEdit, onDelet
             <button
               type="button"
               onClick={(e) => { e.stopPropagation(); onReactivate(alert); }}
-              className="h-7 px-2.5 rounded-full flex items-center gap-1 text-xs font-medium text-primary hover:bg-primary/10 transition-colors"
+              className="h-7 px-2.5 rounded-full flex items-center gap-1 text-xs font-medium text-primary hover:bg-accent transition-colors"
             >
               <RotateCw className="w-3 h-3" />
               הפעל מחדש

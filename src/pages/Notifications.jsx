@@ -101,7 +101,7 @@ export default function Notifications() {
               </div>
               <div className="flex items-center gap-1 flex-shrink-0">
                 {!n.is_read && (
-                  <button onClick={() => markReadMutation.mutate(n.id)} className="w-7 h-7 rounded-full hover:bg-primary/10 flex items-center justify-center transition-colors" title="סמן כנקרא">
+                  <button onClick={() => markReadMutation.mutate(n.id)} className="w-7 h-7 rounded-full hover:bg-accent flex items-center justify-center transition-colors" title="סמן כנקרא">
                     <Check className="w-3.5 h-3.5 text-primary" />
                   </button>
                 )}

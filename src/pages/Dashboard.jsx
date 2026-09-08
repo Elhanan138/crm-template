@@ -230,7 +230,7 @@ export default function Dashboard() {
  });
  if (isLoading || aclLoading) {
   return (
-   <div dir="rtl"className="max-w-[1600px] mx-auto px-4 sm:px-6 space-y-6">
+   <div dir="rtl"className="space-y-6">
     <div className="flex items-center gap-3">
      <Skeleton className="w-10 h-10 rounded-lg"/>
      <Skeleton className="h-8 w-32"/>
@@ -263,7 +263,7 @@ export default function Dashboard() {
  const todayStr = format(new Date(), "EEEE, d 'ב'MMMM", { locale: he });
 
  return (
-  <div dir="rtl"className="max-w-[1600px] mx-auto px-4 sm:px-6">
+  <div dir="rtl">
    <div className="flex items-center justify-between gap-3 mb-6 sm:mb-8">
     <div className="flex items-center gap-3 min-w-0">
      <img src={logoUrl} alt={systemName} className="w-10 h-10 rounded-lg object-contain flex-shrink-0"/>

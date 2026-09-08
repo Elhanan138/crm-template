@@ -4,6 +4,7 @@
 
 import { OWNER_EMAIL } from '@/lib/owner';
 import { slugify } from '@/lib/projectSlug';
+import { runAutomations } from './automationRunner';
 
 const STORAGE_PREFIX = 'oss_data_';
 const FULL = ['full'];
@@ -52,7 +53,9 @@ function entityUpdate(name, id, data) {
   const items = getCollection(name);
   const idx = items.findIndex(item => item.id === id);
   if (idx >= 0) {
-    items[idx] = { ...items[idx], ...data };
+    // Automations answer "what moved since the last run", so an update has to
+    // leave a timestamp. A caller that supplies its own keeps it.
+    items[idx] = { ...items[idx], ...data, updated_date: data.updated_date || new Date().toISOString() };
     setCollection(name, items);
     return items[idx];
   }
@@ -287,6 +290,13 @@ export function invokeLocalFunction(name, body = {}) {
       return linkMeetingToProject(body);
     case 'syncDirectory':
       return syncDirectory(body);
+    case 'runAutomations':
+      return runAutomationRules(body);
+
+    // The client heartbeat. It used to fall through to the default warning while
+    // every automation rule in the system sat unexecuted.
+    case 'runAlertsIfDue':
+      return runAutomationRules(body);
 
     // No-ops: nothing scheduled runs in a browser-only build.
     case 'processProjectAlerts':
@@ -1102,4 +1112,27 @@ function syncDirectory(body = {}) {
     return { data: { preview: members, added: 0, updated: 0, total: members.length } };
   }
   return { data: { success: true, added: 0, updated: 0, total: members.length } };
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Automations. The rules are data; the engine lives in ./automationRunner.js so
+// that it can be tested without a browser and moved to a server unchanged.
+// ─────────────────────────────────────────────────────────────────────────────
+function runAutomationRules(body = {}) {
+  try {
+    const summary = runAutomations(
+      {
+        getCollection,
+        setCollection,
+        createRecord: entityCreate,
+        updateRecord: entityUpdate,
+      },
+      { manualRuleId: body.rule_id || null }
+    );
+    return { data: { success: true, ...summary } };
+  } catch (error) {
+    // A broken rule must never take the heartbeat — and with it the whole app
+    // shell — down with it.
+    return { data: { success: false, error: error?.message || 'הרצת האוטומציות נכשלה' } };
+  }
 }

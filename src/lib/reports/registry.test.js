@@ -108,17 +108,30 @@ describe('dashboard widgets follow the modules', () => {
 });
 
 describe('module relations', () => {
+  // Modules that hold records without a schema take part in the graph too.
+  // Their linking fields are listed here so that a typo in a relation still
+  // fails the suite instead of producing a link that silently matches nothing.
+  const NON_SCHEMA_FIELDS = {
+    projects: ['id', 'client_name', 'project_manager', 'current_liaison'],
+    tasks: ['id', 'project_id', 'assigned_to'],
+  };
+
+  const fieldsOf = (moduleId) =>
+    CRM_SCHEMAS[moduleId]
+      ? CRM_SCHEMAS[moduleId].fields.map((f) => f.key).concat('id')
+      : NON_SCHEMA_FIELDS[moduleId];
+
   it('every relation points at real modules and real fields', async () => {
-    const { RELATIONS } = await import('@/lib/crm/relations');
+    const { RELATIONS, entityForModule } = await import('@/lib/crm/relations');
     const { MODULES, MODULE_IDS } = await import('@/lib/modules');
     for (const rel of RELATIONS) {
       expect(MODULE_IDS, `unknown module ${rel.from}`).toContain(rel.from);
       expect(MODULE_IDS, `unknown module ${rel.to}`).toContain(rel.to);
       expect(MODULES[rel.to].navPath, `${rel.to} has no path`).toBeTruthy();
-      const fromKeys = CRM_SCHEMAS[rel.from].fields.map((f) => f.key);
-      const toKeys = CRM_SCHEMAS[rel.to].fields.map((f) => f.key);
-      expect(fromKeys, `${rel.from}.${rel.fromField}`).toContain(rel.fromField);
-      expect(toKeys, `${rel.to}.${rel.toField}`).toContain(rel.toField);
+      expect(entityForModule(rel.to), `${rel.to} has no entity`).toBeTruthy();
+      expect(['account', 'exact', 'id'], `${rel.from}→${rel.to} match mode`).toContain(rel.match);
+      expect(fieldsOf(rel.from), `${rel.from}.${rel.fromField}`).toContain(rel.fromField);
+      expect(fieldsOf(rel.to), `${rel.to}.${rel.toField}`).toContain(rel.toField);
     }
   });
 

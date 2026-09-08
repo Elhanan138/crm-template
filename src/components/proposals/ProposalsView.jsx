@@ -488,7 +488,7 @@ export default function ProposalsView({ projectId }) {
 
   if (isLoading) {
     return (
-      <div dir="rtl" className="max-w-[1600px] mx-auto px-4 sm:px-6">
+      <div dir="rtl">
         <PageHeader icon={FileText} title="הצעות מחיר" subtitle="טוען..." />
         <CardSkeleton count={4} />
       </div>
@@ -496,7 +496,7 @@ export default function ProposalsView({ projectId }) {
   }
 
   return (
-    <div dir="rtl" className={projectId ? '' : 'max-w-[1600px] mx-auto px-4 sm:px-6'}>
+    <div dir="rtl">
       {!projectId ? (
         <PageHeader
           icon={FileText}

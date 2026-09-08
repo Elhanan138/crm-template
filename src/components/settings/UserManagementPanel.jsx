@@ -424,7 +424,7 @@ function MemberEditDrawer({ member, members = [], onClose, onDelete }) {
    <AlertDialog open={adminConfirm} onOpenChange={setAdminConfirm}>
     <AlertDialogContent className="rounded-lg"dir="rtl">
      <AlertDialogHeader>
-      <AlertDialogTitle className="">הפיכת משתמש לאדמין</AlertDialogTitle>
+      <AlertDialogTitle>הפיכת משתמש לאדמין</AlertDialogTitle>
       <AlertDialogDescription>המשתמש יקבל גישה מלאה לכל הפרויקטים והנתונים במערכת</AlertDialogDescription>
      </AlertDialogHeader>
      <AlertDialogFooter className="flex-row-reverse gap-2">

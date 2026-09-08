@@ -176,7 +176,7 @@ export default function ProjectDocuments({ project, bare = false }) {
       disabled={uploading}
       className="absolute inset-0 opacity-0 w-full h-full cursor-pointer"
      />
-     <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary/8 text-primary text-[11px] font-semibold hover:bg-primary/15 transition-all">
+     <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-accent text-primary text-[11px] font-semibold hover:bg-muted transition-all">
       {uploading ? <Loader2 className="w-3.5 h-3.5 animate-spin"/> : <Upload className="w-3.5 h-3.5"/>}
       {uploading ? 'מעלה...' : 'העלה'}
      </div>
@@ -216,7 +216,7 @@ export default function ProjectDocuments({ project, bare = false }) {
               autoFocus
               className="h-6 text-xs px-2 py-0"
              />
-             <button onClick={() => handleRename(i)} className="w-5 h-5 rounded-full flex items-center justify-center text-primary hover:bg-primary/10"title="שמור">
+             <button onClick={() => handleRename(i)} className="w-5 h-5 rounded-full flex items-center justify-center text-primary hover:bg-accent"title="שמור">
               <Check className="w-3 h-3"/>
              </button>
              <button onClick={() => setEditingIndex(null)} className="w-5 h-5 rounded-full flex items-center justify-center text-muted-foreground hover:bg-muted"title="בטל">
@@ -266,7 +266,7 @@ export default function ProjectDocuments({ project, bare = false }) {
              )}
              <button
               onClick={() => { setEditingIndex(i); setEditName(getFileName(doc)); }}
-              className="w-5 h-5 rounded-full flex items-center justify-center text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors opacity-0 group-hover/doc:opacity-100"
+              className="w-5 h-5 rounded-full flex items-center justify-center text-muted-foreground hover:text-primary hover:bg-accent transition-colors opacity-0 group-hover/doc:opacity-100"
               title="ערוך שם"
              >
               <Pencil className="w-3 h-3"/>

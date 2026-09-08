@@ -316,7 +316,7 @@ export default function ProjectDetail() {
  }
 
  return (
-  <div dir="rtl" className="max-w-[1600px] mx-auto px-4 sm:px-6">
+  <div dir="rtl">
    {/* Back */}
    <BackButton className="mb-6"/>
 
@@ -333,7 +333,7 @@ export default function ProjectDetail() {
     ) : (
      <div
       onClick={() => canAccess && fileInputRef.current?.click()}
-      className={`w-14 h-14 sm:w-[64px] sm:h-[64px] rounded-lg border border-border bg-primary/5 flex items-center justify-center flex-shrink-0 ${uploadingImage ? 'opacity-50' : 'cursor-pointer hover:bg-primary/10'} transition-colors`}
+      className={`w-14 h-14 sm:w-[64px] sm:h-[64px] rounded-lg border border-border bg-accent flex items-center justify-center flex-shrink-0 ${uploadingImage ? 'opacity-50' : 'cursor-pointer hover:bg-accent'} transition-colors`}
      >
       {uploadingImage ? (
        <Loader2 className="w-5 h-5 text-primary animate-spin"/>

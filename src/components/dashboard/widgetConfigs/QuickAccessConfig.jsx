@@ -32,7 +32,7 @@ export default function QuickAccessConfig({ projects, pinnedIds = [], onSave }) 
               key={p.id}
               onClick={() => toggle(p.id)}
               disabled={disabled}
-              className={`w-full flex items-center gap-2.5 rounded-lg border px-2.5 py-1.5 text-right transition-all ${active ? 'bg-primary/10 border-primary/40' : disabled ? 'bg-muted/30 border-border opacity-50 cursor-not-allowed' : 'bg-card border-border hover:border-primary/30'}`}
+              className={`w-full flex items-center gap-2.5 rounded-lg border px-2.5 py-1.5 text-right transition-all ${active ? 'bg-accent border-primary/40' : disabled ? 'bg-muted/30 border-border opacity-50 cursor-not-allowed' : 'bg-card border-border hover:border-primary/30'}`}
             >
               <div className={`w-4 h-4 rounded-md border-2 flex items-center justify-center flex-shrink-0 ${active ? 'bg-primary border-primary' : 'border-muted-foreground/30'}`}>
                 {active && <Check className="w-2.5 h-2.5 text-primary-foreground" />}

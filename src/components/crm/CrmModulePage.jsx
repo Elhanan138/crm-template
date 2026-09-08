@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -6,7 +7,7 @@ import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { Plus, Search, Pencil, Trash2, Lock } from 'lucide-react';
+import { Plus, Search, Pencil, Trash2, Lock, ShieldOff } from 'lucide-react';
 import PageHeader from '@/components/shared/PageHeader';
 import EmptyState from '@/components/shared/EmptyState';
 import CardSkeleton from '@/components/shared/CardSkeleton';
@@ -33,10 +34,14 @@ export function StatusPill({ meta }) {
 export default function CrmModulePage({ schema, moduleId, renderAbove, extraActions, onOpenRecord, EditorComponent }) {
   const {
     records, isLoading, relations, lookups, customFields,
-    save, remove, canEdit, canDelete,
+    save, remove, canEdit, canDelete, isRealAdmin, hiddenCount, scope,
   } = useCrmRecords(schema);
 
-  const [search, setSearch] = useState('');
+  // Links from other modules arrive filtered: ?q= seeds the search box, and
+  // ?recordId= opens one record straight away. A related-records link therefore
+  // lands on the rows it promised, not on the whole module.
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [search, setSearch] = useState(() => searchParams.get('q') || '');
   const [filters, setFilters] = useState({});
   const [sheetRecord, setSheetRecord] = useState(null);
   const [sheetOpen, setSheetOpen] = useState(false);
@@ -55,6 +60,18 @@ export default function CrmModulePage({ schema, moduleId, renderAbove, extraActi
   };
   const openEditor = (record) => { setSheetRecord(record); setSheetOpen(true); };
 
+  // Open a record named in the URL once it has loaded, then drop the param so
+  // a refresh or a back-navigation does not reopen the sheet.
+  const requestedId = searchParams.get('recordId');
+  useEffect(() => {
+    if (!requestedId || isLoading) return;
+    const target = records.find((r) => r.id === requestedId);
+    if (target) openRecord(target);
+    const next = new URLSearchParams(searchParams);
+    next.delete('recordId');
+    setSearchParams(next, { replace: true });
+  }, [requestedId, isLoading, records]);
+
   const handleSave = (form) => {
     save.mutate(form, { onSuccess: () => setSheetOpen(false) });
   };
@@ -69,22 +86,37 @@ export default function CrmModulePage({ schema, moduleId, renderAbove, extraActi
     </span>;
   };
 
+  // A module the viewer may not read at all says so, instead of rendering an
+  // empty list with a create button that would produce invisible records.
+  const restricted = scope === 'admin' && !isRealAdmin;
+
   return (
-    <div dir="rtl" className="max-w-[1600px] mx-auto px-4 sm:px-6 pb-10">
+    <div dir="rtl" className="pb-10">
       <PageHeader
         icon={Icon}
         title={schema.title}
         subtitle={schema.subtitle}
         actions={
-          <div className="flex items-center gap-2">
-            {extraActions}
-            <Button onClick={openNew} className="rounded-full h-9 px-4 text-sm gap-1.5">
-              <Plus className="w-4 h-4" /> {schema.singular} חדש
-            </Button>
-          </div>
+          restricted ? null : (
+            <div className="flex items-center gap-2">
+              {extraActions}
+              <Button onClick={openNew} className="rounded-full h-9 px-4 text-sm gap-1.5">
+                <Plus className="w-4 h-4" /> {schema.singular} חדש
+              </Button>
+            </div>
+          )
         }
       />
 
+      {restricted && (
+        <EmptyState
+          icon={ShieldOff}
+          title="אין לך גישה למודול הזה"
+          description={`${schema.title} זמינים למנהלי מערכת בלבד. פנה למנהל אם נדרשת לך גישה.`}
+        />
+      )}
+
+      {!restricted && (<>
       {renderAbove?.({ records, lookups, openRecord })}
 
       {/* Search + filters — stacks on mobile, one row from sm up */}
@@ -199,9 +231,11 @@ export default function CrmModulePage({ schema, moduleId, renderAbove, extraActi
 
           <p className="text-[11px] text-muted-foreground mt-3">
             {visible.length} מתוך {records.length}
+            {hiddenCount > 0 && ` · ${hiddenCount} רשומות מוסתרות לפי הרשאות`}
           </p>
         </>
       )}
+      </>)}
 
       {sheetOpen && EditorComponent && (
         <EditorComponent

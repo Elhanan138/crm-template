@@ -179,7 +179,7 @@ export default function ClientHighlightsSection({ projectId, memberEmails }) {
     <button
      type="button"
      onClick={() => setDialog({ open: true, highlight: null })}
-     className="inline-flex items-center gap-1 text-xs font-medium text-primary hover:text-primary/80 transition-colors"
+     className="inline-flex items-center gap-1 text-xs font-medium text-primary hover:underline transition-colors"
     >
      <Plus className="w-3.5 h-3.5"/> הוסף מידע
     </button>

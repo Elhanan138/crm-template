@@ -113,7 +113,7 @@ export default function Sidebar({ collapsed, onToggle }) {
      isCollapsed ? 'justify-center px-2 py-2.5' : 'px-3 py-2.5'
     } ${
      active
-      ? 'bg-primary/8 text-primary font-semibold'
+      ? 'bg-accent text-primary font-semibold'
       : 'text-foreground/70 font-medium hover:bg-muted/70 hover:text-foreground'
     }`}
    >

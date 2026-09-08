@@ -1,7 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { api } from '@/api/client';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Loader2, Save } from 'lucide-react';
 import { toast } from 'sonner';
@@ -15,6 +15,10 @@ import { sortFields, validateCustomFields } from '@/lib/customFields';
 
 export default function ProjectWizard() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  // Arriving from a won lead: the deal's details seed the wizard instead of
+  // being retyped, and the lead is closed out once the project exists.
+  const fromLeadId = searchParams.get('lead_id') || '';
   const queryClient = useQueryClient();
   const { user } = useAuth();
   const people = useSelectablePeople();
@@ -29,9 +33,9 @@ export default function ProjectWizard() {
   const submittingRef = useRef(false);
 
   const [form, setForm] = useState({
-    client_name: '',
+    client_name: searchParams.get('client_name') || '',
     image_url: '',
-    contract_value: '',
+    contract_value: searchParams.get('contract_value') || '',
     pricing_model: '',
     project_manager: '',
     current_liaison: '',
@@ -116,8 +120,18 @@ export default function ProjectWizard() {
       }
       return result;
     },
-    onSuccess: (result) => {
+    onSuccess: async (result) => {
       submittingRef.current = false;
+      // Close the loop on the originating lead. Failing to update it must not
+      // fail the project that was already created — it is reported, not thrown.
+      if (fromLeadId) {
+        try {
+          await api.entities.Lead.update(fromLeadId, { stage: 'won', converted_project_id: result.project_id });
+          queryClient.invalidateQueries({ queryKey: ['crm', 'Lead'] });
+        } catch {
+          toast.warning('הפרויקט נוצר, אך עדכון הליד נכשל');
+        }
+      }
       queryClient.invalidateQueries({ queryKey: ['projects'] });
       queryClient.invalidateQueries({ queryKey: ['projectsCreatorMeta'] });
       queryClient.invalidateQueries({ queryKey: ['projectPermissions'] });

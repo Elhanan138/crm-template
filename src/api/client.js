@@ -128,7 +128,9 @@ function createEntityHandler(name) {
       const items = getCollection(name);
       const idx = items.findIndex(item => item.id === id);
       if (idx >= 0) {
-        items[idx] = { ...items[idx], ...data };
+        // Every write leaves a timestamp: the automation runner decides what to
+        // act on by asking which records moved since it last ran.
+        items[idx] = { ...items[idx], ...data, updated_date: data.updated_date || new Date().toISOString() };
         setCollection(name, items);
         return items[idx];
       }
@@ -264,7 +266,6 @@ const localClient = {
       // implementation — that is what silently discarded every settings toggle.
       const defaults = {
         ensureAccess: { data: { allowed: true } },
-        runAlertsIfDue: { data: { success: true } },
       };
       if (defaults[name]) return defaults[name];
       // Functions with full local implementations

@@ -94,7 +94,7 @@ export default function QAManagementSection({ projectId }) {
             <span className="text-[10px] text-muted-foreground bg-muted px-1.5 py-0.5 rounded-full">{savedQAs.length}</span>
           )}
         </div>
-        <Button variant="ghost" size="sm" onClick={openAdd} className="h-7 px-2.5 text-[11px] gap-1 text-primary hover:bg-primary/10">
+        <Button variant="ghost" size="sm" onClick={openAdd} className="h-7 px-2.5 text-[11px] gap-1 text-primary hover:bg-accent">
           <Plus className="w-3.5 h-3.5" /> הוסף
         </Button>
       </div>
@@ -115,7 +115,7 @@ export default function QAManagementSection({ projectId }) {
                       <Zap className="w-2.5 h-2.5" /> מטמון
                     </span>
                   )}
-                  <button onClick={() => openEdit(qa)} className="w-6 h-6 rounded-full hover:bg-primary/10 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all">
+                  <button onClick={() => openEdit(qa)} className="w-6 h-6 rounded-full hover:bg-accent flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all">
                     <Pencil className="w-3 h-3 text-muted-foreground hover:text-primary" />
                   </button>
                   <button onClick={() => handleDelete(qa)} className="w-6 h-6 rounded-full hover:bg-destructive/10 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all">

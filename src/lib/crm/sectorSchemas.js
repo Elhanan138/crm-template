@@ -101,6 +101,7 @@ export const BILLING_CYCLES = [
 export const SECTOR_SCHEMAS = {
   employees: {
     entity: 'Employee',
+    scope: 'admin',
     icon: Users,
     title: 'עובדים',
     subtitle: 'מצבת כוח האדם, תפקידים ומבנה ארגוני',
@@ -135,6 +136,7 @@ export const SECTOR_SCHEMAS = {
 
   recruiting: {
     entity: 'Candidate',
+    scope: 'admin',
     icon: UserPlus,
     title: 'גיוס',
     subtitle: 'מועמדים, משרות ושלבי ראיון',
@@ -170,6 +172,8 @@ export const SECTOR_SCHEMAS = {
 
   training: {
     entity: 'Enrollment',
+    scope: 'own',
+    mineByName: ['participant'],
     icon: GraduationCap,
     title: 'הכשרות',
     subtitle: 'קורסים, הקצאות והשלמות',
@@ -401,6 +405,7 @@ export const SECTOR_SCHEMAS = {
 
   subscriptions: {
     entity: 'Subscription',
+    scope: 'own',
     icon: Repeat,
     title: 'מנויים',
     subtitle: 'הכנסה חוזרת, חידושים ונטישה',

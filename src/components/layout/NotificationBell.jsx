@@ -159,7 +159,7 @@ export default function NotificationBell({ userEmail }) {
      unread.slice().reverse().map((n) => (
       <div
        key={n.id}
-       className="group w-full flex items-start gap-2 px-4 py-3 border-b border-border/60 last:border-0 transition-colors bg-primary/5 hover:bg-primary/10"
+       className="group w-full flex items-start gap-2 px-4 py-3 border-b border-border/60 last:border-0 transition-colors bg-accent hover:bg-muted"
       >
        <button
         onClick={() => handleOpenNotification(n)}
@@ -182,7 +182,7 @@ export default function NotificationBell({ userEmail }) {
         <div className="flex items-center gap-0.5">
          <button
           onClick={() => markReadMutation.mutate(n.id)}
-          className="w-6 h-6 rounded-full hover:bg-primary/10 flex items-center justify-center transition-colors"
+          className="w-6 h-6 rounded-full hover:bg-accent flex items-center justify-center transition-colors"
           title="סמן כנקרא"
          >
           <Check className="w-3.5 h-3.5 text-primary"/>
@@ -204,7 +204,7 @@ export default function NotificationBell({ userEmail }) {
    {/* View all notifications button */}
    <button
     onClick={() => { setOpen(false); navigate('/notifications'); }}
-    className="flex items-center justify-center gap-1.5 py-2.5 border-t border-border bg-muted/20 text-xs font-semibold text-primary hover:bg-primary/5 transition-colors flex-shrink-0"
+    className="flex items-center justify-center gap-1.5 py-2.5 border-t border-border bg-muted/20 text-xs font-semibold text-primary hover:bg-accent transition-colors flex-shrink-0"
    >
     כל ההתראות
     <ChevronLeft className="w-3.5 h-3.5"/>

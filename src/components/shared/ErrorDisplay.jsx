@@ -106,7 +106,7 @@ export default function ErrorDisplay({ code = 'ERR_UNKNOWN_500', context = {}, c
        onClick={handleOpenTicket}
        variant="outline"
        size="sm"
-       className="h-8 rounded-full text-xs gap-1.5 border-primary/30 text-primary hover:bg-primary/10"
+       className="h-8 rounded-full text-xs gap-1.5 border-primary/30 text-primary hover:bg-accent"
       >
        <Send className="w-3.5 h-3.5"/>
        שלח כפנייה

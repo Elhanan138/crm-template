@@ -10,10 +10,12 @@ const loaderFor = (page) => pageLoaders[`/src/pages/${page}.jsx`];
 
 export const hasPage = (page) => Boolean(loaderFor(page));
 
-function buildRoutes(defs) {
+// `meta` carries the module and workspace a route belongs to, so the router can
+// enforce the capability switches instead of only the sidebar hiding the link.
+function buildRoutes(defs, meta = {}) {
   return defs
     .filter((r) => hasPage(r.page))
-    .map((r) => ({ path: r.path, page: r.page, Component: lazy(loaderFor(r.page)) }));
+    .map((r) => ({ path: r.path, page: r.page, Component: lazy(loaderFor(r.page)), ...meta }));
 }
 
 /** Module ids whose pages are all present in this build. */
@@ -21,7 +23,9 @@ export const ACTIVE_MODULE_IDS = MODULE_IDS.filter((id) =>
   MODULES[id].routes.some((r) => hasPage(r.page))
 );
 
-export const MODULE_ROUTES = ACTIVE_MODULE_IDS.flatMap((id) => buildRoutes(MODULES[id].routes));
+export const MODULE_ROUTES = ACTIVE_MODULE_IDS.flatMap((id) =>
+  buildRoutes(MODULES[id].routes, { moduleId: id, workspaceId: MODULES[id].parent || null })
+);
 
 export const CORE_APP_ROUTES = buildRoutes(CORE_ROUTES);
 

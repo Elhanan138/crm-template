@@ -3,6 +3,7 @@ import { Outlet, useLocation } from 'react-router-dom';
 import { MotionPage } from '@/components/shared/motion';
 import Sidebar from './Sidebar';
 import TopBar from './TopBar';
+import WorkspaceTabs from './WorkspaceTabs';
 import AccessDenied from './AccessDenied';
 import AnnouncementPopupModal from './AnnouncementPopupModal';
 import { Suspense } from 'react';
@@ -117,6 +118,7 @@ function AppLayoutInner() {
       <main className={`min-h-screen pt-16 md:pt-0 transition-all duration-300 ${collapsed ? 'md:ms-16' : 'md:ms-[174px]'}`}>
         <TopBar collapsed={collapsed} onToggle={() => setCollapsed(c => !c)} />
         <div className={`mx-auto py-6 md:py-8 ${wide ? 'max-w-none px-3 md:px-4' : 'max-w-[1600px] px-4 md:px-8'}`}>
+          <WorkspaceTabs />
           <MotionPage key={location.pathname}>
             <Outlet />
           </MotionPage>

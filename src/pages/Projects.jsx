@@ -142,7 +142,7 @@ export default function Projects() {
 
   if (isLoading || aclLoading) {
    return (
-    <div dir="rtl" className="max-w-[1600px] mx-auto px-4 sm:px-6">
+    <div dir="rtl">
      <PageHeader icon={CubeIcon} title="פרויקטים"subtitle="טוען פרויקטים..."/>
      <CardSkeleton count={6} />
     </div>
@@ -150,7 +150,7 @@ export default function Projects() {
   }
 
   return (
-   <div dir="rtl" className="max-w-[1600px] mx-auto px-4 sm:px-6">
+   <div dir="rtl">
     {/* Header */}
     <PageHeader
      icon={CubeIcon}

@@ -13,6 +13,13 @@ import {
 //             checkbox | email | phone | url | relation
 // field.list: true  → shown as a column in the table / on the card
 // field.required    → enforced before save
+//
+// schema.scope: who may SEE the rows — 'all' | 'own' | 'project' | 'admin'.
+//               Declared here, enforced centrally in src/lib/crm/visibility.js
+//               for the list, the related-records strip and global search alike.
+//               Defaults to 'all' when omitted.
+// schema.mineByName: fields that name a person by full name rather than by
+//               email, and therefore also count as "mine" under scope 'own'.
 // ─────────────────────────────────────────────────────────────────────────────
 
 export const LEAD_STAGES = [
@@ -132,6 +139,7 @@ import { SECTOR_SCHEMAS } from './sectorSchemas';
 const CORE_SCHEMAS = {
   leads: {
     entity: 'Lead',
+    scope: 'own',
     icon: Filter,
     title: 'לידים וצנרת',
     subtitle: 'ניהול הזדמנויות מכירה מהפנייה ועד הסגירה',
@@ -165,6 +173,7 @@ const CORE_SCHEMAS = {
 
   contacts: {
     entity: 'CrmContact',
+    scope: 'own',
     icon: Contact,
     title: 'אנשי קשר',
     subtitle: 'האנשים שמאחורי הלקוחות',
@@ -187,6 +196,7 @@ const CORE_SCHEMAS = {
 
   invoices: {
     entity: 'Invoice',
+    scope: 'own',
     icon: Receipt,
     title: 'חשבוניות וגבייה',
     subtitle: 'מהצעת מחיר לחשבונית, כולל גיול חוב',
@@ -241,6 +251,7 @@ const CORE_SCHEMAS = {
 
   automations: {
     entity: 'AutomationRule',
+    scope: 'admin',
     icon: Route,
     title: 'אוטומציות',
     subtitle: 'כללי אם-אז על הישויות שקיימות במערכת',

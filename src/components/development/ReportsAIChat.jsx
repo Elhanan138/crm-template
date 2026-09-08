@@ -151,7 +151,7 @@ export default function ReportsAIChat() {
          <button
           key={s}
           onClick={() => send(s)}
-          className="px-3 py-1.5 rounded-full text-xs font-medium bg-card hover:bg-primary/10 hover:text-primary transition-colors border border-border"
+          className="px-3 py-1.5 rounded-full text-xs font-medium bg-card hover:bg-accent hover:text-primary transition-colors border border-border"
          >
           {s}
          </button>

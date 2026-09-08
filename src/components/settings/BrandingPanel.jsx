@@ -238,7 +238,7 @@ export default function BrandingPanel() {
             onDrop={(e) => { e.preventDefault(); setDragging(false); ingestFile(e.dataTransfer.files?.[0]); }}
             onClick={() => fileRef.current?.click()}
             className={`w-20 h-20 flex-shrink-0 rounded-xl border-2 border-dashed flex items-center justify-center overflow-hidden cursor-pointer transition-colors ${
-              dragging ? 'border-primary bg-primary/5' : 'border-border bg-muted/30 hover:border-primary/40'
+              dragging ? 'border-primary bg-accent' : 'border-border bg-muted/30 hover:border-primary/40'
             }`}
           >
             {uploading

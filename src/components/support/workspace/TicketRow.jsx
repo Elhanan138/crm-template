@@ -18,7 +18,7 @@ export default function TicketRow({ ticket, teamMembers = [], active, selected, 
   return (
     <div className={cn(
       'flex items-start gap-2.5 px-3 py-3 rounded-lg border transition-colors cursor-pointer',
-      active ? 'border-brand/50 bg-accent/40' : selected ? 'border-primary/40 bg-primary/5' : 'border-border bg-card hover:bg-muted/20'
+      active ? 'border-brand/50 bg-accent/40' : selected ? 'border-primary/40 bg-accent' : 'border-border bg-card hover:bg-muted/20'
     )}>
       <Checkbox
         checked={selected}

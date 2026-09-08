@@ -5,6 +5,7 @@ import { useAccessControl } from '@/hooks/useAccessControl';
 import { cleanEmail } from '@/lib/permissions';
 import { toast } from 'sonner';
 import { sortFields } from '@/lib/customFields';
+import { useRecordViewer, visibleRecords, scopeOf } from '@/lib/crm/visibility';
 
 export const currency = (v) =>
   v === null || v === undefined || v === '' ? '—' : `₪${Number(v).toLocaleString()}`;
@@ -29,10 +30,21 @@ export function useCrmRecords(schema) {
   const myEmail = cleanEmail(effectiveUser?.email);
   const entity = schema.entity;
 
-  const { data: records = [], isLoading } = useQuery({
+  const viewer = useRecordViewer();
+
+  const { data: allRecords = [], isLoading } = useQuery({
     queryKey: ['crm', entity],
     queryFn: () => api.entities[entity].list(schema.defaultSort),
   });
+
+  // The list never sees a row the viewer may not see. Filtering here rather
+  // than in the page is what keeps the rule identical in the table, in the
+  // related-records strip and in global search.
+  const records = useMemo(
+    () => visibleRecords(allRecords, schema, viewer),
+    [allRecords, schema, viewer]
+  );
+  const hiddenCount = allRecords.length - records.length;
 
   // Related entities referenced by relation fields, fetched once each.
   const relationEntities = useMemo(
@@ -97,6 +109,7 @@ export function useCrmRecords(schema) {
   return {
     records, isLoading, relations, lookups, customFields,
     save, remove, canEdit, canDelete, isRealAdmin, myEmail,
+    viewer, hiddenCount, scope: scopeOf(schema),
   };
 }
 

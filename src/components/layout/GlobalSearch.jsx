@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react'
 import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 import { api } from '@/api/client';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueries, useQueryClient } from '@tanstack/react-query';
 import { Command as CommandPrimitive } from 'cmdk';
 import { Command, CommandList, CommandGroup, CommandItem } from '@/components/ui/command';
 import { useAccessControl } from '@/hooks/useAccessControl';
@@ -10,6 +10,9 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { cleanEmail } from '@/lib/permissions';
 import { normalizeHebrew, scoreMatch, freshnessBonus } from '@/lib/hebrewSearch';
 import { getProjectPath } from '@/lib/projectSlug';
+import { CRM_SEARCH_SOURCES, sourceForType, searchTextsOf } from '@/lib/crm/searchSources';
+import { CRM_SCHEMAS } from '@/lib/crm/schemas';
+import { useRecordViewer, visibleModuleRecords } from '@/lib/crm/visibility';
 import { CheckSquare, Calendar, FileSignature,
   BookOpen, Users,
   Search, Clock, CornerDownLeft, X
@@ -74,7 +77,23 @@ const TYPE_META = {
   guide:     { label: 'מדריכים',   icon: BookOpen,         color: 'text-success',  path: '/guides', idParam: 'guideId' },
   member:    { label: 'אנשי צוות', icon: Users,            color: 'text-secondary', path: '/profile', idParam: 'memberId' },
 };
-const TYPE_ORDER = ['project', 'task', 'quote', 'meeting', 'guide', 'member'];
+// Schema-driven modules join the same table, derived rather than hand-listed.
+for (const source of CRM_SEARCH_SOURCES) {
+  TYPE_META[source.type] = {
+    label: source.label,
+    icon: source.icon,
+    color: 'text-primary',
+    path: source.path,
+    crm: true,
+  };
+}
+
+// Project-side types first — they are what most searches are for — then the
+// modules, in the order the manifest declares them.
+const TYPE_ORDER = [
+  'project', 'task', 'quote', 'meeting', 'guide', 'member',
+  ...CRM_SEARCH_SOURCES.map((s) => s.type),
+];
 
 export default function GlobalSearch() {
   const navigate = useNavigate();
@@ -133,6 +152,22 @@ export default function GlobalSearch() {
     queryKey: ['allClients'], queryFn: () => api.entities.Client.list(),
     enabled: searchActive,
   });
+  // One query per schema-driven module, sharing the cache key the module pages
+  // already use — opening search does not refetch what a list just loaded.
+  const crmResults = useQueries({
+    queries: CRM_SEARCH_SOURCES.map((source) => ({
+      queryKey: ['crm', source.entity],
+      queryFn: () => api.entities[source.entity].list(),
+      enabled: searchActive,
+      staleTime: 30000,
+    })),
+  });
+  // A stable reference keyed on what actually changed, so the scoring memo below
+  // is not thrown away on every keystroke-driven re-render.
+  const crmSignature = crmResults.map((r) => r.dataUpdatedAt ?? 0).join('|');
+  const crmData = useMemo(() => crmResults.map((r) => r.data), [crmSignature]);
+  const viewer = useRecordViewer();
+
   const clientMap = React.useMemo(() => {
     const map = {};
     (clients || []).forEach(c => { map[c.id] = c.company_name; });
@@ -224,6 +259,20 @@ export default function GlobalSearch() {
       member: buildGroup(teamMembers, 'member'),
     };
 
+    // Schema-driven modules, scored on the fields they already declare and
+    // filtered by the same visibility rule their own list obeys.
+    CRM_SEARCH_SOURCES.forEach((source, i) => {
+      const rows = visibleModuleRecords(source.moduleId, crmData[i], viewer, CRM_SCHEMAS);
+      groups[source.type] = rows
+        .map((record) => {
+          const { primary, secondary } = searchTextsOf(source, record);
+          return { record, type: source.type, score: scoreMatch(q, primary, ...secondary) + freshnessBonus(record) };
+        })
+        .filter((x) => x.score > 0)
+        .sort((a, b) => b.score - a.score)
+        .slice(0, 5);
+    });
+
     const allScored = Object.values(groups).flat();
     const leading = allScored.length > 0 ? allScored.reduce((max, item) => item.score > max.score ? item : max) : null;
     const showLeading = !!(leading && leading.score >= 70);
@@ -234,7 +283,7 @@ export default function GlobalSearch() {
       .sort((a, b) => b.topScore - a.topScore);
 
     return { groups, leading, showLeading, groupOrder, totalCount: allScored.length };
-  }, [query, projects, milestones, tasks, quotes, meetings, guides, teamMembers, clientMap, canViewProject, canAccess]);
+  }, [query, projects, milestones, tasks, quotes, meetings, guides, teamMembers, clientMap, canViewProject, canAccess, crmData, viewer]);
 
   const totalCount = results?.totalCount ?? 0;
 
@@ -259,6 +308,14 @@ export default function GlobalSearch() {
 
   const handleSelect = (type, record) => {
     const meta = TYPE_META[type];
+    // A module record opens where it lives, with its sheet already open.
+    if (meta.crm) {
+      navigate(`${meta.path}?recordId=${encodeURIComponent(record.id)}`);
+      savePrefs(null);
+      setOpen(false);
+      setMobileOpen(false);
+      return;
+    }
     const projectId = type === 'project' ? record.id : record.project_id;
     if (meta.path) {
       const qs = meta.idParam ? `?${meta.idParam}=${record.id}` : '';
@@ -281,9 +338,12 @@ export default function GlobalSearch() {
     const { record, type } = item;
     const meta = TYPE_META[type];
     const Icon = meta.icon;
+    const source = meta.crm ? sourceForType(type) : null;
     const proj = type === 'project' ? record : projects.find(p => p.id === record.project_id);
-    const title = type === 'project' ? projectLabel(record) : (record.proposal_number || record.name || record.title || '');
-    const sub = type === 'project' ? record.name
+    const title = source ? (record[source.titleField] || '—')
+      : type === 'project' ? projectLabel(record) : (record.proposal_number || record.name || record.title || '');
+    const sub = source ? (source.subtitleField ? record[source.subtitleField] : '')
+      : type === 'project' ? record.name
       : type === 'guide' ? record.description
       : type === 'member' ? record.role
       : type === 'quote' ? (record.client_name || (proj ? projectLabel(proj) : ''))

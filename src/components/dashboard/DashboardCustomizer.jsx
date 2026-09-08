@@ -82,7 +82,7 @@ export default function DashboardCustomizer({ open, onClose, widgets, order, hid
                {hasOptions && (
                 <button
                  onClick={(e) => { e.stopPropagation(); setExpanded(isOpen ? null : w.id); }}
-                 className={`w-7 h-7 rounded-lg flex items-center justify-center transition-colors ${isOpen ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:bg-muted'}`}
+                 className={`w-7 h-7 rounded-lg flex items-center justify-center transition-colors ${isOpen ? 'bg-accent text-primary' : 'text-muted-foreground hover:bg-muted'}`}
                  title="הגדרות ווידג'ט"
                 >
                  <ChevronDown className={`w-4 h-4 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
