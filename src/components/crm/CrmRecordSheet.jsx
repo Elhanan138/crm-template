@@ -1,31 +1,21 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet';
 import { Loader2, Save } from 'lucide-react';
 import { toast } from 'sonner';
-import CustomFieldsRenderer from '@/components/shared/CustomFieldsRenderer';
 import RelatedRecords from '@/components/crm/RelatedRecords';
 import { recordActionsFor } from '@/lib/crm/recordActions';
-import { readField, isDerived } from '@/lib/crm/derived';
+import { isDerived } from '@/lib/crm/derived';
 import { useI18n } from '@/lib/i18n';
 import RecordTrail from '@/components/crm/RecordTrail';
-import { formatValue } from '@/lib/crm/useCrmRecords';
-import PersonSelect from '@/components/shared/PersonSelect';
-import DateField from '@/components/ui/date-field';
 import { validateCustomFields } from '@/lib/customFields';
+import CrmFormFields from '@/components/crm/CrmFormFields';
 import { useFormLayout } from '@/lib/useFormLayout';
 import LineItemsEditor from '@/components/crm/LineItemsEditor';
 import { LINE_FIELD, lineSourceFor, lineTotals, cleanLines } from '@/lib/crm/lineItems';
 
-const CONTROL = 'h-9 rounded-lg border-border bg-background text-sm';
 
-const NONE = '__none__';
 
 const defaultsFor = (schema) =>
   Object.fromEntries(
@@ -93,121 +83,6 @@ export default function CrmRecordSheet({
   // the custom fields — which is what it has always been.
   const layout = useFormLayout(schema.entity, customFields);
 
-  const renderField = (field) => {
-    // A derived field has no input: it is the answer to the other fields, and it
-    // updates the moment they do. Showing it as a disabled box would invite
-    // someone to try to "fix" a number that is not stored anywhere.
-    if (isDerived(field)) {
-      const derivedValue = readField(field, form);
-      const meta = field.options?.find((o) => String(o.value) === String(derivedValue));
-      return (
-        <div key={field.key} className="space-y-1">
-          <Label className="text-xs font-medium text-muted-foreground">{field.label}</Label>
-          <div className="h-9 flex items-center px-3 rounded-lg border border-dashed border-border bg-muted/30 text-sm">
-            {meta ? (
-              <span className="text-xs font-semibold">{meta.label}</span>
-            ) : (
-              <span dir={['currency', 'number', 'percent'].includes(field.type) ? 'ltr' : undefined}>
-                {formatValue(field, derivedValue)}
-              </span>
-            )}
-          </div>
-          <p className="text-[11px] text-muted-foreground">{t('מחושב אוטומטית')}</p>
-        </div>
-      );
-    }
-
-    const value = form[field.key] ?? (field.type === 'checkbox' ? false : '');
-    const error = errors[field.key];
-    const wide = field.type === 'textarea';
-    // Once there are lines, the total is theirs to state.
-    const ownedByLines = lineSource && field.key === lineSource.totalField
-      && (form[LINE_FIELD] || []).length > 0;
-
-    if (field.type === 'checkbox') {
-      return (
-        <label
-          key={field.key}
-          className="flex items-center gap-2 cursor-pointer rounded-lg border border-border bg-background px-3 h-9"
-        >
-          <Checkbox checked={!!value} disabled={readOnly} onCheckedChange={(v) => set(field.key, v === true)} />
-          <span className="text-sm">{field.label}</span>
-        </label>
-      );
-    }
-
-    let control;
-    if (field.type === 'person') {
-      control = (
-        <PersonSelect value={value} onChange={(v) => set(field.key, v)} by={field.by || 'email'} disabled={readOnly} />
-      );
-    } else if (field.type === 'date') {
-      // Hebrew calendar picker, same control as the rest of the system.
-      control = <DateField value={value} onChange={(v) => set(field.key, v)} disabled={readOnly} />;
-    } else if (field.type === 'textarea') {
-      control = (
-        <Textarea
-          value={value} rows={3} disabled={readOnly}
-          onChange={(e) => set(field.key, e.target.value)}
-          className="rounded-lg border-border bg-background text-sm"
-        />
-      );
-    } else if (field.type === 'select') {
-      control = (
-        <Select value={value === '' ? undefined : String(value)} disabled={readOnly}
-          onValueChange={(v) => set(field.key, field.options.find((o) => String(o.value) === v)?.value ?? v)}>
-          <SelectTrigger className={CONTROL}><SelectValue placeholder="בחר..." /></SelectTrigger>
-          <SelectContent>
-            {field.options.map((o) => <SelectItem key={String(o.value)} value={String(o.value)}>{o.label}</SelectItem>)}
-          </SelectContent>
-        </Select>
-      );
-    } else if (field.type === 'relation') {
-      const items = relations?.[field.entity] || [];
-      control = (
-        <Select value={value === '' ? undefined : String(value)} disabled={readOnly}
-          onValueChange={(v) => set(field.key, v === NONE ? '' : v)}>
-          <SelectTrigger className={CONTROL}><SelectValue placeholder="בחר..." /></SelectTrigger>
-          <SelectContent>
-            <SelectItem value={NONE}>ללא</SelectItem>
-            {items.map((r) => (
-              <SelectItem key={r.id} value={r.id}>{r[field.labelField] || r.name || r.id}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      );
-    } else {
-      const isNumeric = ['number', 'currency', 'percent'].includes(field.type);
-      control = (
-        <Input
-          type={isNumeric ? 'number' : 'text'}
-          inputMode={isNumeric ? 'decimal' : undefined}
-          dir={isNumeric || ['email', 'phone', 'url'].includes(field.type) ? 'ltr' : 'rtl'}
-          value={value} disabled={readOnly}
-          onChange={(e) => set(field.key, e.target.value)}
-          className={CONTROL}
-        />
-      );
-    }
-
-    return (
-      <div key={field.key} className={`space-y-1 ${wide ? 'sm:col-span-2' : ''}`}>
-        <Label className="text-xs font-medium text-muted-foreground">
-          {field.label}{field.required && <span className="text-destructive"> *</span>}
-        </Label>
-        {ownedByLines ? (
-          <div className="h-9 flex items-center px-3 rounded-lg border border-dashed border-border bg-muted/30 text-sm">
-            <span dir="ltr">{formatValue(field, value)}</span>
-          </div>
-        ) : control}
-        {ownedByLines && <p className="text-[11px] text-muted-foreground">{t('מחושב מהשורות')}</p>}
-        {error
-          ? <p className="text-[11px] text-destructive">{error}</p>
-          : field.help && <p className="text-[11px] text-muted-foreground">{field.help}</p>}
-      </div>
-    );
-  };
-
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent side={dir === 'rtl' ? 'left' : 'right'} dir={dir} className="w-full sm:max-w-lg flex flex-col p-0">
@@ -222,18 +97,16 @@ export default function CrmRecordSheet({
 
         <div className="flex-1 overflow-y-auto px-5 py-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            {layout.map((item) => (item.kind === 'builtin'
-              ? renderField(item.field)
-              : (
-                <div key={item.key} className={item.field.type === 'textarea' ? 'sm:col-span-2' : ''}>
-                  <CustomFieldsRenderer
-                    fields={[item.field]}
-                    values={form.custom_fields || {}}
-                    onChange={(v) => set('custom_fields', { ...(form.custom_fields || {}), ...v })}
-                    columns={1}
-                  />
-                </div>
-              )))}
+            <CrmFormFields
+              schema={schema}
+              layout={layout}
+              form={form}
+              set={set}
+              errors={errors}
+              relations={relations}
+              readOnly={readOnly}
+              lineSource={lineSource}
+            />
             {lineSource && (
               <LineItemsEditor
                 source={lineSource}

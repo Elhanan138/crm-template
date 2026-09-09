@@ -1,4 +1,5 @@
 import { describe, it, expect } from 'vitest';
+import { readFileSync } from 'node:fs';
 import { resolveLayout, moveInLayout, isCustomised, orderFor } from './formLayout';
 import { formFieldsOf } from './customFields';
 
@@ -183,5 +184,46 @@ describe('which fields a form has', () => {
   it('says an entity it has never heard of has no form, rather than throwing', () => {
     expect(formFieldsOf('NotARecord')).toEqual([]);
     expect(formFieldsOf(undefined)).toEqual([]);
+  });
+});
+
+describe('the preview and the form are the same code', () => {
+  // A preview drawn separately is correct on the day it is written and wrong
+  // the first time either side changes. These check the wiring that prevents
+  // that, since a rendering test cannot prove two screens look alike.
+  const read = (path) => readFileSync(path, 'utf8');
+
+  const PAIRS = [
+    ['src/components/crm/CrmRecordSheet.jsx', 'CrmFormFields'],
+    ['src/components/tasks/TaskEditSheet.jsx', 'TaskFormFields'],
+    ['src/components/support/SupportForm.jsx', 'SupportFormFields'],
+    ['src/components/project/wizard/Step1General.jsx', 'ProjectFormFields'],
+  ];
+
+  it('has every form render its fields through the shared renderer', () => {
+    for (const [form, renderer] of PAIRS) {
+      expect(read(form), `${form} should render <${renderer}>`).toContain(`<${renderer}`);
+    }
+  });
+
+  it('has the preview render those very same renderers', () => {
+    const preview = read('src/components/settings/FormPreview.jsx');
+    for (const [, renderer] of PAIRS) {
+      expect(preview, `preview should render <${renderer}>`).toContain(`<${renderer}`);
+    }
+  });
+
+  it('leaves no form drawing its own fields inline any more', () => {
+    for (const [form] of PAIRS) {
+      // The tell-tale of a hand-rolled second copy: a local block map.
+      expect(read(form), `${form} still declares its own blocks`).not.toMatch(/const blocks = \{/);
+    }
+  });
+
+  it('gives custom fields no heading and no section of their own', () => {
+    // A custom field is a question on the form, not an appendix to it.
+    for (const [form] of PAIRS) {
+      expect(read(form), `${form} still labels a custom-fields section`).not.toContain('שדות נוספים');
+    }
   });
 });

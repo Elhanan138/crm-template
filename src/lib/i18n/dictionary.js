@@ -927,6 +927,9 @@ export const EN = {
   "סדר מקורי": "Original order",
   "שדה מותאם": "Custom field",
   "שמירת סדר הטופס נכשלה": "Saving the form order failed",
+
+  // ── Settings screens ──────────────────────────────────────────────────────
+  "גררו כל שדה למקום שבו הוא צריך להופיע. זה הטופס עצמו, לא הדמיה שלו.": "Drag any field to where it belongs. This is the form itself, not an impression of it.",
 };
 
 /** Every language the switcher offers. */
