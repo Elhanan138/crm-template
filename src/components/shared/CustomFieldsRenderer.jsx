@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { sortFields, visibleFields, pruneHiddenValues } from '@/lib/customFields';
 import PersonSelect from '@/components/shared/PersonSelect';
 import DateField from '@/components/ui/date-field';
+import { PercentField, CurrencyField, RelativeDayNote, PersonAvatar } from '@/components/shared/fieldControls';
 
 // DESIGN_SYSTEM §7: h-10 in a full form. A custom field is drawn exactly like a
 // declared one — on the form it is another question, not an annex to it.
@@ -70,11 +71,35 @@ export default function CustomFieldsRenderer({ fields, values = {}, onChange, co
             )}
 
             {field.type === 'person' && (
-              <PersonSelect value={value} onChange={(v) => set(field.key, v)} by={field.by || 'name'} />
+              <div className="flex items-center gap-2">
+                <PersonAvatar name={value} />
+                <div className="flex-1 min-w-0">
+                  <PersonSelect value={value} onChange={(v) => set(field.key, v)} by={field.by || 'name'} />
+                </div>
+              </div>
             )}
 
             {field.type === 'date' && (
-              <DateField value={value} onChange={(v) => set(field.key, v)} />
+              <div className="space-y-1">
+                <DateField value={value} onChange={(v) => set(field.key, v)} />
+                <RelativeDayNote value={value} />
+              </div>
+            )}
+
+            {field.type === 'percent' && (
+              <PercentField
+                value={value}
+                onChange={(e) => set(field.key, e.target.value)}
+                className={INPUT_CLASS}
+              />
+            )}
+
+            {field.type === 'currency' && (
+              <CurrencyField
+                value={value}
+                onChange={(e) => set(field.key, e.target.value)}
+                className={INPUT_CLASS}
+              />
             )}
 
             {field.type === 'select' && (
@@ -90,7 +115,7 @@ export default function CustomFieldsRenderer({ fields, values = {}, onChange, co
               </Select>
             )}
 
-            {!['textarea', 'select', 'checkbox', 'person', 'date'].includes(field.type) && (
+            {!['textarea', 'select', 'checkbox', 'person', 'date', 'percent', 'currency'].includes(field.type) && (
               <Input
                 type={field.type === 'number' ? 'number' : 'text'}
                 inputMode={field.type === 'number' ? 'numeric' : undefined}

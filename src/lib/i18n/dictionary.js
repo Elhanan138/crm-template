@@ -937,6 +937,15 @@ export const EN = {
   "אין משימות שתואמות את הסינון": "No tasks match the filter",
   "יש משימות במערכת, אך אף אחת מהן לא תואמת את הסינון הנוכחי.": "There are tasks in the system, but none match the current filter.",
   "כל המשימות": "All tasks",
+
+  // ── Settings screens ──────────────────────────────────────────────────────
+  "היום": "Today",
+  "מחר": "Tomorrow",
+  "אתמול": "Yesterday",
+  "לפני {n} ימים": "{n} days ago",
+  "בעוד {n} ימים": "in {n} days",
+  "סכום כספי": "Currency amount",
+  "אחוז": "Percentage",
 };
 
 /** Every language the switcher offers. */

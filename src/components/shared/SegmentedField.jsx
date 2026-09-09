@@ -1,4 +1,5 @@
 import React from 'react';
+import { dotFor, surfaceFor } from '@/lib/tones';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // SEGMENTED CHOICE
@@ -34,11 +35,11 @@ export default function SegmentedField({
             onClick={() => onChange(id)}
             className={`flex-1 flex items-center justify-center gap-1.5 h-8 rounded-md text-xs font-semibold transition-all disabled:opacity-50 ${
               active
-                ? `${option.active || 'bg-card text-foreground'} shadow-sm`
+                ? `${option.active || surfaceFor(option.tone)} shadow-sm`
                 : 'text-muted-foreground hover:text-foreground hover:bg-card/60'
             }`}
           >
-            <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${option.dot}`} />
+            <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${option.dot || dotFor(option.tone)}`} />
             <span className="truncate">{option.label}</span>
           </button>
         );

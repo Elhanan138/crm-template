@@ -11,6 +11,30 @@ import { readField, isDerived } from '@/lib/crm/derived';
 import { formatValue } from '@/lib/crm/useCrmRecords';
 import { useI18n } from '@/lib/i18n';
 import { LINE_FIELD } from '@/lib/crm/lineItems';
+import SegmentedField from '@/components/shared/SegmentedField';
+import {
+  ToneDot, ScaleField, PercentField, CurrencyField, RelativeDayNote, PersonAvatar,
+} from '@/components/shared/fieldControls';
+import { toneOfOption, textFor, normalizeTone, toneForNumber } from '@/lib/tones';
+
+// A short list is easier to read laid out than hidden behind a menu. Four is
+// the point where the row starts to crowd on a phone.
+const SEGMENT_LIMIT = 4;
+
+// What a derived number means, so it can be coloured by it rather than by its
+// sign. Anything not named here stays quiet — colour that marks everything
+// marks nothing.
+const DERIVED_BOUNDS = {
+  balance: { badAbove: 0 },
+  overdue_days: { badAbove: 0 },
+  days_to_due: { badBelow: 0 },
+  delivery_days_left: { badBelow: 0 },
+  margin_percent: { badBelow: 0 },
+  risk_score: { warnAbove: 8, badAbove: 14 },
+};
+
+const toneForDerived = (key, value) =>
+  (DERIVED_BOUNDS[key] ? toneForNumber(value, DERIVED_BOUNDS[key]) : 'neutral');
 
 // ─────────────────────────────────────────────────────────────────────────────
 // The fields of a schema-driven form.
@@ -40,13 +64,22 @@ export default function CrmFormFields({
     if (isDerived(field)) {
       const derivedValue = readField(field, form);
       const meta = field.options?.find((o) => String(o.value) === String(derivedValue));
+      // A derived value is the answer the form is working towards, so it says
+      // what it means: a balance owed reads as owed, an overdue count as late.
+      const tone = meta
+        ? normalizeTone(meta.tone)
+        : toneForDerived(field.key, derivedValue);
       return (
         <Field label={field.label} help={t('מחושב אוטומטית')}>
-          <div className="h-10 flex items-center px-3 rounded-lg border border-dashed border-border bg-muted/30 text-sm">
+          <div className="h-10 flex items-center gap-2 px-3 rounded-lg border border-dashed border-border bg-muted/30 text-sm">
+            {tone !== 'neutral' && <ToneDot tone={tone} />}
             {meta ? (
-              <span className="text-xs font-semibold">{meta.label}</span>
+              <span className={`text-xs font-semibold ${textFor(tone)}`}>{meta.label}</span>
             ) : (
-              <span dir={['currency', 'number', 'percent'].includes(field.type) ? 'ltr' : undefined}>
+              <span
+                className={`font-semibold tabular-nums ${textFor(tone)}`}
+                dir={['currency', 'number', 'percent'].includes(field.type) ? 'ltr' : undefined}
+              >
                 {formatValue(field, derivedValue)}
               </span>
             )}
@@ -71,13 +104,53 @@ export default function CrmFormFields({
     }
 
     let control;
-    if (field.type === 'person') {
+    if (field.scale) {
       control = (
-        <PersonSelect value={value} onChange={(v) => set(field.key, v)} by={field.by || 'email'} disabled={readOnly} />
+        <ScaleField
+          value={value}
+          onChange={(v) => set(field.key, v)}
+          max={field.scale}
+          labels={field.scaleLabels}
+          ariaLabel={field.label}
+          disabled={readOnly}
+        />
+      );
+    } else if (field.type === 'person') {
+      control = (
+        <div className="flex items-center gap-2">
+          <PersonAvatar name={value} />
+          <div className="flex-1 min-w-0">
+            <PersonSelect value={value} onChange={(v) => set(field.key, v)} by={field.by || 'email'} disabled={readOnly} />
+          </div>
+        </div>
+      );
+    } else if (field.type === 'percent') {
+      control = (
+        <PercentField
+          value={value}
+          onChange={(e) => set(field.key, e.target.value)}
+          disabled={readOnly}
+          bounds={DERIVED_BOUNDS[field.key]}
+          className={CONTROL}
+        />
+      );
+    } else if (field.type === 'currency') {
+      control = (
+        <CurrencyField
+          value={value}
+          onChange={(e) => set(field.key, e.target.value)}
+          disabled={readOnly}
+          className={CONTROL}
+        />
       );
     } else if (field.type === 'date') {
       // Hebrew calendar picker, same control as the rest of the system.
-      control = <DateField value={value} onChange={(v) => set(field.key, v)} disabled={readOnly} />;
+      control = (
+        <div className="space-y-1">
+          <DateField value={value} onChange={(v) => set(field.key, v)} disabled={readOnly} />
+          <RelativeDayNote value={value} />
+        </div>
+      );
     } else if (field.type === 'textarea') {
       control = (
         <Textarea
@@ -87,12 +160,34 @@ export default function CrmFormFields({
         />
       );
     } else if (field.type === 'select') {
-      control = (
+      const options = field.options || [];
+      const toned = options.some((o) => o.tone);
+      control = options.length <= SEGMENT_LIMIT && options.length > 1 && toned ? (
+        <SegmentedField
+          value={value}
+          onChange={(v) => set(field.key, v)}
+          options={options.map((o) => ({ id: o.value, label: o.label, tone: o.tone }))}
+          idOf={(o) => o.id}
+          ariaLabel={field.label}
+          disabled={readOnly}
+        />
+      ) : (
         <Select value={value === '' ? undefined : String(value)} disabled={readOnly}
-          onValueChange={(v) => set(field.key, field.options.find((o) => String(o.value) === v)?.value ?? v)}>
-          <SelectTrigger className={CONTROL}><SelectValue placeholder="בחר..." /></SelectTrigger>
+          onValueChange={(v) => set(field.key, options.find((o) => String(o.value) === v)?.value ?? v)}>
+          <SelectTrigger className={CONTROL}>
+            {/* The chosen option keeps its colour outside the menu too. */}
+            {toned && value !== '' && <ToneDot tone={toneOfOption(options, value)} />}
+            <SelectValue placeholder="בחר..." />
+          </SelectTrigger>
           <SelectContent>
-            {field.options.map((o) => <SelectItem key={String(o.value)} value={String(o.value)}>{o.label}</SelectItem>)}
+            {options.map((o) => (
+              <SelectItem key={String(o.value)} value={String(o.value)}>
+                <span className="inline-flex items-center gap-2">
+                  {toned && <ToneDot tone={o.tone} />}
+                  {o.label}
+                </span>
+              </SelectItem>
+            ))}
           </SelectContent>
         </Select>
       );

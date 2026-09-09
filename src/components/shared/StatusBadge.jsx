@@ -1,34 +1,18 @@
 import React from 'react';
 import { cva } from 'class-variance-authority';
 import { cn } from '@/lib/utils';
+import { SURFACE_CLASS, DOT_CLASS } from '@/lib/tones';
 
 // Single source of truth for every status display in the system.
 // tones map to semantic tokens only — no hard-coded palette colors.
+// The tone→classes map lives in src/lib/tones.js, so a status cannot be one
+// colour in a table and another in the form that sets it.
 const badge = cva(
   'inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold',
-  {
-    variants: {
-      tone: {
-        neutral: 'bg-muted text-muted-foreground',
-        success: 'bg-success-muted text-success',
-        warning: 'bg-warning-muted text-warning',
-        info: 'bg-info-muted text-info',
-        destructive: 'bg-destructive/10 text-destructive',
-        accent: 'bg-accent text-accent-foreground',
-      },
-    },
-    defaultVariants: { tone: 'neutral' },
-  }
+  { variants: { tone: SURFACE_CLASS }, defaultVariants: { tone: 'neutral' } },
 );
 
-const dotByTone = {
-  neutral: 'bg-muted-foreground',
-  success: 'bg-success',
-  warning: 'bg-warning',
-  info: 'bg-info',
-  destructive: 'bg-destructive',
-  accent: 'bg-primary',
-};
+const dotByTone = DOT_CLASS;
 
 // Central dictionary: every status value across every entity → { label (Hebrew), tone }.
 export const STATUS_MAP = {

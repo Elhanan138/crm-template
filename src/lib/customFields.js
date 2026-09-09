@@ -1,5 +1,6 @@
 import {
   Type, AlignLeft, Hash, Calendar, ChevronDown, ToggleLeft, Link2, Mail, Phone, User,
+  Banknote, Percent,
 } from 'lucide-react';
 import { CRM_SCHEMAS } from '@/lib/crm/schemas';
 import { ACTIVE_MODULE_IDS } from '@/lib/moduleRegistry';
@@ -11,6 +12,8 @@ export const FIELD_TYPES = [
   { value: 'text', label: 'טקסט קצר', icon: Type },
   { value: 'textarea', label: 'טקסט ארוך', icon: AlignLeft },
   { value: 'number', label: 'מספר', icon: Hash },
+  { value: 'currency', label: 'סכום כספי', icon: Banknote },
+  { value: 'percent', label: 'אחוז', icon: Percent },
   { value: 'date', label: 'תאריך', icon: Calendar },
   { value: 'select', label: 'בחירה מרשימה', icon: ChevronDown, hasOptions: true },
   { value: 'checkbox', label: 'תיבת סימון', icon: ToggleLeft },
@@ -74,6 +77,8 @@ export function validateCustomFields(fields, values = {}) {
 export function formatCustomValue(field, value) {
   if (value === undefined || value === null || value === '') return '—';
   if (field.type === 'checkbox') return value ? 'כן' : 'לא';
+  if (field.type === 'currency') return `₪${Number(value).toLocaleString()}`;
+  if (field.type === 'percent') return `${Number(value).toLocaleString()}%`;
   if (field.type === 'number') return Number(value).toLocaleString();
   return String(value);
 }
@@ -189,8 +194,10 @@ const LEGACY_FORM_FIELDS = {
  */
 export function formFieldsOf(entity) {
   const schema = Object.values(CRM_SCHEMAS).find((s) => s.entity === entity);
-  // A derived field has no input — it is the answer to the others — so there is
-  // nothing to place, and it is left out.
-  if (schema) return schema.fields.filter((f) => !f.derive);
+  // Derived fields are included. They take no input, but they are the answer the
+  // form is working towards — a balance owed, a risk score — and leaving them
+  // out of the layout took them out of the form itself. They are shown as a
+  // result rather than a control, and they can be positioned like anything else.
+  if (schema) return schema.fields;
   return LEGACY_FORM_FIELDS[entity] || [];
 }

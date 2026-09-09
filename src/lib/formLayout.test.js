@@ -168,8 +168,9 @@ describe('which fields a form has', () => {
     expect(leadKeys).toContain('value');
   });
 
-  it('leaves derived columns out — nothing to place for a number nobody types', () => {
-    expect(formFieldsOf('Lead').map((f) => f.key)).not.toContain('weighted_value');
+  it('includes derived columns — they are the answer the form works towards', () => {
+    // Filtering them out of the layout took them out of the form itself.
+    expect(formFieldsOf('Lead').map((f) => f.key)).toContain('weighted_value');
   });
 
   it('gives every entry a key and a label to show', () => {

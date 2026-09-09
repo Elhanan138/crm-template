@@ -169,7 +169,7 @@ export const SECTOR_SCHEMAS = {
       // How long this candidate has been waiting where they are. A pipeline
       // rots by stalling, not by rejecting.
       { key: 'days_in_stage', label: 'ימים בשלב', type: 'number', list: true, derive: ageInStage },
-      { key: 'rating', label: 'דירוג 1-5', type: 'number' },
+      { key: 'rating', label: 'דירוג 1-5', type: 'number', scale: 5, scaleLabels: ['חלש', 'סביר', 'טוב', 'טוב מאוד', 'מצוין'] },
       { key: 'email', label: 'אימייל', type: 'email' },
       { key: 'phone', label: 'טלפון', type: 'phone' },
       { key: 'cv_url', label: 'קורות חיים', type: 'url' },
@@ -398,8 +398,10 @@ export const SECTOR_SCHEMAS = {
         { value: 'people', label: 'כוח אדם' },
         { value: 'vendor', label: 'ספקים' },
       ], list: true },
-      { key: 'likelihood', label: 'הסתברות', type: 'select', options: RISK_LEVELS, required: true, list: true, default: 3 },
-      { key: 'impact', label: 'השפעה', type: 'select', options: RISK_LEVELS, required: true, list: true, default: 3 },
+      // A judgement on a scale is pressed, not chosen from a menu: the range is
+      // the point, and the score below moves while you press.
+      { key: 'likelihood', label: 'הסתברות', type: 'select', options: RISK_LEVELS, scale: 5, scaleLabels: ['נמוך מאוד', 'נמוך', 'בינוני', 'גבוה', 'קריטי'], required: true, list: true, default: 3 },
+      { key: 'impact', label: 'השפעה', type: 'select', options: RISK_LEVELS, scale: 5, scaleLabels: ['נמוך מאוד', 'נמוך', 'בינוני', 'גבוה', 'קריטי'], required: true, list: true, default: 3 },
       // Likelihood x impact — the score every risk register is read by, and the
       // band it lands in. Both were implicit in two fields nobody multiplied.
       { key: 'risk_score', label: 'ציון סיכון', type: 'number', list: true, derive: riskScore },
