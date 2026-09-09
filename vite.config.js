@@ -17,8 +17,11 @@ export default defineConfig({
   server: {
     host: true,
     allowedHosts: true,
-    port: 5173,
-    strictPort: true,
+    // 5173 by default, but a host that assigns a port gets to. Pinning it with
+    // strictPort meant a second copy of the dev server simply refused to start,
+    // and nothing here depends on the number: there is no OAuth callback, no
+    // webhook, and the local data client makes no network calls at all.
+    port: Number(process.env.PORT) || 5173,
   },
   resolve: {
     alias: { '@': path.resolve(__dirname, './src') },
