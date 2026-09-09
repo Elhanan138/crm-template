@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { Search } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useI18n } from '@/lib/i18n';
 
 export default function SectionStepperNav({
  title,
@@ -12,6 +13,7 @@ export default function SectionStepperNav({
  searchable = false,
  searchPlaceholder = 'חיפוש...',
 }) {
+ const { t } = useI18n();
  const [query, setQuery] = useState('');
 
  // Searching only the top-level labels made the box useless here: the settings
@@ -53,7 +55,7 @@ export default function SectionStepperNav({
      <SelectTrigger className="h-9 rounded-lg text-sm"><SelectValue /></SelectTrigger>
      <SelectContent>
       {sections.map(s => (
-       <SelectItem key={s.key} value={s.key}>{s.label}</SelectItem>
+       <SelectItem key={s.key} value={s.key}>{t(s.label)}</SelectItem>
       ))}
      </SelectContent>
     </Select>
@@ -62,7 +64,7 @@ export default function SectionStepperNav({
       <SelectTrigger className="h-8 rounded-lg text-xs"><SelectValue /></SelectTrigger>
       <SelectContent>
        {activeSection.children.map(c => (
-        <SelectItem key={c.key} value={c.key}>{c.label}</SelectItem>
+        <SelectItem key={c.key} value={c.key}>{t(c.label)}</SelectItem>
        ))}
       </SelectContent>
      </Select>
@@ -96,7 +98,7 @@ export default function SectionStepperNav({
        <div key={section.key}>
         <button
          onClick={() => onSelect(section.key)}
-         title={section.hint || undefined}
+         title={section.hint ? t(section.hint) : undefined}
          className={`relative w-full flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 ${
           isActive
            ? 'bg-accent text-accent-foreground font-semibold'
@@ -104,7 +106,7 @@ export default function SectionStepperNav({
          }`}
         >
          <Icon className="w-4 h-4 flex-shrink-0"/>
-         <span>{section.label}</span>
+         <span>{t(section.label)}</span>
          {section.badge ? (
           <span className="ms-auto rounded-full bg-warning-muted text-warning text-[10px] px-1.5 py-0.5 font-semibold">
            {section.badge}
@@ -123,7 +125,7 @@ export default function SectionStepperNav({
             <button
              key={child.key}
              onClick={() => goToChild(section.key, child.key)}
-             title={child.hint || undefined}
+             title={child.hint ? t(child.hint) : undefined}
              className={`relative w-full flex items-center gap-2 rounded-lg px-3 py-1.5 text-[13px] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 ${
               childActive
                ? 'bg-accent text-accent-foreground font-semibold'
@@ -131,7 +133,7 @@ export default function SectionStepperNav({
              }`}
             >
              <ChildIcon className="w-3.5 h-3.5 flex-shrink-0"/>
-             <span>{child.label}</span>
+             <span>{t(child.label)}</span>
              {childActive && (
               <span className="absolute start-0 top-1.5 bottom-1.5 w-[3px] rounded-full bg-primary"/>
              )}
@@ -144,7 +146,7 @@ export default function SectionStepperNav({
       );
      })}
      {q && filtered.length === 0 && (
-      <p className="text-xs text-muted-foreground px-3 py-2">אין הגדרה שתואמת "{query}"</p>
+      <p className="text-xs text-muted-foreground px-3 py-2">{t('אין הגדרה שתואמת')} "{query}"</p>
      )}
     </div>
    </div>

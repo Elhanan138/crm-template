@@ -3,6 +3,7 @@ import { ACTIVE_WORKSPACES, STANDALONE_MODULE_IDS, ACTIVE_MODULE_IDS } from '@/l
 import { isFeatureEnabled } from '@/lib/features';
 import { isSectionEnabled } from '@/lib/settingsSections';
 import { APP_IDENTITY } from '@/lib/appIdentity';
+import { SETTINGS_CATALOG } from '@/lib/settingsCatalog';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // CAPABILITY CATALOGUE
@@ -38,17 +39,8 @@ const FEATURE_SURFACES = [
   { key: 'announcements', label: 'הכרזות ופופאפים', hint: 'חלונות הודעה למשתמשים' },
 ];
 
-const SETTINGS_SURFACES = [
-  { key: 'users', label: 'משתמשים והרשאות' },
-  { key: 'system-features', label: 'תכונות מערכת' },
-  { key: 'custom-fields', label: 'שדות מותאמים' },
-  { key: 'integrations', label: 'אינטגרציות' },
-  { key: 'supabase', label: 'חיבור Supabase' },
-  { key: 'project-tabs', label: 'תתי-עמודים בפרויקטים' },
-  { key: 'popups', label: 'פופאפים והכרזות' },
-  { key: 'notifications', label: 'מרכז התראות' },
-  { key: 'branding', label: 'מיתוג' },
-];
+// From the catalog, like everything else that lists a settings section.
+const SETTINGS_SURFACES = SETTINGS_CATALOG.map((s) => ({ key: s.id, label: s.label }));
 
 /** The full catalogue, grouped for display. Only what this build contains. */
 export function buildCapabilityCatalogue() {

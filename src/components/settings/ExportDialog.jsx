@@ -14,11 +14,13 @@ import { ACTIVE_MODULE_IDS } from '@/lib/moduleRegistry';
 import { currentBuild, advanceBuild } from '@/lib/exportBuild';
 import { SETTINGS_CATALOG } from '@/lib/settingsCatalog';
 import { recordAudit } from '@/lib/auditLog';
+import { useI18n } from '@/lib/i18n';
 
 // The same catalog the settings page and the export planner read.
 const SETTINGS_SECTIONS = SETTINGS_CATALOG.map((s) => ({ id: s.id, label: s.label }));
 
 export default function ExportDialog({ open, onOpenChange }) {
+  const { t } = useI18n();
   // Only modules actually present in this bundle can be exported.
   const [selected, setSelected] = useState(() => new Set(ACTIVE_MODULE_IDS));
   const [sections, setSections] = useState(() => new Set(SETTINGS_SECTIONS.map((s) => s.id)));
@@ -189,7 +191,7 @@ export default function ExportDialog({ open, onOpenChange }) {
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-lg">
         <DialogHeader>
-          <DialogTitle>ייצוא לפריסה (Vercel / Netlify)</DialogTitle>
+          <DialogTitle>{t("ייצוא לפריסה (Vercel / Netlify)")}</DialogTitle>
           <DialogDescription>
             בחר את המודולים שייכללו. החבילה נבנית כאן בדפדפן ומאומתת לפני ההורדה — אם היא לא הייתה נבנית, היא לא תרד.
           </DialogDescription>
@@ -197,7 +199,7 @@ export default function ExportDialog({ open, onOpenChange }) {
 
         <div className="grid grid-cols-2 gap-4 max-h-[45vh] overflow-y-auto">
           <div>
-            <p className="text-xs font-semibold text-muted-foreground mb-1">מודולים</p>
+            <p className="text-xs font-semibold text-muted-foreground mb-1">{t("מודולים")}</p>
             {ACTIVE_MODULE_IDS.map((id) => (
               <Row
                 key={id}
@@ -208,20 +210,20 @@ export default function ExportDialog({ open, onOpenChange }) {
             ))}
           </div>
           <div>
-            <p className="text-xs font-semibold text-muted-foreground mb-1">מקטעי הגדרות</p>
+            <p className="text-xs font-semibold text-muted-foreground mb-1">{t("מקטעי הגדרות")}</p>
             {SETTINGS_SECTIONS.map((s) => (
               <Row
                 key={s.id}
                 checked={sections.has(s.id)}
                 onChange={() => toggle(setSections)(s.id)}
-                label={s.label}
+                label={t(s.label)}
               />
             ))}
           </div>
         </div>
 
         <div className="border-t border-border pt-3 space-y-2">
-          <p className="text-xs font-semibold text-muted-foreground">מיתוג החבילה</p>
+          <p className="text-xs font-semibold text-muted-foreground">{t("מיתוג החבילה")}</p>
           {blankTemplate ? (
             <p className="text-[11px] text-muted-foreground">
               תבנית ריקה נבחרה — החבילה תצא ללא שם, ללא לוגו וללא פרטי חברה.
@@ -233,29 +235,29 @@ export default function ExportDialog({ open, onOpenChange }) {
                   type="button"
                   onClick={() => logoInputRef.current?.click()}
                   className="w-12 h-12 flex-shrink-0 rounded-lg border-2 border-dashed border-border flex items-center justify-center overflow-hidden hover:border-primary/40 transition-colors"
-                  aria-label="בחר לוגו"
+                  aria-label={t("בחר לוגו")}
                 >
                   {brand.logo
                     ? <img src={brand.logo} alt="" className="w-full h-full object-contain p-1" />
                     : <Upload className="w-4 h-4 text-muted-foreground" />}
                 </button>
                 <div className="grid grid-cols-2 gap-2 flex-1 min-w-0">
-                  <Input value={brand.name} onChange={(e) => setBrandField('name', e.target.value)} placeholder="שם הלקוח" className="h-8 rounded-lg text-xs" />
-                  <Input value={brand.subtitle} onChange={(e) => setBrandField('subtitle', e.target.value)} placeholder="כותרת משנה" className="h-8 rounded-lg text-xs" />
+                  <Input value={brand.name} onChange={(e) => setBrandField('name', e.target.value)} placeholder={t("שם הלקוח")} className="h-8 rounded-lg text-xs" />
+                  <Input value={brand.subtitle} onChange={(e) => setBrandField('subtitle', e.target.value)} placeholder={t("כותרת משנה")} className="h-8 rounded-lg text-xs" />
                 </div>
                 <Button
                   variant="ghost" size="icon" className="h-8 w-8 flex-shrink-0"
-                  onClick={() => setBrandField('logo', '')} disabled={!brand.logo} aria-label="נקה לוגו"
+                  onClick={() => setBrandField('logo', '')} disabled={!brand.logo} aria-label={t("נקה לוגו")}
                 >
                   <RotateCcw className="w-3.5 h-3.5" />
                 </Button>
               </div>
               <div className="grid grid-cols-2 gap-2">
-                <Input value={brand.company.tagline || ''} onChange={(e) => setCompanyField('tagline', e.target.value)} placeholder="תת-כותרת מסמכים" className="h-8 rounded-lg text-xs" />
-                <Input value={brand.company.legalId || ''} onChange={(e) => setCompanyField('legalId', e.target.value)} placeholder="ח.פ / ע.מ" dir="ltr" className="h-8 rounded-lg text-xs" />
-                <Input value={brand.company.address || ''} onChange={(e) => setCompanyField('address', e.target.value)} placeholder="כתובת" className="h-8 rounded-lg text-xs col-span-2" />
-                <Input value={brand.company.paymentTerms || ''} onChange={(e) => setCompanyField('paymentTerms', e.target.value)} placeholder="תנאי תשלום" className="h-8 rounded-lg text-xs" />
-                <Input value={brand.company.bank || ''} onChange={(e) => setCompanyField('bank', e.target.value)} placeholder="פרטי בנק" dir="ltr" className="h-8 rounded-lg text-xs" />
+                <Input value={brand.company.tagline || ''} onChange={(e) => setCompanyField('tagline', e.target.value)} placeholder={t("תת-כותרת מסמכים")} className="h-8 rounded-lg text-xs" />
+                <Input value={brand.company.legalId || ''} onChange={(e) => setCompanyField('legalId', e.target.value)} placeholder={t("ח.פ / ע.מ")} dir="ltr" className="h-8 rounded-lg text-xs" />
+                <Input value={brand.company.address || ''} onChange={(e) => setCompanyField('address', e.target.value)} placeholder={t("כתובת")} className="h-8 rounded-lg text-xs col-span-2" />
+                <Input value={brand.company.paymentTerms || ''} onChange={(e) => setCompanyField('paymentTerms', e.target.value)} placeholder={t("תנאי תשלום")} className="h-8 rounded-lg text-xs" />
+                <Input value={brand.company.bank || ''} onChange={(e) => setCompanyField('bank', e.target.value)} placeholder={t("פרטי בנק")} dir="ltr" className="h-8 rounded-lg text-xs" />
               </div>
               <input ref={logoInputRef} type="file" accept="image/*" className="hidden" onChange={(e) => { pickLogo(e.target.files?.[0]); e.target.value = ''; }} />
             </>
@@ -263,31 +265,31 @@ export default function ExportDialog({ open, onOpenChange }) {
         </div>
 
         <div className="border-t border-border pt-3 space-y-1.5">
-          <p className="text-xs font-semibold text-muted-foreground">תכונות</p>
+          <p className="text-xs font-semibold text-muted-foreground">{t("תכונות")}</p>
           {Object.entries(OPTIONAL_FEATURES).map(([id, f]) => (
             <Row
               key={id}
               checked={features.has(id)}
               onChange={() => toggle(setFeatures)(id)}
-              label={f.label}
+              label={t(f.label)}
             />
           ))}
           <Row
             checked={devTools}
             onChange={() => setDevTools((v) => !v)}
-            label="כלי פיתוח — בדיקות וכפתור הייצוא, כדי שגם מהחבילה הזו אפשר יהיה לייצא"
+            label={t("כלי פיתוח — בדיקות וכפתור הייצוא, כדי שגם מהחבילה הזו אפשר יהיה לייצא")}
           />
           <Row
             checked={blankTemplate}
             onChange={() => setBlankTemplate((v) => !v)}
-            label="תבנית ריקה — בלי לוגו, בלי שם מוצר ובלי פרטי חברה"
+            label={t("תבנית ריקה — בלי לוגו, בלי שם מוצר ובלי פרטי חברה")}
           />
         </div>
 
         <div className="border-t border-border pt-3 space-y-2">
           <div className="flex items-center gap-1.5">
             <Github className="w-3.5 h-3.5 text-muted-foreground" />
-            <p className="text-xs font-semibold text-muted-foreground">דחיפה ל-GitHub</p>
+            <p className="text-xs font-semibold text-muted-foreground">{t("דחיפה ל-GitHub")}</p>
           </div>
           <div className="grid grid-cols-3 gap-2">
             <Input
@@ -319,12 +321,12 @@ export default function ExportDialog({ open, onOpenChange }) {
         </div>
 
         <div className="border-t border-border pt-3 space-y-1.5">
-          <p className="text-xs font-semibold text-muted-foreground">מה ייכנס לחבילה</p>
+          <p className="text-xs font-semibold text-muted-foreground">{t("מה ייכנס לחבילה")}</p>
           {previewError && (
             <p className="text-[11px] text-destructive">{previewError}</p>
           )}
           {!preview && !previewError && (
-            <p className="text-[11px] text-muted-foreground">מחשב…</p>
+            <p className="text-[11px] text-muted-foreground">{t("מחשב…")}</p>
           )}
           {preview && (
             <div className="rounded-lg bg-muted p-3 space-y-1 text-[11px]">
@@ -336,7 +338,7 @@ export default function ExportDialog({ open, onOpenChange }) {
                   מודולים שיוסרו: {preview.droppedModules.map(labelOf).join(', ')}
                 </p>
               ) : (
-                <p className="text-muted-foreground">כל המודולים של הבניין הזה נכללים</p>
+                <p className="text-muted-foreground">{t("כל המודולים של הבניין הזה נכללים")}</p>
               )}
               {preview.droppedSections.length > 0 && (
                 <p className="text-muted-foreground">
@@ -375,7 +377,7 @@ export default function ExportDialog({ open, onOpenChange }) {
           <div className="text-xs bg-success/10 text-success rounded-md p-3 space-y-0.5">
             <p className="font-semibold">החבילה ירדה · {(result.size / 1024).toFixed(0)} KB</p>
             <p>{result.files} קבצים · {result.modules.length} מודולים · {result.droppedDependencies.length} חבילות הושמטו</p>
-            {result.blankTemplate && <p>תבנית ריקה — ללא מיתוג</p>}
+            {result.blankTemplate && <p>{t("תבנית ריקה — ללא מיתוג")}</p>}
           </div>
         )}
 

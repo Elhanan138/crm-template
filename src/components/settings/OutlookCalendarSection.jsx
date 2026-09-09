@@ -28,6 +28,7 @@ import {
 import { formatDate } from '@/lib/formatDate';
 import MockDataPanel from '@/components/settings/MockDataPanel';
 import DirectorySyncPanel from '@/components/settings/DirectorySyncPanel';
+import { useI18n } from '@/lib/i18n';
 
 const SETTING_KEYS = {
   integration_mode: { label: 'מצב פעולה', type: 'select', options: [{ value: 'mock', label: 'נתוני בדיקה (Mock)' }, { value: 'live', label: 'חיבור אמיתי (Live)' }], field: 'mode', default: 'mock' },
@@ -100,6 +101,7 @@ function SettingRow({ settingKey, settings, onSave }) {
 }
 
 export default function OutlookCalendarSection() {
+  const { t } = useI18n();
   const queryClient = useQueryClient();
   const { data: config = {}, isLoading } = useOutlookCalendarConfig();
   const isAdmin = config.enabled;
@@ -117,14 +119,14 @@ export default function OutlookCalendarSection() {
       queryClient.invalidateQueries({ queryKey: ['outlook-calendar-config'] });
       toast.success(checked ? 'יומן Outlook הופעל לכל המשתמשים' : 'יומן Outlook כובה');
     } catch {
-      toast.error('שגיאה בעדכון ההגדרה');
+      toast.error(t("שגיאה בעדכון ההגדרה"));
     }
   };
 
   const handleSettingSave = ({ key, value }) => {
     saveSetting.mutate(
       { key, value },
-      { onSuccess: () => toast.success('הגדרה נשמרה'), onError: () => toast.error('שגיאה בשמירת הגדרה') }
+      { onSuccess: () => toast.success(t("הגדרה נשמרה")), onError: () => toast.error(t("שגיאה בשמירת הגדרה")) }
     );
   };
 
@@ -140,7 +142,7 @@ export default function OutlookCalendarSection() {
     }
     saveSetting.mutate(
       { key: 'integration_mode', value: { mode: 'live' } },
-      { onSuccess: () => toast.success('עברת למצב Live'), onError: () => toast.error('שגיאה במעבר ל-Live') }
+      { onSuccess: () => toast.success(t("עברת למצב Live")), onError: () => toast.error(t("שגיאה במעבר ל-Live")) }
     );
   };
 
@@ -152,15 +154,15 @@ export default function OutlookCalendarSection() {
           if (action === 'force_sync') {
             toast.success(`סונכרן: ${data?.synced ?? 0} אירועים`);
           } else if (action === 'reset_token') {
-            toast.success('Delta token אופס');
+            toast.success(t("Delta token אופס"));
           } else if (action === 'disconnect') {
-            toast.success('משתמש נותק');
+            toast.success(t("משתמש נותק"));
           } else if (action === 'sync_all') {
             toast.success(`סונכרנו ${data?.results?.length ?? 0} משתמשים`);
           }
           queryClient.invalidateQueries({ queryKey: ['outlook-admin-users'] });
         },
-        onError: () => toast.error('שגיאה בביצוע הפעולה'),
+        onError: () => toast.error(t("שגיאה בביצוע הפעולה")),
       }
     );
   };
@@ -170,7 +172,7 @@ export default function OutlookCalendarSection() {
       { action: 'sync_all' },
       {
         onSuccess: (data) => toast.success(`סונכרנו ${data?.results?.length ?? 0} משתמשים`),
-        onError: () => toast.error('שגיאה בסנכרון'),
+        onError: () => toast.error(t("שגיאה בסנכרון")),
       }
     );
   };
@@ -181,7 +183,7 @@ export default function OutlookCalendarSection() {
 
   return (
     <SectionCard
-      title="יומן Outlook — אינטגרציה"
+      title={t("יומן Outlook — אינטגרציה")}
       icon={Calendar}
       actions={
         <StatusBadge
@@ -192,17 +194,17 @@ export default function OutlookCalendarSection() {
     >
       <div className="space-y-1">
         <div className="flex items-center justify-between gap-3 py-2 border-b border-border">
-          <span className="text-sm text-foreground">הצגת יומן Outlook למשתמשים</span>
+          <span className="text-sm text-foreground">{t("הצגת יומן Outlook למשתמשים")}</span>
           <Switch checked={config.enabled || false} onCheckedChange={handleToggle} />
         </div>
 
         {config.enabled && (
           <>
             <div className="pt-3 pb-1">
-              <h4 className="text-sm font-semibold text-foreground">סנכרון והגדרות</h4>
+              <h4 className="text-sm font-semibold text-foreground">{t("סנכרון והגדרות")}</h4>
             </div>
             {settingsLoading ? (
-              <div className="flex items-center gap-2 py-4 text-caption"><Loader2 className="w-3.5 h-3.5 animate-spin" /> טוען הגדרות…</div>
+              <div className="flex items-center gap-2 py-4 text-caption"><Loader2 className="w-3.5 h-3.5 animate-spin" /> {t("טוען הגדרות…")}</div>
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1">
                 <SettingRow settingKey="outlook_sync_enabled" settings={settings} onSave={handleSettingSave} />
@@ -225,9 +227,9 @@ export default function OutlookCalendarSection() {
             )}
 
             <div className="pt-4 mt-2 border-t border-border">
-              <h4 className="text-sm font-semibold text-foreground mb-2">סטטוס חיבורים</h4>
+              <h4 className="text-sm font-semibold text-foreground mb-2">{t("סטטוס חיבורים")}</h4>
               {statusLoading ? (
-                <div className="flex items-center gap-2 py-2 text-caption"><Loader2 className="w-3.5 h-3.5 animate-spin" /> טוען…</div>
+                <div className="flex items-center gap-2 py-2 text-caption"><Loader2 className="w-3.5 h-3.5 animate-spin" /> {t("טוען…")}</div>
               ) : (
                 <div className="flex flex-wrap gap-2">
                   {Object.entries(integrationStatus).map(([type, s]) => (
@@ -246,7 +248,7 @@ export default function OutlookCalendarSection() {
 
             <div className="pt-4 mt-2 border-t border-border">
               <div className="flex items-center justify-between gap-2 mb-2">
-                <h4 className="text-sm font-semibold text-foreground">משתמשים מחוברים</h4>
+                <h4 className="text-sm font-semibold text-foreground">{t("משתמשים מחוברים")}</h4>
                 <Button
                   variant="outline"
                   size="sm"
@@ -259,9 +261,9 @@ export default function OutlookCalendarSection() {
                 </Button>
               </div>
               {usersLoading ? (
-                <div className="flex items-center gap-2 py-2 text-caption"><Loader2 className="w-3.5 h-3.5 animate-spin" /> טוען…</div>
+                <div className="flex items-center gap-2 py-2 text-caption"><Loader2 className="w-3.5 h-3.5 animate-spin" /> {t("טוען…")}</div>
               ) : adminUsers.length === 0 ? (
-                <p className="text-caption py-2">אין משתמשים מחוברים עדיין.</p>
+                <p className="text-caption py-2">{t("אין משתמשים מחוברים עדיין.")}</p>
               ) : (
                 <div className="space-y-1">
                   {adminUsers.map((u) => (
@@ -289,20 +291,20 @@ export default function OutlookCalendarSection() {
                         <span className="text-xs text-muted-foreground hidden md:inline">{u.pending_count} ממתינים</span>
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground" aria-label="פעולות">
+                            <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground" aria-label={t("פעולות")}>
                               <MoreVertical className="w-3.5 h-3.5" />
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="start">
                             <DropdownMenuItem onClick={() => handleAdminAction('force_sync', u.email)}>
-                              <RefreshCw className="w-3.5 h-3.5" /> סנכרן עכשיו
+                              <RefreshCw className="w-3.5 h-3.5" /> {t("סנכרן עכשיו")}
                             </DropdownMenuItem>
                             <DropdownMenuItem onClick={() => handleAdminAction('reset_token', u.email)}>
-                              <RotateCcw className="w-3.5 h-3.5" /> אפס delta token
+                              <RotateCcw className="w-3.5 h-3.5" /> {t("אפס delta token")}
                             </DropdownMenuItem>
                             <DropdownMenuSeparator />
                             <DropdownMenuItem className="text-destructive" onClick={() => setDisconnectTarget(u)}>
-                              <Unlink className="w-3.5 h-3.5" /> נתק
+                              <Unlink className="w-3.5 h-3.5" /> {t("נתק")}
                             </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
@@ -319,7 +321,7 @@ export default function OutlookCalendarSection() {
       <AlertDialog open={liveSwitchOpen} onOpenChange={setLiveSwitchOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>מעבר למצב Live</AlertDialogTitle>
+            <AlertDialogTitle>{t("מעבר למצב Live")}</AlertDialogTitle>
             <AlertDialogDescription>
               מצב Live דורש חיבור פעיל ל-Outlook ו-Microsoft Teams. כל הנתונים יסונכרנו מ-Graph API האמיתי שלך.
               {!integrationStatus.outlook?.connected && ' חסר חיבור Outlook.'}
@@ -333,7 +335,7 @@ export default function OutlookCalendarSection() {
             >
               אשר מעבר
             </AlertDialogAction>
-            <AlertDialogCancel>ביטול</AlertDialogCancel>
+            <AlertDialogCancel>{t("ביטול")}</AlertDialogCancel>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
@@ -341,7 +343,7 @@ export default function OutlookCalendarSection() {
       <AlertDialog open={!!disconnectTarget} onOpenChange={(open) => !open && setDisconnectTarget(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>ניתוק משתמש</AlertDialogTitle>
+            <AlertDialogTitle>{t("ניתוק משתמש")}</AlertDialogTitle>
             <AlertDialogDescription>
               {disconnectTarget?.email ? `ניתוק ${disconnectTarget.email}` : 'ניתוק משתמש'}. הסנכרון יופסק ורשומת הסנכרון תימחק. אירועים מתועדים לא יימחקו.
             </AlertDialogDescription>
@@ -353,7 +355,7 @@ export default function OutlookCalendarSection() {
             >
               נתק
             </AlertDialogAction>
-            <AlertDialogCancel>ביטול</AlertDialogCancel>
+            <AlertDialogCancel>{t("ביטול")}</AlertDialogCancel>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

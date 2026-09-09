@@ -9,8 +9,10 @@ import SectionCard from '@/components/shared/SectionCard';
 import StatusBadge from '@/components/shared/StatusBadge';
 import { OUTLOOK_CONNECTOR_ID } from '@/lib/outlookConnector';
 import { TEAMS_CONNECTOR_ID } from '@/lib/teamsConnector';
+import { useI18n } from '@/lib/i18n';
 
 export default function UserConnectionsPanel() {
+  const { t } = useI18n();
   const queryClient = useQueryClient();
   const [search, setSearch] = useState('');
   const [linkCopied, setLinkCopied] = useState(null);
@@ -35,7 +37,7 @@ export default function UserConnectionsPanel() {
 
   const handleCopyLink = async (service, connectorId, email) => {
     if (!connectorId || connectorId.startsWith('REPLACE_WITH')) {
-      toast.error('Connector ID לא הוגדר. יש לרשום את הקונקטור ב-workspace תחילה.');
+      toast.error(t("Connector ID לא הוגדר. יש לרשום את הקונקטור ב-workspace תחילה."));
       return;
     }
     try {
@@ -53,7 +55,7 @@ export default function UserConnectionsPanel() {
 
   return (
     <SectionCard
-      title="חיבורי Outlook ו-Teams למשתמשים"
+      title={t("חיבורי Outlook ו-Teams למשתמשים")}
       icon={Users}
       actions={
         <span className="text-xs text-muted-foreground">
@@ -68,7 +70,7 @@ export default function UserConnectionsPanel() {
 
         {!outlookConfigured || !teamsConfigured ? (
           <div className="flex items-start gap-2 p-3 rounded-lg bg-warning-muted text-warning text-xs">
-            <span className="font-semibold">שים לב:</span>
+            <span className="font-semibold">{t("שים לב:")}</span>
             <span>
               {!outlookConfigured && 'מזהה Outlook connector עדיין placeholder. '}
               {!teamsConfigured && 'מזהה Teams connector עדיין placeholder. '}
@@ -82,21 +84,21 @@ export default function UserConnectionsPanel() {
           <Input
             value={search}
             onChange={e => setSearch(e.target.value)}
-            placeholder="חיפוש לפי שם או אימייל…"
+            placeholder={t("חיפוש לפי שם או אימייל…")}
             className="pr-9 h-9"
           />
         </div>
 
         {isLoading ? (
           <div className="flex items-center gap-2 py-6 justify-center text-caption">
-            <Loader2 className="w-4 h-4 animate-spin" /> טוען משתמשים…
+            <Loader2 className="w-4 h-4 animate-spin" /> {t("טוען משתמשים…")}
           </div>
         ) : filtered.length === 0 ? (
-          <p className="text-caption py-4 text-center">לא נמצאו משתמשים.</p>
+          <p className="text-caption py-4 text-center">{t("לא נמצאו משתמשים.")}</p>
         ) : (
           <div className="border border-border rounded-lg overflow-hidden">
             <div className="grid grid-cols-[1fr_auto_auto] gap-2 px-3 py-2 bg-muted/50 text-caption font-semibold border-b border-border">
-              <span>משתמש</span>
+              <span>{t("משתמש")}</span>
               <span className="text-center w-24">Outlook</span>
               <span className="text-center w-24">Teams</span>
             </div>
@@ -109,9 +111,9 @@ export default function UserConnectionsPanel() {
                   </div>
                   <div className="w-24 flex flex-col items-center gap-1">
                     {u.outlook_connected ? (
-                      <StatusBadge tone="success" label="מחובר" />
+                      <StatusBadge tone="success" label={t("מחובר")} />
                     ) : (
-                      <StatusBadge tone="neutral" label="לא מחובר" />
+                      <StatusBadge tone="neutral" label={t("לא מחובר")} />
                     )}
                     <Button
                       variant="ghost"
@@ -121,17 +123,17 @@ export default function UserConnectionsPanel() {
                       onClick={() => handleCopyLink('Outlook', OUTLOOK_CONNECTOR_ID, u.email)}
                     >
                       {linkCopied === `outlook:${u.email}` ? (
-                        <><CheckCircle2 className="w-3 h-3 text-success" /> הועתק</>
+                        <><CheckCircle2 className="w-3 h-3 text-success" /> {t("הועתק")}</>
                       ) : (
-                        <><Link2 className="w-3 h-3" /> קישור</>
+                        <><Link2 className="w-3 h-3" /> {t("קישור")}</>
                       )}
                     </Button>
                   </div>
                   <div className="w-24 flex flex-col items-center gap-1">
                     {u.teams_connected ? (
-                      <StatusBadge tone="success" label="מחובר" />
+                      <StatusBadge tone="success" label={t("מחובר")} />
                     ) : (
-                      <StatusBadge tone="neutral" label="לא מחובר" />
+                      <StatusBadge tone="neutral" label={t("לא מחובר")} />
                     )}
                     <Button
                       variant="ghost"
@@ -141,9 +143,9 @@ export default function UserConnectionsPanel() {
                       onClick={() => handleCopyLink('Teams', TEAMS_CONNECTOR_ID, u.email)}
                     >
                       {linkCopied === `teams:${u.email}` ? (
-                        <><CheckCircle2 className="w-3 h-3 text-success" /> הועתק</>
+                        <><CheckCircle2 className="w-3 h-3 text-success" /> {t("הועתק")}</>
                       ) : (
-                        <><Link2 className="w-3 h-3" /> קישור</>
+                        <><Link2 className="w-3 h-3" /> {t("קישור")}</>
                       )}
                     </Button>
                   </div>

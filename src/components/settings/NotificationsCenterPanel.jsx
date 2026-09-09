@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Loader2, BellRing, Clock, Play } from 'lucide-react';
 import { toast } from 'sonner';
 import AllNotificationsTable from './notifications/AllNotificationsTable';
+import { useI18n } from '@/lib/i18n';
 
 const WEEK_DAYS = [
   { id: 0, label: 'א' }, { id: 1, label: 'ב' }, { id: 2, label: 'ג' },
@@ -14,6 +15,7 @@ const WEEK_DAYS = [
 ];
 
 export default function NotificationsCenterPanel() {
+  const { t } = useI18n();
   const queryClient = useQueryClient();
 
   // --- Master switches ---
@@ -45,9 +47,9 @@ export default function NotificationsCenterPanel() {
     mutationFn: (value) => api.functions.invoke('notificationsAdmin', { action: 'setConfig', settingKey: 'alerts_heartbeat_config', value }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['heartbeat-config'] });
-      toast.success('תצורת ה-heartbeat נשמרה');
+      toast.success(t("תצורת ה-heartbeat נשמרה"));
     },
-    onError: () => toast.error('שמירה נכשלה'),
+    onError: () => toast.error(t("שמירה נכשלה")),
   });
 
   // --- Status (last run timestamps) ---
@@ -80,7 +82,7 @@ export default function NotificationsCenterPanel() {
       queryClient.invalidateQueries({ queryKey: ['notifications-status'] });
       queryClient.invalidateQueries({ queryKey: ['all-notifications'] });
     },
-    onError: () => toast.error('ההרצה נכשלה'),
+    onError: () => toast.error(t("ההרצה נכשלה")),
   });
 
   // --- Local state for heartbeat editing ---
@@ -113,8 +115,8 @@ export default function NotificationsCenterPanel() {
             <BellRing className="w-4 h-4 text-primary" />
           </div>
           <div>
-            <h3 className="text-sm font-bold text-foreground">מתגי אב</h3>
-            <p className="text-[11px] text-muted-foreground">שליטה גלובלית בכל שיגור התראות ומיילים מהמערכת</p>
+            <h3 className="text-sm font-bold text-foreground">{t("מתגי אב")}</h3>
+            <p className="text-[11px] text-muted-foreground">{t("שליטה גלובלית בכל שיגור התראות ומיילים מהמערכת")}</p>
           </div>
         </div>
 
@@ -124,8 +126,8 @@ export default function NotificationsCenterPanel() {
           <div className="space-y-3">
             <div className="flex items-center justify-between rounded-lg bg-muted/40 px-3 py-2.5">
               <div>
-                <span className="text-sm font-medium text-foreground">כל ההתראות</span>
-                <p className="text-[11px] text-muted-foreground">כיבוי מיידי של כל השיגורים</p>
+                <span className="text-sm font-medium text-foreground">{t("כל ההתראות")}</span>
+                <p className="text-[11px] text-muted-foreground">{t("כיבוי מיידי של כל השיגורים")}</p>
               </div>
               <Switch
                 checked={master.all}
@@ -136,8 +138,8 @@ export default function NotificationsCenterPanel() {
 
             <div className={`flex items-center justify-between rounded-lg bg-muted/40 px-3 py-2.5 transition-opacity ${!master.all ? 'opacity-40' : ''}`}>
               <div>
-                <span className="text-sm font-medium text-foreground">פעמון</span>
-                <p className="text-[11px] text-muted-foreground">התראות בתוך המערכת</p>
+                <span className="text-sm font-medium text-foreground">{t("פעמון")}</span>
+                <p className="text-[11px] text-muted-foreground">{t("התראות בתוך המערכת")}</p>
               </div>
               <Switch
                 checked={master.bell}
@@ -148,8 +150,8 @@ export default function NotificationsCenterPanel() {
 
             <div className={`flex items-center justify-between rounded-lg bg-muted/40 px-3 py-2.5 transition-opacity ${!master.all ? 'opacity-40' : ''}`}>
               <div>
-                <span className="text-sm font-medium text-foreground">מייל</span>
-                <p className="text-[11px] text-muted-foreground">שליחת מיילים מהמערכת</p>
+                <span className="text-sm font-medium text-foreground">{t("מייל")}</span>
+                <p className="text-[11px] text-muted-foreground">{t("שליחת מיילים מהמערכת")}</p>
               </div>
               <Switch
                 checked={master.email}
@@ -174,14 +176,14 @@ export default function NotificationsCenterPanel() {
             <Clock className="w-4 h-4 text-primary" />
           </div>
           <div>
-            <h3 className="text-sm font-bold text-foreground">תזמון (Heartbeat)</h3>
-            <p className="text-[11px] text-muted-foreground">שעות ותדירות ריצת סריקת האלרטים</p>
+            <h3 className="text-sm font-bold text-foreground">{t("תזמון (Heartbeat)")}</h3>
+            <p className="text-[11px] text-muted-foreground">{t("שעות ותדירות ריצת סריקת האלרטים")}</p>
           </div>
         </div>
 
         <div className="space-y-3">
           <div className="flex items-center justify-between rounded-lg bg-muted/40 px-3 py-2">
-            <span className="text-sm font-medium">אלרטים פעילים</span>
+            <span className="text-sm font-medium">{t("אלרטים פעילים")}</span>
             <Switch
               checked={hb.enabled}
               onCheckedChange={(v) => setHbDraft({ ...hb, enabled: v })}
@@ -190,21 +192,21 @@ export default function NotificationsCenterPanel() {
 
           <div className="grid grid-cols-3 gap-2">
             <div className="space-y-1">
-              <label className="text-[11px] text-muted-foreground">שעת התחלה</label>
+              <label className="text-[11px] text-muted-foreground">{t("שעת התחלה")}</label>
               <Input type="number" min={0} max={23} value={hb.start_hour} onChange={(e) => setHbDraft({ ...hb, start_hour: Number(e.target.value) })} className="h-8 text-sm" />
             </div>
             <div className="space-y-1">
-              <label className="text-[11px] text-muted-foreground">שעת סיום</label>
+              <label className="text-[11px] text-muted-foreground">{t("שעת סיום")}</label>
               <Input type="number" min={0} max={23} value={hb.end_hour} onChange={(e) => setHbDraft({ ...hb, end_hour: Number(e.target.value) })} className="h-8 text-sm" />
             </div>
             <div className="space-y-1">
-              <label className="text-[11px] text-muted-foreground">תדירות (דקות)</label>
+              <label className="text-[11px] text-muted-foreground">{t("תדירות (דקות)")}</label>
               <Input type="number" min={1} value={hb.frequency_minutes} onChange={(e) => setHbDraft({ ...hb, frequency_minutes: Number(e.target.value) })} className="h-8 text-sm" />
             </div>
           </div>
 
           <div className="space-y-1">
-            <label className="text-[11px] text-muted-foreground">ימים פעילים</label>
+            <label className="text-[11px] text-muted-foreground">{t("ימים פעילים")}</label>
             <div className="flex gap-1">
               {WEEK_DAYS.map(d => (
                 <button
@@ -221,20 +223,20 @@ export default function NotificationsCenterPanel() {
           {/* Status row */}
           <div className="rounded-lg bg-muted/30 px-3 py-2 space-y-1">
             <div className="flex items-center justify-between text-[11px]">
-              <span className="text-muted-foreground">ריצת אלרטים אחרונה:</span>
+              <span className="text-muted-foreground">{t("ריצת אלרטים אחרונה:")}</span>
               <span className="text-foreground font-medium">{fmtTime(status.alertsLastRun)}</span>
             </div>
             <div className="flex items-center justify-between text-[11px]">
-              <span className="text-muted-foreground">ריצת תזכורות אחרונה:</span>
+              <span className="text-muted-foreground">{t("ריצת תזכורות אחרונה:")}</span>
               <span className="text-foreground font-medium">{fmtTime(status.remindersLastRun)}</span>
             </div>
             <div className="flex items-center justify-between text-[11px]">
-              <span className="text-muted-foreground">התראות שנשלחו היום:</span>
+              <span className="text-muted-foreground">{t("התראות שנשלחו היום:")}</span>
               <span className="text-foreground font-medium">{status.alertsSentToday ?? '—'}</span>
             </div>
           </div>
 
-          <p className="text-[11px] text-muted-foreground">תזכורות אישיות נשלחות תמיד, גם מחוץ לחלון השעות.</p>
+          <p className="text-[11px] text-muted-foreground">{t("תזכורות אישיות נשלחות תמיד, גם מחוץ לחלון השעות.")}</p>
 
           <Button size="sm" onClick={() => saveHb.mutate(hb)} disabled={saveHb.isPending || !hbDraft} className="w-full">
             {saveHb.isPending && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
@@ -246,7 +248,7 @@ export default function NotificationsCenterPanel() {
       <div className="bg-card rounded-xl border border-border shadow-sm p-5">
         <div className="flex items-center gap-2.5 mb-3">
           <Play className="w-4 h-4 text-primary" />
-          <h3 className="text-sm font-bold text-foreground">הרץ עכשיו</h3>
+          <h3 className="text-sm font-bold text-foreground">{t("הרץ עכשיו")}</h3>
         </div>
         <div className="grid grid-cols-3 gap-2">
           <Button variant="outline" size="sm" onClick={() => runNow.mutate('reminders')} disabled={runNow.isPending} className="text-xs">

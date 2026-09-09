@@ -4,8 +4,10 @@ import { useQueryClient } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
 import { Mail, CheckCircle2, XCircle, Loader2, Send } from 'lucide-react';
 import { toast } from 'sonner';
+import { useI18n } from '@/lib/i18n';
 
 export default function GmailSection({ status }) {
+  const { t } = useI18n();
  const queryClient = useQueryClient();
  const [sending, setSending] = useState(false);
  const connected = status?.connected;
@@ -19,9 +21,9 @@ export default function GmailSection({ status }) {
     subject: `בדיקת חיבור Gmail${APP_IDENTITY.name ? ` — ${APP_IDENTITY.name}` : ''}`,
     body: `זוהי הודעת בדיקה מ${SYSTEM_LABEL}.\n\nאם קיבלת הודעה זו, חיבור ה-Gmail פעיל ותקין.\nכל התראות המערכת יישלחו מכתובת זו מעתה.`,
    });
-   toast.success('הודעת בדיקה נשלחה לכתובת האימייל שלך');
+   toast.success(t("הודעת בדיקה נשלחה לכתובת האימייל שלך"));
   } catch (e) {
-   toast.error('שליחת אימייל נכשלה. ודא שהחיבור ל-Gmail פעיל.');
+   toast.error(t("שליחת אימייל נכשלה. ודא שהחיבור ל-Gmail פעיל."));
   }
   setSending(false);
  };
@@ -37,11 +39,11 @@ export default function GmailSection({ status }) {
       <h3 className="text-base font-bold text-foreground">Gmail</h3>
       {connected ? (
        <span className="inline-flex items-center gap-1 text-[11px] px-2.5 py-1 rounded-full font-semibold bg-success-muted text-success border border-success">
-        <CheckCircle2 className="w-3 h-3"/> מחובר
+        <CheckCircle2 className="w-3 h-3"/> {t("מחובר")}
        </span>
       ) : (
        <span className="inline-flex items-center gap-1 text-[11px] px-2.5 py-1 rounded-full font-semibold bg-muted text-muted-foreground border border-border">
-        <XCircle className="w-3 h-3"/> לא מחובר
+        <XCircle className="w-3 h-3"/> {t("לא מחובר")}
        </span>
       )}
      </div>

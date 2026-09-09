@@ -11,6 +11,7 @@ import {
 } from '@/components/ui/dialog';
 import { Plus, Trash2, Pencil, ArrowUp, ArrowDown, Loader2, SlidersHorizontal } from 'lucide-react';
 import { toast } from 'sonner';
+import { useI18n } from '@/lib/i18n';
 import {
   FIELD_TYPES, FIELD_TYPE_MAP, CUSTOM_FIELD_ENTITIES, fieldKeyFrom, sortFields,
   VISIBILITY_OPERATORS,
@@ -19,6 +20,7 @@ import {
 const INPUT = 'h-9 rounded-lg text-sm';
 
 function FieldDialog({ open, onOpenChange, field, entity, existingKeys, siblings = [], onSave }) {
+ const { t } = useI18n();
   const [draft, setDraft] = useState(
     () => field || { label: '', type: 'text', required: false, placeholder: '', help: '', options: [] }
   );
@@ -29,9 +31,9 @@ function FieldDialog({ open, onOpenChange, field, entity, existingKeys, siblings
 
   const save = () => {
     const label = draft.label.trim();
-    if (!label) return toast.error('שם השדה חובה');
+    if (!label) return toast.error(t("שם השדה חובה"));
     const options = optionsText.split('\n').map((o) => o.trim()).filter(Boolean);
-    if (type?.hasOptions && options.length === 0) return toast.error('הוסף לפחות אפשרות אחת');
+    if (type?.hasOptions && options.length === 0) return toast.error(t("הוסף לפחות אפשרות אחת"));
     onSave({
       ...draft,
       label,
@@ -46,34 +48,34 @@ function FieldDialog({ open, onOpenChange, field, entity, existingKeys, siblings
       <DialogContent className="max-w-md">
         <DialogHeader>
           <DialogTitle>{field ? 'עריכת שדה' : 'שדה חדש'}</DialogTitle>
-          <DialogDescription>השדה יופיע בטופס היצירה והעריכה של הישות שנבחרה.</DialogDescription>
+          <DialogDescription>{t("השדה יופיע בטופס היצירה והעריכה של הישות שנבחרה.")}</DialogDescription>
         </DialogHeader>
 
         <div className="space-y-3">
           <div className="space-y-1">
-            <Label className="text-xs text-muted-foreground">שם השדה</Label>
-            <Input value={draft.label} onChange={(e) => set({ label: e.target.value })} className={INPUT} placeholder="שם השדה" />
+            <Label className="text-xs text-muted-foreground">{t("שם השדה")}</Label>
+            <Input value={draft.label} onChange={(e) => set({ label: e.target.value })} className={INPUT} placeholder={t("שם השדה")} />
           </div>
 
           <div className="space-y-1">
-            <Label className="text-xs text-muted-foreground">סוג</Label>
+            <Label className="text-xs text-muted-foreground">{t("סוג")}</Label>
             <Select value={draft.type} onValueChange={(v) => set({ type: v })}>
               <SelectTrigger className={INPUT}><SelectValue /></SelectTrigger>
               <SelectContent>
-                {FIELD_TYPES.map((t) => <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>)}
+                {FIELD_TYPES.map((type) => <SelectItem key={type.value} value={type.value}>{t(type.label)}</SelectItem>)}
               </SelectContent>
             </Select>
           </div>
 
           {type?.hasOptions && (
             <div className="space-y-1">
-              <Label className="text-xs text-muted-foreground">אפשרויות — שורה לכל אפשרות</Label>
+              <Label className="text-xs text-muted-foreground">{t("אפשרויות — שורה לכל אפשרות")}</Label>
               <textarea
                 value={optionsText}
                 onChange={(e) => setOptionsText(e.target.value)}
                 rows={4}
                 className="w-full rounded-lg border border-border bg-background p-2 text-sm"
-                placeholder={'נמוך\nבינוני\nגבוה'}
+                placeholder={[t('נמוך'), t('בינוני'), t('גבוה')].join('\n')}
               />
             </div>
           )}
@@ -82,15 +84,15 @@ function FieldDialog({ open, onOpenChange, field, entity, existingKeys, siblings
               so there is one vocabulary for "when is this true". */}
           {siblings.length > 0 && (
             <div className="space-y-1">
-              <Label className="text-xs text-muted-foreground">הצג רק כאשר</Label>
+              <Label className="text-xs text-muted-foreground">{t("הצג רק כאשר")}</Label>
               <div className="grid grid-cols-3 gap-2">
                 <Select
                   value={draft.visible_when?.field || '__always__'}
                   onValueChange={(v) => set({ visible_when: v === '__always__' ? null : { ...(draft.visible_when || {}), field: v, operator: draft.visible_when?.operator || 'eq' } })}
                 >
-                  <SelectTrigger className={INPUT}><SelectValue placeholder="תמיד" /></SelectTrigger>
+                  <SelectTrigger className={INPUT}><SelectValue placeholder={t("תמיד")} /></SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="__always__">תמיד מוצג</SelectItem>
+                    <SelectItem value="__always__">{t("תמיד מוצג")}</SelectItem>
                     {siblings.map((sib) => <SelectItem key={sib.key} value={sib.key}>{sib.label}</SelectItem>)}
                   </SelectContent>
                 </Select>
@@ -101,14 +103,14 @@ function FieldDialog({ open, onOpenChange, field, entity, existingKeys, siblings
                 >
                   <SelectTrigger className={INPUT}><SelectValue /></SelectTrigger>
                   <SelectContent>
-                    {VISIBILITY_OPERATORS.map((op) => <SelectItem key={op.value} value={op.value}>{op.label}</SelectItem>)}
+                    {VISIBILITY_OPERATORS.map((op) => <SelectItem key={op.value} value={op.value}>{t(op.label)}</SelectItem>)}
                   </SelectContent>
                 </Select>
                 <Input
                   value={draft.visible_when?.value ?? ''}
                   onChange={(e) => set({ visible_when: { ...(draft.visible_when || {}), value: e.target.value } })}
                   disabled={!draft.visible_when?.field || ['empty', 'not_empty'].includes(draft.visible_when?.operator)}
-                  placeholder="ערך"
+                  placeholder={t("ערך")}
                   className={INPUT}
                 />
               </div>
@@ -117,11 +119,11 @@ function FieldDialog({ open, onOpenChange, field, entity, existingKeys, siblings
 
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1">
-              <Label className="text-xs text-muted-foreground">טקסט מציין מקום</Label>
+              <Label className="text-xs text-muted-foreground">{t("טקסט מציין מקום")}</Label>
               <Input value={draft.placeholder || ''} onChange={(e) => set({ placeholder: e.target.value })} className={INPUT} />
             </div>
             <div className="space-y-1">
-              <Label className="text-xs text-muted-foreground">הסבר מתחת לשדה</Label>
+              <Label className="text-xs text-muted-foreground">{t("הסבר מתחת לשדה")}</Label>
               <Input value={draft.help || ''} onChange={(e) => set({ help: e.target.value })} className={INPUT} />
             </div>
           </div>
@@ -133,7 +135,7 @@ function FieldDialog({ open, onOpenChange, field, entity, existingKeys, siblings
         </div>
 
         <DialogFooter>
-          <Button onClick={save}>שמירה</Button>
+          <Button onClick={save}>{t("שמירה")}</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
@@ -141,6 +143,7 @@ function FieldDialog({ open, onOpenChange, field, entity, existingKeys, siblings
 }
 
 export default function CustomFieldsPanel() {
+  const { t } = useI18n();
   const queryClient = useQueryClient();
   const [entity, setEntity] = useState('Project');
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -158,13 +161,13 @@ export default function CustomFieldsPanel() {
   const saveMutation = useMutation({
     mutationFn: ({ id, ...data }) =>
       id ? api.entities.CustomField.update(id, data) : api.entities.CustomField.create(data),
-    onSuccess: () => { invalidate(); setDialogOpen(false); setEditing(null); toast.success('השדה נשמר'); },
+    onSuccess: () => { invalidate(); setDialogOpen(false); setEditing(null); toast.success(t("השדה נשמר")); },
     onError: (e) => toast.error(e?.message || 'שמירת השדה נכשלה'),
   });
 
   const deleteMutation = useMutation({
     mutationFn: (id) => api.entities.CustomField.delete(id),
-    onSuccess: () => { invalidate(); toast.success('השדה נמחק'); },
+    onSuccess: () => { invalidate(); toast.success(t("השדה נמחק")); },
     onError: (e) => toast.error(e?.message || 'מחיקת השדה נכשלה'),
   });
 
@@ -187,12 +190,12 @@ export default function CustomFieldsPanel() {
               <SlidersHorizontal className="w-4 h-4 text-primary" />
             </div>
             <div>
-              <h3 className="text-sm font-bold text-foreground">שדות מותאמים</h3>
-              <p className="text-[11px] text-muted-foreground">הוסף שדות משלך לטפסים במערכת — ללא שינוי קוד</p>
+              <h3 className="text-sm font-bold text-foreground">{t("שדות מותאמים")}</h3>
+              <p className="text-[11px] text-muted-foreground">{t("הוסף שדות משלך לטפסים במערכת — ללא שינוי קוד")}</p>
             </div>
           </div>
           <Button size="sm" className="gap-1.5 flex-shrink-0" onClick={() => { setEditing(null); setDialogOpen(true); }}>
-            <Plus className="w-3.5 h-3.5" /> שדה חדש
+            <Plus className="w-3.5 h-3.5" /> {t("שדה חדש")}
           </Button>
         </div>
 
@@ -207,7 +210,7 @@ export default function CustomFieldsPanel() {
                   : 'text-muted-foreground hover:text-foreground hover:bg-muted'
               }`}
             >
-              {e.label}
+              {t(e.label)}
             </button>
           ))}
         </div>
@@ -236,16 +239,16 @@ export default function CustomFieldsPanel() {
                     </p>
                   </div>
                   <div className="flex items-center gap-0.5 flex-shrink-0">
-                    <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => move(field, -1)} disabled={i === 0} aria-label="הזז למעלה">
+                    <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => move(field, -1)} disabled={i === 0} aria-label={t("הזז למעלה")}>
                       <ArrowUp className="w-3.5 h-3.5" />
                     </Button>
-                    <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => move(field, 1)} disabled={i === fields.length - 1} aria-label="הזז למטה">
+                    <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => move(field, 1)} disabled={i === fields.length - 1} aria-label={t("הזז למטה")}>
                       <ArrowDown className="w-3.5 h-3.5" />
                     </Button>
-                    <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => { setEditing(field); setDialogOpen(true); }} aria-label="עריכה">
+                    <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => { setEditing(field); setDialogOpen(true); }} aria-label={t("עריכה")}>
                       <Pencil className="w-3.5 h-3.5" />
                     </Button>
-                    <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={() => deleteMutation.mutate(field.id)} aria-label="מחיקה">
+                    <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={() => deleteMutation.mutate(field.id)} aria-label={t("מחיקה")}>
                       <Trash2 className="w-3.5 h-3.5" />
                     </Button>
                   </div>

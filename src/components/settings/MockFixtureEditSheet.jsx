@@ -11,6 +11,7 @@ import {
   Sheet, SheetContent, SheetHeader, SheetTitle, SheetFooter,
 } from '@/components/ui/sheet';
 import { Loader2 } from 'lucide-react';
+import { useI18n } from '@/lib/i18n';
 
 const FIXTURE_TYPES = [
   { value: 'calendar_event', label: 'אירוע יומן' },
@@ -20,6 +21,7 @@ const FIXTURE_TYPES = [
 ];
 
 export default function MockFixtureEditSheet({ fixture, open, onOpenChange, onSave, isSaving }) {
+  const { t } = useI18n();
   const isCreate = !fixture?.id;
   const [scenarioKey, setScenarioKey] = useState(fixture?.scenario_key || '');
   const [fixtureType, setFixtureType] = useState(fixture?.fixture_type || 'calendar_event');
@@ -82,17 +84,17 @@ export default function MockFixtureEditSheet({ fixture, open, onOpenChange, onSa
 
         <div className="space-y-4 px-4 py-2">
           <div className="space-y-1.5">
-            <Label>מזהה תרחיש</Label>
+            <Label>{t("מזהה תרחיש")}</Label>
             <Input
               value={scenarioKey}
               onChange={(e) => setScenarioKey(e.target.value)}
-              placeholder="מזהה באנגלית, במקפים"
+              placeholder={t("מזהה באנגלית, במקפים")}
               disabled={!isCreate}
             />
           </div>
 
           <div className="space-y-1.5">
-            <Label>סוג</Label>
+            <Label>{t("סוג")}</Label>
             <Select value={fixtureType} onValueChange={setFixtureType} disabled={!isCreate}>
               <SelectTrigger className="h-9"><SelectValue /></SelectTrigger>
               <SelectContent>
@@ -104,7 +106,7 @@ export default function MockFixtureEditSheet({ fixture, open, onOpenChange, onSa
           </div>
 
           <div className="flex items-center justify-between gap-3 py-1">
-            <Label>פעיל</Label>
+            <Label>{t("פעיל")}</Label>
             <Switch checked={isActive} onCheckedChange={setIsActive} />
           </div>
 
@@ -120,7 +122,7 @@ export default function MockFixtureEditSheet({ fixture, open, onOpenChange, onSa
           </div>
 
           <div className="space-y-1.5">
-            <Label>הערות</Label>
+            <Label>{t("הערות")}</Label>
             <Textarea
               value={notes}
               onChange={(e) => setNotes(e.target.value)}

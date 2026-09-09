@@ -15,6 +15,7 @@ import {
   useDeleteFixture,
 } from '@/hooks/useMockFixtures';
 import MockFixtureEditSheet from './MockFixtureEditSheet';
+import { useI18n } from '@/lib/i18n';
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
@@ -28,6 +29,7 @@ const TYPE_LABELS = {
 };
 
 export default function MockDataPanel({ isAdmin, isLive }) {
+  const { t } = useI18n();
   const { data: fixtures = [], isLoading } = useMockFixtures(isAdmin);
   const { data: counts = {} } = useMockCounts(isAdmin);
   const seedMut = useSeedMockData();
@@ -51,13 +53,13 @@ export default function MockDataPanel({ isAdmin, isLive }) {
     setPurgeOpen(false);
     purgeMut.mutate(undefined, {
       onSuccess: (data) => toast.success(`נמחקו ${data.deleted_events} אירועים, ${data.deleted_logs} תיעודים${data.project_deleted ? ', פרויקט הדגמה נמחק' : ''}`),
-      onError: () => toast.error('שגיאה במחיקת נתונים'),
+      onError: () => toast.error(t("שגיאה במחיקת נתונים")),
     });
   };
 
   const handleToggle = (id) => {
     toggleMut.mutate(id, {
-      onError: () => toast.error('שגיאה בהחלפת מצב'),
+      onError: () => toast.error(t("שגיאה בהחלפת מצב")),
     });
   };
 
@@ -69,14 +71,14 @@ export default function MockDataPanel({ isAdmin, isLive }) {
         toast.success(isCreate ? 'תרחיש נוצר' : 'תרחיש עודכן');
         setEditOpen(false);
       },
-      onError: () => toast.error('שגיאה בשמירה'),
+      onError: () => toast.error(t("שגיאה בשמירה")),
     });
   };
 
   const handleDelete = (id) => {
     deleteMut.mutate(id, {
-      onSuccess: () => toast.success('תרחיש נמחק'),
-      onError: () => toast.error('שגיאה במחיקה'),
+      onSuccess: () => toast.success(t("תרחיש נמחק")),
+      onError: () => toast.error(t("שגיאה במחיקה")),
     });
   };
 
@@ -85,7 +87,7 @@ export default function MockDataPanel({ isAdmin, isLive }) {
   return (
     <>
       <SectionCard
-        title="סביבת בדיקה — נתונים מדומים"
+        title={t("סביבת בדיקה — נתונים מדומים")}
         icon={FlaskConical}
         className="bg-warning-muted border-warning/20"
         actions={
@@ -128,10 +130,10 @@ export default function MockDataPanel({ isAdmin, isLive }) {
 
           {isLoading ? (
             <div className="flex items-center gap-2 py-4 text-caption">
-              <Loader2 className="w-3.5 h-3.5 animate-spin" /> טוען תרחישים…
+              <Loader2 className="w-3.5 h-3.5 animate-spin" /> {t("טוען תרחישים…")}
             </div>
           ) : fixtures.length === 0 ? (
-            <p className="text-caption py-2">אין תרחישים מוגדרים. לחץ "צור נתוני בדיקה" להתחלה.</p>
+            <p className="text-caption py-2">{t("אין תרחישים מוגדרים. לחץ \"צור נתוני בדיקה\" להתחלה.")}</p>
           ) : (
             <div className="space-y-1">
               {fixtures.map((f) => (
@@ -160,7 +162,7 @@ export default function MockDataPanel({ isAdmin, isLive }) {
                       variant="ghost"
                       size="icon"
                       className="h-7 w-7 text-muted-foreground"
-                      aria-label="עריכה"
+                      aria-label={t("עריכה")}
                       onClick={() => { setEditTarget(f); setEditOpen(true); }}
                     >
                       <Pencil className="w-3.5 h-3.5" />
@@ -178,7 +180,7 @@ export default function MockDataPanel({ isAdmin, isLive }) {
             onClick={() => { setEditTarget(null); setEditOpen(true); }}
             disabled={isLive}
           >
-            <Plus className="w-3.5 h-3.5" /> הוסף תרחיש מותאם
+            <Plus className="w-3.5 h-3.5" /> {t("הוסף תרחיש מותאם")}
           </Button>
         </div>
       </SectionCard>
@@ -194,7 +196,7 @@ export default function MockDataPanel({ isAdmin, isLive }) {
       <AlertDialog open={purgeOpen} onOpenChange={setPurgeOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>מחיקת נתוני בדיקה</AlertDialogTitle>
+            <AlertDialogTitle>{t("מחיקת נתוני בדיקה")}</AlertDialogTitle>
             <AlertDialogDescription>
               פעולה זו תמחק את כל האירועים המדומים (is_mock: true), את כל תיעודי הפגישות מפרויקט ההדגמה, ואת פרויקט ההדגמה עצמו. לא ניתן לשחזר.
             </AlertDialogDescription>
@@ -206,7 +208,7 @@ export default function MockDataPanel({ isAdmin, isLive }) {
             >
               מחק הכל
             </AlertDialogAction>
-            <AlertDialogCancel>ביטול</AlertDialogCancel>
+            <AlertDialogCancel>{t("ביטול")}</AlertDialogCancel>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

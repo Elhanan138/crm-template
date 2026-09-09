@@ -6,8 +6,10 @@ import { Switch } from '@/components/ui/switch';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Eye, Lock, Loader2 } from 'lucide-react';
 import { PROJECT_TABS } from '@/components/project/projectTabs';
+import { useI18n } from '@/lib/i18n';
 
 export default function GlobalTabVisibilityPanel() {
+  const { t } = useI18n();
  const queryClient = useQueryClient();
 
  const { data: res, isLoading } = useQuery({
@@ -43,8 +45,8 @@ export default function GlobalTabVisibilityPanel() {
      <Eye className="w-4 h-4 text-primary"/>
     </div>
     <div>
-     <h3 className="text-sm font-bold text-foreground">תתי-עמודים גלובליים</h3>
-     <p className="text-[11px] text-muted-foreground">נהל אילו טאבים יופיעו בכל הפרויקטים — הסתרה אינה מוחקת נתונים</p>
+     <h3 className="text-sm font-bold text-foreground">{t("תתי-עמודים גלובליים")}</h3>
+     <p className="text-[11px] text-muted-foreground">{t("נהל אילו טאבים יופיעו בכל הפרויקטים — הסתרה אינה מוחקת נתונים")}</p>
     </div>
    </div>
    <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
@@ -64,11 +66,11 @@ export default function GlobalTabVisibilityPanel() {
           <TooltipTrigger asChild>
            <div className="flex items-center gap-1.5 cursor-help">
             <Lock className="w-3 h-3 text-muted-foreground"/>
-            <span className="text-[11px] text-muted-foreground whitespace-nowrap">תמיד מוצג</span>
+            <span className="text-[11px] text-muted-foreground whitespace-nowrap">{t("תמיד מוצג")}</span>
            </div>
           </TooltipTrigger>
           <TooltipContent>
-           <p>טאב הסקירה אינו ניתן להסתרה</p>
+           <p>{t("טאב הסקירה אינו ניתן להסתרה")}</p>
           </TooltipContent>
          </Tooltip>
         </TooltipProvider>

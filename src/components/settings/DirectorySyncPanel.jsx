@@ -14,6 +14,7 @@ import {
   Accordion, AccordionContent, AccordionItem, AccordionTrigger,
 } from '@/components/ui/accordion';
 import { formatDate } from '@/lib/formatDate';
+import { useI18n } from '@/lib/i18n';
 
 /**
  * Entra ID directory sync panel.
@@ -21,6 +22,7 @@ import { formatDate } from '@/lib/formatDate';
  * Apply updates only selected members. New members are created one-by-one.
  */
 export default function DirectorySyncPanel() {
+  const { t } = useI18n();
   const [sheetOpen, setSheetOpen] = useState(false);
   const [diff, setDiff] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -48,7 +50,7 @@ export default function DirectorySyncPanel() {
       setDiff(res.data);
       setSelected(new Set());
     } catch (e) {
-      toast.error('שגיאה בסנכרון דירקטורי');
+      toast.error(t("שגיאה בסנכרון דירקטורי"));
       setSheetOpen(false);
     } finally {
       setLoading(false);
@@ -91,7 +93,7 @@ export default function DirectorySyncPanel() {
       setDiff(preview.data);
       setSelected(new Set());
     } catch (e) {
-      toast.error('שגיאה בעדכון רשומות');
+      toast.error(t("שגיאה בעדכון רשומות"));
     } finally {
       setApplying(false);
     }
@@ -104,12 +106,12 @@ export default function DirectorySyncPanel() {
         action: 'create',
         entra_object_id: entraObjectId,
       });
-      toast.success('איש צוות נוצר');
+      toast.success(t("איש צוות נוצר"));
       // Refresh preview
       const preview = await api.functions.invoke('syncDirectory', { action: 'preview' });
       setDiff(preview.data);
     } catch (e) {
-      toast.error('שגיאה ביצירת איש צוות');
+      toast.error(t("שגיאה ביצירת איש צוות"));
     } finally {
       setCreating(null);
     }
@@ -122,7 +124,7 @@ export default function DirectorySyncPanel() {
 
   return (
     <SectionCard
-      title="דירקטורי ארגוני"
+      title={t("דירקטורי ארגוני")}
       icon={Users}
       actions={
         <Button
@@ -151,7 +153,7 @@ export default function DirectorySyncPanel() {
       <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
         <SheetContent side="left" className="w-full sm:max-w-xl p-0 overflow-hidden flex flex-col">
           <SheetHeader className="px-5 sm:px-6 py-4 border-b border-border text-right shrink-0">
-            <SheetTitle className="text-base font-bold">סנכרון דירקטורי</SheetTitle>
+            <SheetTitle className="text-base font-bold">{t("סנכרון דירקטורי")}</SheetTitle>
             {lastSync && (
               <p className="text-xs text-muted-foreground">
                 סנכרון אחרון: {formatDate(lastSync, 'short-padded')}
@@ -218,7 +220,7 @@ export default function DirectorySyncPanel() {
                   </AccordionTrigger>
                   <AccordionContent className="space-y-1 pt-2">
                     {newUsers.length === 0 ? (
-                      <p className="text-xs text-muted-foreground py-2">אין משתמשים חדשים</p>
+                      <p className="text-xs text-muted-foreground py-2">{t("אין משתמשים חדשים")}</p>
                     ) : (
                       newUsers.map((u) => (
                         <div key={u.entra_object_id} className="flex items-center gap-2 py-1.5">
@@ -256,7 +258,7 @@ export default function DirectorySyncPanel() {
                   </AccordionTrigger>
                   <AccordionContent className="space-y-1 pt-2">
                     {orphaned.length === 0 ? (
-                      <p className="text-xs text-muted-foreground py-2">אין רשומות יתומות</p>
+                      <p className="text-xs text-muted-foreground py-2">{t("אין רשומות יתומות")}</p>
                     ) : (
                       orphaned.map((o) => (
                         <div key={o.member_id} className="flex items-center gap-2 py-1.5">
@@ -264,7 +266,7 @@ export default function DirectorySyncPanel() {
                             <span className="text-sm text-foreground">{o.name}</span>
                             <span className="text-xs text-muted-foreground block" dir="ltr">{o.email}</span>
                           </div>
-                          <StatusBadge label="ללא מקבילה" tone="warning" className="text-[10px]" />
+                          <StatusBadge label={t("ללא מקבילה")} tone="warning" className="text-[10px]" />
                         </div>
                       ))
                     )}
@@ -281,7 +283,7 @@ export default function DirectorySyncPanel() {
                   </AccordionTrigger>
                   <AccordionContent className="space-y-1 pt-2">
                     {disabled.length === 0 ? (
-                      <p className="text-xs text-muted-foreground py-2">אין משתמשים מנוטרלים</p>
+                      <p className="text-xs text-muted-foreground py-2">{t("אין משתמשים מנוטרלים")}</p>
                     ) : (
                       <>
                         <button
@@ -309,7 +311,7 @@ export default function DirectorySyncPanel() {
                 </AccordionItem>
               </Accordion>
             ) : (
-              <p className="text-sm text-muted-foreground text-center py-12">לא נטענו נתונים</p>
+              <p className="text-sm text-muted-foreground text-center py-12">{t("לא נטענו נתונים")}</p>
             )}
           </div>
 

@@ -11,6 +11,7 @@ import { SETTINGS_CATALOG, ADMIN_SECTIONS } from '@/lib/settingsCatalog';
 import PageHeader from '@/components/shared/PageHeader';
 import { NAV_ICONS } from '@/lib/navIcons';
 import SectionStepperNav from '@/components/shared/SectionStepperNav';
+import { useI18n } from '@/lib/i18n';
 // The export runs entirely in the browser (src/lib/browserExport.js), so the
 // button works in the deployed app too — not just on the dev server. It is
 // resolved through a glob so that a bundle exported with dev tools switched off
@@ -40,6 +41,7 @@ const ALL_TABS = [
 ].filter((t) => (t.key === 'admin' ? ADMIN_CHILDREN.length > 0 : isSectionEnabled(t.key)));
 
 export default function Settings() {
+  const { t } = useI18n();
   const { isRealAdmin } = useAccessControl();
   const [searchParams, setSearchParams] = useSearchParams();
   const [adminSub, setAdminSub] = useState(ADMIN_CHILDREN[0]?.key || 'system-features');
@@ -63,15 +65,15 @@ export default function Settings() {
     <div>
       <PageHeader
         icon={NAV_ICONS.settings}
-        title="הגדרות"
-        subtitle="ניהול המערכת, ההעדפות ומעקב הפעולות"
+        title={t("הגדרות")}
+        subtitle={t("ניהול המערכת, ההעדפות ומעקב הפעולות")}
         actions={
           EXPORT_ENABLED ? (
             <Button
               onClick={() => setExportOpen(true)}
               className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-full px-5 h-10 text-sm font-semibold gap-2"
             >
-              <Download className="w-4 h-4" /> ייצוא (ZIP)
+              <Download className="w-4 h-4" /> {t("ייצוא (ZIP)")}
             </Button>
           ) : null
         }
@@ -81,9 +83,9 @@ export default function Settings() {
         <aside className="lg:w-56 lg:flex-shrink-0">
           <div className="sticky top-20">
             <SectionStepperNav
-              title="הגדרות"
+              title={t("הגדרות")}
               searchable
-              searchPlaceholder="חיפוש הגדרה..."
+              searchPlaceholder={t("חיפוש הגדרה...")}
               sections={sections}
               activeKey={active}
               activeChildKey={active === 'admin' ? adminSub : undefined}

@@ -6,10 +6,12 @@ import { Loader2, ToggleLeft, RotateCcw } from 'lucide-react';
 import { toast } from 'sonner';
 import { recordAudit } from '@/lib/auditLog';
 import { buildCapabilityCatalogue, ACCESS_LEVELS, SETTINGS_KEY, accessOf } from '@/lib/capabilities';
+import { useI18n } from '@/lib/i18n';
 
 const CATALOGUE = buildCapabilityCatalogue();
 
 function Segmented({ value, onChange, disabled }) {
+  const { t } = useI18n();
   return (
     <div className="flex bg-muted/50 rounded-lg p-0.5 flex-shrink-0">
       {ACCESS_LEVELS.map((level) => (
@@ -26,7 +28,7 @@ function Segmented({ value, onChange, disabled }) {
               : 'text-muted-foreground hover:text-foreground'
           }`}
         >
-          {level.label}
+          {t(level.label)}
         </button>
       ))}
     </div>
@@ -34,11 +36,12 @@ function Segmented({ value, onChange, disabled }) {
 }
 
 function Row({ item, value, onChange, disabled, muted }) {
+  const { t } = useI18n();
   return (
     <div className={`flex items-center justify-between gap-3 rounded-lg px-3 py-2 ${muted ? 'opacity-50' : ''} hover:bg-muted/30`}>
       <div className="min-w-0">
-        <p className="text-sm font-medium truncate">{item.label}</p>
-        {item.hint && <p className="text-[11px] text-muted-foreground truncate" dir="auto">{item.hint}</p>}
+        <p className="text-sm font-medium truncate">{t(item.label)}</p>
+        {item.hint && <p className="text-[11px] text-muted-foreground truncate" dir="auto">{t(item.hint)}</p>}
       </div>
       <Segmented value={value} onChange={onChange} disabled={disabled} />
     </div>
@@ -46,6 +49,7 @@ function Row({ item, value, onChange, disabled, muted }) {
 }
 
 export default function CapabilitiesPanel() {
+  const { t } = useI18n();
   const queryClient = useQueryClient();
 
   const { data: res, isLoading } = useQuery({
@@ -80,7 +84,7 @@ export default function CapabilitiesPanel() {
     mutationFn: () => api.functions.invoke('globalTabVisibility', { action: 'reset', settingKey: SETTINGS_KEY }),
     onSuccess: () => {
       invalidate();
-      toast.success('הכל הוחזר לפתוח');
+      toast.success(t("הכל הוחזר לפתוח"));
       recordAudit({ area: 'capabilities', action: 'איפוס כל היכולות לפתוח' });
     },
     onError: (e) => toast.error(e?.message || 'האיפוס נכשל'),
@@ -101,9 +105,9 @@ export default function CapabilitiesPanel() {
               <ToggleLeft className="w-4 h-4 text-primary" />
             </div>
             <div className="min-w-0">
-              <h3 className="text-sm font-bold">יכולות המערכת</h3>
+              <h3 className="text-sm font-bold">{t("יכולות המערכת")}</h3>
               <p className="text-[11px] text-muted-foreground">
-                כיבוי מסתיר את היכולת לגמרי — מהתפריט, מהמסלול ומכל מקום שהיא מופיעה בו.
+                {t('כיבוי מסתיר את היכולת לגמרי — מהתפריט, מהמסלול ומכל מקום שהיא מופיעה בו.')}
               </p>
             </div>
           </div>
@@ -111,7 +115,7 @@ export default function CapabilitiesPanel() {
             variant="outline" size="sm" className="h-8 gap-1.5 text-xs flex-shrink-0"
             onClick={() => resetMutation.mutate()} disabled={closedCount === 0 && Object.keys(values).length === 0}
           >
-            <RotateCcw className="w-3.5 h-3.5" /> אפס הכל
+            <RotateCcw className="w-3.5 h-3.5" /> {t("אפס הכל")}
           </Button>
         </div>
         {closedCount > 0 && (
@@ -127,7 +131,7 @@ export default function CapabilitiesPanel() {
         return (
           <section key={group.id} className="bg-card rounded-xl border border-border shadow-sm p-4">
             <div className="flex items-center justify-between gap-3 mb-2">
-              <h4 className="text-xs font-bold text-muted-foreground">{group.label}</h4>
+              <h4 className="text-xs font-bold text-muted-foreground">{t(group.label)}</h4>
               {group.parent && (
                 <Segmented
                   value={parentLevel}

@@ -9,8 +9,10 @@ import AlertHeartbeatSection from '@/components/settings/AlertHeartbeatSection';
 import UserConnectionsPanel from '@/components/settings/UserConnectionsPanel';
 import ServerStatusCard from '@/components/settings/ServerStatusCard';
 import { useServerRuntime } from '@/lib/runtimeCapabilities';
+import { useI18n } from '@/lib/i18n';
 
 export default function IntegrationsPanel() {
+  const { t } = useI18n();
  const { hasServer } = useServerRuntime();
  const { data: status = {}, refetch, isRefetching } = useQuery({
   queryKey: ['integrations-status'],
@@ -30,8 +32,8 @@ export default function IntegrationsPanel() {
       <Plug className="w-5 h-5 text-primary"/>
      </div>
      <div>
-      <h2 className="text-base font-bold text-foreground">אינטגרציות</h2>
-      <p className="text-caption">חיבור המערכת לשירותים חיצוניים</p>
+      <h2 className="text-base font-bold text-foreground">{t("אינטגרציות")}</h2>
+      <p className="text-caption">{t("חיבור המערכת לשירותים חיצוניים")}</p>
      </div>
     </div>
     {hasServer && (

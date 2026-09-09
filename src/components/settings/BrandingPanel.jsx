@@ -11,6 +11,7 @@ import { toast } from 'sonner';
 import BrandMark from '@/components/shared/BrandMark';
 import { BRAND_PRESETS, presetForColor } from '@/lib/brandPresets';
 import { recordAudit } from '@/lib/auditLog';
+import { useI18n } from '@/lib/i18n';
 
 function extractColors(dataUrl, maxColors = 6) {
   return new Promise((resolve) => {
@@ -81,6 +82,7 @@ const Section = ({ icon: Icon, title, hint, children, className = '' }) => (
 );
 
 function ContrastBadge({ color }) {
+ const { t } = useI18n();
   if (!isHex(color)) return null;
   const fg = bestForeground(color);
   const ratio = contrastRatio(color, fg);
@@ -90,7 +92,7 @@ function ContrastBadge({ color }) {
       className={`inline-flex items-center gap-1 text-[11px] px-2 py-0.5 rounded-full ${
         pass ? 'bg-success/10 text-success' : 'bg-destructive/10 text-destructive'
       }`}
-      title="יחס ניגודיות מול צבע הטקסט שייבחר אוטומטית"
+      title={t("יחס ניגודיות מול צבע הטקסט שייבחר אוטומטית")}
     >
       {pass ? <Check className="w-3 h-3" /> : <AlertTriangle className="w-3 h-3" />}
       ניגודיות {ratio.toFixed(1)}:1 {pass ? '· תקין' : '· נמוך'}
@@ -99,6 +101,7 @@ function ContrastBadge({ color }) {
 }
 
 export default function BrandingPanel() {
+  const { t } = useI18n();
   const {
     logoUrl, setLogo, resetLogo, isCustom,
     systemName, setSystemName,
@@ -126,8 +129,8 @@ export default function BrandingPanel() {
 
   const ingestFile = async (file) => {
     if (!file) return;
-    if (!file.type.startsWith('image/')) return toast.error('יש לבחור קובץ תמונה');
-    if (file.size > 2 * 1024 * 1024) return toast.error('גודל הקובץ חייב להיות עד 2MB');
+    if (!file.type.startsWith('image/')) return toast.error(t("יש לבחור קובץ תמונה"));
+    if (file.size > 2 * 1024 * 1024) return toast.error(t("גודל הקובץ חייב להיות עד 2MB"));
     setUploading(true);
     try {
       const dataUrl = await new Promise((resolve, reject) => {
@@ -141,9 +144,9 @@ export default function BrandingPanel() {
       setPalette(colors);
       if (colors.length) {
         setBrandColor(colors[0]);
-        toast.success('הלוגו עודכן וצבעי המותג הוחלו');
+        toast.success(t("הלוגו עודכן וצבעי המותג הוחלו"));
       } else {
-        toast.success('הלוגו עודכן');
+        toast.success(t("הלוגו עודכן"));
       }
     } catch (err) {
       toast.error(err?.message || 'שגיאה בהעלאת הקובץ');
@@ -156,20 +159,20 @@ export default function BrandingPanel() {
     const url = logoUrlInput.trim();
     if (!url) return;
     if (!/^https?:\/\//i.test(url) && !url.startsWith('/')) {
-      return toast.error('כתובת חייבת להתחיל ב-https:// או ב-/');
+      return toast.error(t("כתובת חייבת להתחיל ב-https:// או ב-/"));
     }
     setLogo(url);
     setLogoUrlInput('');
     const colors = await extractColors(url);
     if (colors.length) setPalette(colors);
-    toast.success('הלוגו עודכן מכתובת');
+    toast.success(t("הלוגו עודכן מכתובת"));
   };
 
   const applyHex = () => {
     const value = hexInput.trim().startsWith('#') ? hexInput.trim() : `#${hexInput.trim()}`;
-    if (!isHex(value)) return toast.error('קוד צבע לא תקין — נדרש פורמט #rrggbb');
+    if (!isHex(value)) return toast.error(t("קוד צבע לא תקין — נדרש פורמט #rrggbb"));
     setBrandColor(value);
-    toast.success('צבע המותג הוחל');
+    toast.success(t("צבע המותג הוחל"));
   };
 
   const doExport = () => {
@@ -179,7 +182,7 @@ export default function BrandingPanel() {
     a.download = `branding-${systemName.replace(/\s+/g, '-').toLowerCase()}.json`;
     a.click();
     URL.revokeObjectURL(a.href);
-    toast.success('קובץ המיתוג יוצא');
+    toast.success(t("קובץ המיתוג יוצא"));
   };
 
   const doImport = async (e) => {
@@ -188,7 +191,7 @@ export default function BrandingPanel() {
     if (!file) return;
     try {
       importBranding(JSON.parse(await file.text()));
-      toast.success('המיתוג יובא והוחל');
+      toast.success(t("המיתוג יובא והוחל"));
       recordAudit({ area: 'branding', action: 'ייבוא קובץ מיתוג', target: file.name });
     } catch (err) {
       toast.error(err?.message || 'קובץ המיתוג לא תקין');
@@ -197,7 +200,7 @@ export default function BrandingPanel() {
 
   const doReset = () => {
     resetBranding();
-    toast.success('המיתוג אופס לברירת המחדל');
+    toast.success(t("המיתוג אופס לברירת המחדל"));
     recordAudit({ area: 'branding', action: 'איפוס מיתוג לברירת המחדל', before: systemName });
   };
 
@@ -205,18 +208,18 @@ export default function BrandingPanel() {
     <div className="space-y-4">
       <div className="flex items-center justify-between gap-3 flex-wrap">
         <div className="min-w-0">
-          <h2 className="text-base font-bold leading-tight">מיתוג</h2>
-          <p className="text-[11px] text-muted-foreground">משפיע על סרגל הצד, כותרת הדפדפן, האייקון והמסמכים.</p>
+          <h2 className="text-base font-bold leading-tight">{t("מיתוג")}</h2>
+          <p className="text-[11px] text-muted-foreground">{t("משפיע על סרגל הצד, כותרת הדפדפן, האייקון והמסמכים.")}</p>
         </div>
         <div className="flex gap-1.5 flex-shrink-0">
           <Button onClick={doExport} variant="outline" size="sm" className="h-8 gap-1.5 text-xs">
-            <Download className="w-3.5 h-3.5" /> ייצוא
+            <Download className="w-3.5 h-3.5" /> {t("ייצוא")}
           </Button>
           <Button onClick={() => importRef.current?.click()} variant="outline" size="sm" className="h-8 gap-1.5 text-xs">
-            <FileUp className="w-3.5 h-3.5" /> ייבוא
+            <FileUp className="w-3.5 h-3.5" /> {t("ייבוא")}
           </Button>
           <Button onClick={doReset} variant="ghost" size="sm" className="h-8 gap-1.5 text-xs text-destructive hover:text-destructive">
-            <RotateCcw className="w-3.5 h-3.5" /> איפוס
+            <RotateCcw className="w-3.5 h-3.5" /> {t("איפוס")}
           </Button>
         </div>
       </div>
@@ -225,7 +228,7 @@ export default function BrandingPanel() {
       <div className="grid lg:grid-cols-2 gap-4 items-start">
 
       {/* ── Logo ─────────────────────────────────────────────────── */}
-      <Section icon={Upload} title="לוגו" hint="גרירה, בחירה מהמחשב או כתובת. PNG מרובע עד 2MB.">
+      <Section icon={Upload} title={t("לוגו")} hint={t("גרירה, בחירה מהמחשב או כתובת. PNG מרובע עד 2MB.")}>
         <div className="flex items-start gap-3">
           <div
             onDragOver={(e) => { e.preventDefault(); setDragging(true); }}
@@ -244,10 +247,10 @@ export default function BrandingPanel() {
           <div className="flex-1 min-w-0 space-y-2">
             <div className="flex gap-1.5">
               <Button onClick={() => fileRef.current?.click()} disabled={uploading} size="sm" className="h-8 gap-1.5 text-xs flex-1">
-                <Upload className="w-3.5 h-3.5" /> העלאה
+                <Upload className="w-3.5 h-3.5" /> {t("העלאה")}
               </Button>
               <Button onClick={resetLogo} disabled={!isCustom} variant="outline" size="sm" className="h-8 gap-1.5 text-xs">
-                <RotateCcw className="w-3.5 h-3.5" /> נקה
+                <RotateCcw className="w-3.5 h-3.5" /> {t("נקה")}
               </Button>
             </div>
             <div className="flex gap-1.5">
@@ -259,7 +262,7 @@ export default function BrandingPanel() {
                 dir="ltr"
                 className="h-8 rounded-lg text-xs flex-1 min-w-0"
               />
-              <Button onClick={applyLogoUrl} variant="outline" size="icon" className="h-8 w-8 flex-shrink-0" aria-label="החל כתובת">
+              <Button onClick={applyLogoUrl} variant="outline" size="icon" className="h-8 w-8 flex-shrink-0" aria-label={t("החל כתובת")}>
                 <Link2 className="w-3.5 h-3.5" />
               </Button>
             </div>
@@ -276,27 +279,27 @@ export default function BrandingPanel() {
       </Section>
 
       {/* ── Identity ─────────────────────────────────────────────── */}
-      <Section icon={Type} title="זהות ופרטי חברה" hint="שם וכותרת מופיעים בסרגל הצד ובלשונית; פרטי החברה מופיעים בהצעות מחיר.">
+      <Section icon={Type} title={t("זהות ופרטי חברה")} hint={t("שם וכותרת מופיעים בסרגל הצד ובלשונית; פרטי החברה מופיעים בהצעות מחיר.")}>
         <div className="grid grid-cols-2 gap-2">
-          <Field label="שם המערכת" value={nameInput} onChange={setNameInput} onCommit={() => setSystemName(nameInput)} placeholder={defaults.systemName} />
-          <Field label="כותרת משנה" value={subtitleInput} onChange={setSubtitleInput} onCommit={() => setSystemSubtitle(subtitleInput)} placeholder={defaults.systemSubtitle} />
-          <Field label="תת-כותרת מסמכים" value={company.tagline || ''} onChange={(v) => setCompany({ tagline: v })} placeholder="תת-כותרת שתופיע במסמכים" />
-          <Field label="ח.פ / ע.מ" value={company.legalId || ''} onChange={(v) => setCompany({ legalId: v })} dir="ltr" />
-          <Field label="כתובת" value={company.address || ''} onChange={(v) => setCompany({ address: v })} className="col-span-2" />
-          <Field label="תנאי תשלום" value={company.paymentTerms || ''} onChange={(v) => setCompany({ paymentTerms: v })} placeholder="שוטף + 30" />
-          <Field label="פרטי בנק" value={company.bank || ''} onChange={(v) => setCompany({ bank: v })} dir="ltr" />
+          <Field label={t("שם המערכת")} value={nameInput} onChange={setNameInput} onCommit={() => setSystemName(nameInput)} placeholder={defaults.systemName} />
+          <Field label={t("כותרת משנה")} value={subtitleInput} onChange={setSubtitleInput} onCommit={() => setSystemSubtitle(subtitleInput)} placeholder={defaults.systemSubtitle} />
+          <Field label={t("תת-כותרת מסמכים")} value={company.tagline || ''} onChange={(v) => setCompany({ tagline: v })} placeholder={t("תת-כותרת שתופיע במסמכים")} />
+          <Field label={t("ח.פ / ע.מ")} value={company.legalId || ''} onChange={(v) => setCompany({ legalId: v })} dir="ltr" />
+          <Field label={t("כתובת")} value={company.address || ''} onChange={(v) => setCompany({ address: v })} className="col-span-2" />
+          <Field label={t("תנאי תשלום")} value={company.paymentTerms || ''} onChange={(v) => setCompany({ paymentTerms: v })} placeholder={t("שוטף + 30")} />
+          <Field label={t("פרטי בנק")} value={company.bank || ''} onChange={(v) => setCompany({ bank: v })} dir="ltr" />
         </div>
       </Section>
 
       {/* ── Colour ───────────────────────────────────────────────── */}
-      <Section icon={Palette} title="צבע מותג" hint="מוחל מיידית. צבע הטקסט נבחר אוטומטית לפי ניגודיות.">
+      <Section icon={Palette} title={t("צבע מותג")} hint={t("מוחל מיידית. צבע הטקסט נבחר אוטומטית לפי ניגודיות.")}>
         <div className="flex flex-wrap items-center gap-3">
           <input
             type="color"
             value={brandColor || '#2d3436'}
             onChange={(e) => setBrandColor(e.target.value)}
             className="w-10 h-10 rounded-lg border border-border cursor-pointer bg-transparent p-0"
-            title="בחר צבע"
+            title={t("בחר צבע")}
           />
           <Input
             value={hexInput}
@@ -306,16 +309,16 @@ export default function BrandingPanel() {
             dir="ltr"
             className="h-9 w-32 rounded-lg font-mono text-xs"
           />
-          <Button onClick={applyHex} variant="outline" size="sm">החל</Button>
+          <Button onClick={applyHex} variant="outline" size="sm">{t("החל")}</Button>
           <Button onClick={() => setBrandColor(null)} variant="ghost" size="sm" className="gap-1.5" disabled={!brandColor}>
-            <RotateCcw className="w-3.5 h-3.5" /> נקה
+            <RotateCcw className="w-3.5 h-3.5" /> {t("נקה")}
           </Button>
           <ContrastBadge color={brandColor} />
         </div>
 
         {palette.length > 0 && (
           <div className="space-y-2">
-            <p className="text-xs text-muted-foreground">חולצו מהלוגו — לחץ להחלה</p>
+            <p className="text-xs text-muted-foreground">{t("חולצו מהלוגו — לחץ להחלה")}</p>
             <div className="flex flex-wrap gap-2">
               {palette.map((color) => (
                 <button
@@ -335,14 +338,14 @@ export default function BrandingPanel() {
         )}
 
         <div className="space-y-2">
-          <p className="text-xs text-muted-foreground">ערכות מוכנות</p>
+          <p className="text-xs text-muted-foreground">{t("ערכות מוכנות")}</p>
           <div className="flex flex-wrap gap-2">
             {BRAND_PRESETS.map((preset) => {
               const active = presetForColor(brandColor)?.id === preset.id;
               return (
                 <button
                   key={preset.id}
-                  title={preset.hint}
+                  title={t(preset.hint)}
                   aria-pressed={active}
                   onClick={() => { setPalette(preset.palette); setBrandColor(preset.primary); toast.success(`ערכת "${preset.label}" הוחלה`); }}
                   className={`flex items-center gap-2 px-2.5 py-1.5 rounded-lg border transition-colors ${
@@ -354,7 +357,7 @@ export default function BrandingPanel() {
                       <span key={c} className="w-3.5 h-3.5 rounded-full border border-background" style={{ backgroundColor: c }} />
                     ))}
                   </span>
-                  <span className="text-xs">{preset.label}</span>
+                  <span className="text-xs">{t(preset.label)}</span>
                   {active && <Check className="w-3 h-3 text-primary" />}
                 </button>
               );
@@ -364,11 +367,11 @@ export default function BrandingPanel() {
       </Section>
 
       {/* ── Radius + live preview ────────────────────────────────── */}
-      <Section icon={Squircle} title="עיגול פינות ותצוגה מקדימה" hint="משפיע על כפתורים, כרטיסים ושדות בכל המערכת.">
+      <Section icon={Squircle} title={t("עיגול פינות ותצוגה מקדימה")} hint={t("משפיע על כפתורים, כרטיסים ושדות בכל המערכת.")}>
         <div className="flex items-center gap-3">
           <Slider value={[radius]} min={0} max={1.5} step={0.05} onValueChange={([v]) => setRadius(v)} className="flex-1" />
           <span className="text-[11px] font-mono text-muted-foreground w-12 text-left">{radius.toFixed(2)}</span>
-          <Button onClick={() => setRadius(defaults.radius)} variant="ghost" size="icon" className="h-7 w-7" aria-label="איפוס עיגול">
+          <Button onClick={() => setRadius(defaults.radius)} variant="ghost" size="icon" className="h-7 w-7" aria-label={t("איפוס עיגול")}>
             <RotateCcw className="w-3.5 h-3.5" />
           </Button>
         </div>
@@ -381,10 +384,10 @@ export default function BrandingPanel() {
             </div>
           </div>
           <div className="flex flex-wrap items-center gap-2">
-            <Button size="sm" className="h-8 text-xs">פעולה ראשית</Button>
-            <Button size="sm" variant="outline" className="h-8 text-xs">משנית</Button>
-            <span className="inline-flex items-center px-2.5 py-1 rounded-full text-[11px] bg-primary text-primary-foreground">תגית</span>
-            <Input placeholder="שדה" className="h-8 text-xs flex-1 min-w-[80px]" />
+            <Button size="sm" className="h-8 text-xs">{t("פעולה ראשית")}</Button>
+            <Button size="sm" variant="outline" className="h-8 text-xs">{t("משנית")}</Button>
+            <span className="inline-flex items-center px-2.5 py-1 rounded-full text-[11px] bg-primary text-primary-foreground">{t("תגית")}</span>
+            <Input placeholder={t("שדה")} className="h-8 text-xs flex-1 min-w-[80px]" />
           </div>
         </div>
       </Section>

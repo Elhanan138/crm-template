@@ -12,6 +12,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { toast } from 'sonner';
 import PopupLivePreview from './PopupLivePreview';
 import PopupAIAssistant from './PopupAIAssistant';
+import { useI18n } from '@/lib/i18n';
 
 const toDateTimeLocal = (iso) => {
  if (!iso) return '';
@@ -23,6 +24,7 @@ const toDateTimeLocal = (iso) => {
 const fromDateTimeLocal = (val) => val ? new Date(val).toISOString() : null;
 
 export default function PopupEditorSheet({ open, popup, onClose }) {
+  const { t } = useI18n();
  const queryClient = useQueryClient();
  const isEdit = !!popup;
 
@@ -63,7 +65,7 @@ export default function PopupEditorSheet({ open, popup, onClose }) {
 
  const handleSave = async (e) => {
   e.preventDefault();
-  if (!form.title.trim()) { toast.error('כותרת חובה'); return; }
+  if (!form.title.trim()) { toast.error(t("כותרת חובה")); return; }
   setSaving(true);
   try {
    const payload = {
@@ -73,15 +75,15 @@ export default function PopupEditorSheet({ open, popup, onClose }) {
    };
    if (isEdit) {
     await api.entities.AnnouncementPopup.update(popup.id, payload);
-    toast.success('הפופאפ עודכן');
+    toast.success(t("הפופאפ עודכן"));
    } else {
     await api.entities.AnnouncementPopup.create(payload);
-    toast.success('הפופאפ נוצר');
+    toast.success(t("הפופאפ נוצר"));
    }
    queryClient.invalidateQueries({ queryKey: ['announcementPopups'] });
    onClose();
   } catch (err) {
-   toast.error('השמירה נכשלה');
+   toast.error(t("השמירה נכשלה"));
   } finally {
    setSaving(false);
   }
@@ -100,93 +102,93 @@ export default function PopupEditorSheet({ open, popup, onClose }) {
      {/* Form side (right in RTL) */}
      <form onSubmit={handleSave} className="p-6 space-y-4 lg:border-l border-border">
       <div>
-       <Label className="text-xs font-medium text-muted-foreground mb-2 block">יצירת תוכן עם AI</Label>
+       <Label className="text-xs font-medium text-muted-foreground mb-2 block">{t("יצירת תוכן עם AI")}</Label>
        <PopupAIAssistant onGenerated={handleAIGenerated} />
       </div>
 
       <div className="space-y-1.5">
-       <Label className="text-xs font-medium text-muted-foreground">כותרת *</Label>
-       <Input value={form.title} onChange={(e) => set('title', e.target.value)} placeholder="כותרת הפופאפ"className="h-9 rounded-lg"/>
+       <Label className="text-xs font-medium text-muted-foreground">{t("כותרת *")}</Label>
+       <Input value={form.title} onChange={(e) => set('title', e.target.value)} placeholder={t("כותרת הפופאפ")}className="h-9 rounded-lg"/>
       </div>
 
       <div className="space-y-1.5">
-       <Label className="text-xs font-medium text-muted-foreground">תוכן (Markdown)</Label>
-       <Textarea value={form.content} onChange={(e) => set('content', e.target.value)} placeholder="תוכן ההודעה..."rows={5} className="rounded-lg text-sm"/>
+       <Label className="text-xs font-medium text-muted-foreground">{t("תוכן (Markdown)")}</Label>
+       <Textarea value={form.content} onChange={(e) => set('content', e.target.value)} placeholder={t("תוכן ההודעה...")}rows={5} className="rounded-lg text-sm"/>
       </div>
 
       <div className="grid grid-cols-2 gap-3">
        <div className="space-y-1.5">
-        <Label className="text-xs font-medium text-muted-foreground">סוג עיצוב</Label>
+        <Label className="text-xs font-medium text-muted-foreground">{t("סוג עיצוב")}</Label>
         <Select value={form.layoutType} onValueChange={(v) => set('layoutType', v)}>
          <SelectTrigger className="h-9 rounded-lg"><SelectValue /></SelectTrigger>
          <SelectContent>
-          <SelectItem value="announcement">הכרזה</SelectItem>
-          <SelectItem value="changelog">מה חדש</SelectItem>
-          <SelectItem value="alert">התראה</SelectItem>
+          <SelectItem value="announcement">{t("הכרזה")}</SelectItem>
+          <SelectItem value="changelog">{t("מה חדש")}</SelectItem>
+          <SelectItem value="alert">{t("התראה")}</SelectItem>
          </SelectContent>
         </Select>
        </div>
        <div className="space-y-1.5">
-        <Label className="text-xs font-medium text-muted-foreground">סטטוס</Label>
+        <Label className="text-xs font-medium text-muted-foreground">{t("סטטוס")}</Label>
         <Select value={form.status} onValueChange={(v) => set('status', v)}>
          <SelectTrigger className="h-9 rounded-lg"><SelectValue /></SelectTrigger>
          <SelectContent>
-          <SelectItem value="draft">טיוטה</SelectItem>
-          <SelectItem value="scheduled">מתוזמן</SelectItem>
-          <SelectItem value="active">פעיל</SelectItem>
-          <SelectItem value="archived">בארכיון</SelectItem>
+          <SelectItem value="draft">{t("טיוטה")}</SelectItem>
+          <SelectItem value="scheduled">{t("מתוזמן")}</SelectItem>
+          <SelectItem value="active">{t("פעיל")}</SelectItem>
+          <SelectItem value="archived">{t("בארכיון")}</SelectItem>
          </SelectContent>
         </Select>
        </div>
       </div>
 
       <div className="space-y-1.5">
-       <Label className="text-xs font-medium text-muted-foreground">כתובת תמונה (אופציונלי)</Label>
+       <Label className="text-xs font-medium text-muted-foreground">{t("כתובת תמונה (אופציונלי)")}</Label>
        <Input value={form.mediaUrl} onChange={(e) => set('mediaUrl', e.target.value)} placeholder="https://..."className="h-9 rounded-lg"dir="ltr"/>
       </div>
 
       <div className="grid grid-cols-2 gap-3">
        <div className="space-y-1.5">
-        <Label className="text-xs font-medium text-muted-foreground">טקסט כפתור</Label>
-        <Input value={form.ctaLabel} onChange={(e) => set('ctaLabel', e.target.value)} placeholder="למידע נוסף"className="h-9 rounded-lg"/>
+        <Label className="text-xs font-medium text-muted-foreground">{t("טקסט כפתור")}</Label>
+        <Input value={form.ctaLabel} onChange={(e) => set('ctaLabel', e.target.value)} placeholder={t("למידע נוסף")}className="h-9 rounded-lg"/>
        </div>
        <div className="space-y-1.5">
-        <Label className="text-xs font-medium text-muted-foreground">כתובת כפתור</Label>
+        <Label className="text-xs font-medium text-muted-foreground">{t("כתובת כפתור")}</Label>
         <Input value={form.ctaUrl} onChange={(e) => set('ctaUrl', e.target.value)} placeholder="https://..."className="h-9 rounded-lg"dir="ltr"/>
        </div>
       </div>
 
       <div className="grid grid-cols-2 gap-3">
        <div className="space-y-1.5">
-        <Label className="text-xs font-medium text-muted-foreground">תאריך התחלה</Label>
+        <Label className="text-xs font-medium text-muted-foreground">{t("תאריך התחלה")}</Label>
         <Input type="datetime-local"value={form.startsAt} onChange={(e) => set('startsAt', e.target.value)} className="h-9 rounded-lg"/>
        </div>
        <div className="space-y-1.5">
-        <Label className="text-xs font-medium text-muted-foreground">תאריך סיום</Label>
+        <Label className="text-xs font-medium text-muted-foreground">{t("תאריך סיום")}</Label>
         <Input type="datetime-local"value={form.endsAt} onChange={(e) => set('endsAt', e.target.value)} className="h-9 rounded-lg"/>
        </div>
       </div>
 
       <div className="grid grid-cols-2 gap-3">
        <div className="space-y-1.5">
-        <Label className="text-xs font-medium text-muted-foreground">תדירות הצגה</Label>
+        <Label className="text-xs font-medium text-muted-foreground">{t("תדירות הצגה")}</Label>
         <Select value={form.frequency} onValueChange={(v) => set('frequency', v)}>
          <SelectTrigger className="h-9 rounded-lg"><SelectValue /></SelectTrigger>
          <SelectContent>
-          <SelectItem value="once_ever">פעם אחת לעולם</SelectItem>
-          <SelectItem value="once_per_session">פעם אחת לסשן</SelectItem>
-          <SelectItem value="every_login">בכל כניסה</SelectItem>
+          <SelectItem value="once_ever">{t("פעם אחת לעולם")}</SelectItem>
+          <SelectItem value="once_per_session">{t("פעם אחת לסשן")}</SelectItem>
+          <SelectItem value="every_login">{t("בכל כניסה")}</SelectItem>
          </SelectContent>
         </Select>
        </div>
        <div className="space-y-1.5">
-        <Label className="text-xs font-medium text-muted-foreground">קהל יעד</Label>
+        <Label className="text-xs font-medium text-muted-foreground">{t("קהל יעד")}</Label>
         <Select value={form.targetRole} onValueChange={(v) => set('targetRole', v)}>
          <SelectTrigger className="h-9 rounded-lg"><SelectValue /></SelectTrigger>
          <SelectContent>
-          <SelectItem value="all">כולם</SelectItem>
-          <SelectItem value="admin">אדמינים בלבד</SelectItem>
-          <SelectItem value="user">משתמשים בלבד</SelectItem>
+          <SelectItem value="all">{t("כולם")}</SelectItem>
+          <SelectItem value="admin">{t("אדמינים בלבד")}</SelectItem>
+          <SelectItem value="user">{t("משתמשים בלבד")}</SelectItem>
          </SelectContent>
         </Select>
        </div>
@@ -204,13 +206,13 @@ export default function PopupEditorSheet({ open, popup, onClose }) {
         {saving ? <Loader2 className="w-3.5 h-3.5 animate-spin"/> : <Save className="w-3.5 h-3.5"/>}
         {isEdit ? 'עדכן' : 'צור פופאפ'}
        </Button>
-       <Button type="button"variant="outline"onClick={onClose} className="rounded-full h-9 px-4 text-sm">ביטול</Button>
+       <Button type="button"variant="outline"onClick={onClose} className="rounded-full h-9 px-4 text-sm">{t("ביטול")}</Button>
       </div>
      </form>
 
      {/* Preview side (left in RTL) */}
      <div className="p-6 bg-muted/20">
-      <p className="text-xs font-medium text-muted-foreground mb-3 text-right">תצפיה מקדימה</p>
+      <p className="text-xs font-medium text-muted-foreground mb-3 text-right">{t("תצפיה מקדימה")}</p>
       <PopupLivePreview popup={previewPopup} />
      </div>
     </div>

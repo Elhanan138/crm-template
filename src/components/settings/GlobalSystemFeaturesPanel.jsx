@@ -8,6 +8,7 @@ import { Bot, Bell, Loader2, Mail, FolderKanban, BarChart3 } from 'lucide-react'
 import { isFeatureEnabled } from '@/lib/features';
 import { ACTIVE_MODULE_IDS } from '@/lib/moduleRegistry';
 import { APP_IDENTITY } from '@/lib/appIdentity';
+import { useI18n } from '@/lib/i18n';
 
 const AGENT_LABEL = APP_IDENTITY.name ? `${APP_IDENTITY.name} Agent` : 'עוזר חכם';
 
@@ -37,6 +38,7 @@ const ALERT_MODES = [
 ];
 
 export default function GlobalSystemFeaturesPanel() {
+  const { t } = useI18n();
  const queryClient = useQueryClient();
 
  const { data: res, isLoading } = useQuery({
@@ -75,7 +77,7 @@ export default function GlobalSystemFeaturesPanel() {
   mutationFn: (mode) => api.functions.invoke('globalTabVisibility', { action: 'set', settingKey: 'project_alerts_mode', tabId: 'project_alerts_mode', enabled: mode }),
   onSuccess: (_r, mode) => {
    queryClient.invalidateQueries({ queryKey: ['project-alerts-mode'] });
-   toast.success('מצב ההתראות עודכן');
+   toast.success(t("מצב ההתראות עודכן"));
    recordAudit({ area: 'features', action: 'שינוי מצב התראות פרויקטים', after: mode });
   },
   onError: (e) => toast.error(e?.message || 'עדכון מצב ההתראות נכשל'),
@@ -101,8 +103,8 @@ export default function GlobalSystemFeaturesPanel() {
       <Bot className="w-4 h-4 text-primary"/>
      </div>
      <div>
-      <h3 className="text-sm font-bold text-foreground">תכונות מערכת גלובליות</h3>
-      <p className="text-[11px] text-muted-foreground">נהל אילו תכונות מערכתיות יופיעו לכל המשתמשים</p>
+      <h3 className="text-sm font-bold text-foreground">{t("תכונות מערכת גלובליות")}</h3>
+      <p className="text-[11px] text-muted-foreground">{t("נהל אילו תכונות מערכתיות יופיעו לכל המשתמשים")}</p>
      </div>
     </div>
 
@@ -115,7 +117,7 @@ export default function GlobalSystemFeaturesPanel() {
         <div className="flex items-center gap-2 mb-2">
          <Icon className="w-3.5 h-3.5 text-muted-foreground flex-shrink-0"/>
          <div className="min-w-0">
-          <span className="text-sm font-medium text-foreground truncate">{feature.label}</span>
+          <span className="text-sm font-medium text-foreground truncate">{t(feature.label)}</span>
           <p className="text-[10px] text-muted-foreground truncate">{feature.description}</p>
          </div>
         </div>
@@ -130,7 +132,7 @@ export default function GlobalSystemFeaturesPanel() {
              : 'text-muted-foreground hover:text-foreground hover:bg-muted'
            }`}
           >
-           {state.label}
+           {t(state.label)}
           </button>
          ))}
         </div>
@@ -148,8 +150,8 @@ export default function GlobalSystemFeaturesPanel() {
       <Bell className="w-4 h-4 text-primary"/>
      </div>
      <div>
-      <h3 className="text-sm font-bold text-foreground">התראות פרויקט</h3>
-      <p className="text-[11px] text-muted-foreground">שלוט במי יכול ליצור ולקבל התראות פרויקט</p>
+      <h3 className="text-sm font-bold text-foreground">{t("התראות פרויקט")}</h3>
+      <p className="text-[11px] text-muted-foreground">{t("שלוט במי יכול ליצור ולקבל התראות פרויקט")}</p>
      </div>
     </div>
 
@@ -170,7 +172,7 @@ export default function GlobalSystemFeaturesPanel() {
            : 'text-muted-foreground hover:text-foreground hover:bg-muted'
          }`}
         >
-         {mode.label}
+         {t(mode.label)}
         </button>
        ))}
       </div>

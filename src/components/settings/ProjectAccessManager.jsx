@@ -8,9 +8,11 @@ import { Loader2, ChevronDown, ShieldCheck, Search, RefreshCw } from 'lucide-rea
 import { CubeIcon } from '@radix-ui/react-icons';
 import { toast } from 'sonner';
 import { cleanEmail as clean } from '@/lib/permissions';
+import { useI18n } from '@/lib/i18n';
 
 /* One member's access row — binary: either has access or doesn't */
 function MemberAccessRow({ member, projectId, hasAccess }) {
+ const { t } = useI18n();
  const queryClient = useQueryClient();
  const [saving, setSaving] = useState(false);
 
@@ -29,11 +31,11 @@ function MemberAccessRow({ member, projectId, hasAccess }) {
   } catch (err) {
    const status = err?.response?.status;
    if (status === 403) {
-    toast.error('אין לך הרשאה לפעולה זו');
+    toast.error(t("אין לך הרשאה לפעולה זו"));
    } else if (status === 422) {
     toast.error(err?.response?.data?.error || 'המשתמש אינו קיים במערכת');
    } else {
-    toast.error('שגיאה בשמירה');
+    toast.error(t("שגיאה בשמירה"));
    }
   }
   setSaving(false);
@@ -74,6 +76,7 @@ function MemberAccessRow({ member, projectId, hasAccess }) {
 
 /* A single expandable project block */
 function ProjectBlock({ project, members, projPerms }) {
+ const { t } = useI18n();
  const [open, setOpen] = useState(false);
  const grants = projPerms.filter(pp => pp.project_id === project.id && (pp.permissions || []).length);
  const grantedEmails = new Set(grants.map(g => clean(g.member_email)));
@@ -108,7 +111,7 @@ function ProjectBlock({ project, members, projPerms }) {
    {open && (
     <div className="p-3 pt-0 space-y-2 bg-muted/10">
      {members.length === 0 ? (
-      <p className="text-sm text-muted-foreground text-center py-4">אין חברי צוות.</p>
+      <p className="text-sm text-muted-foreground text-center py-4">{t("אין חברי צוות.")}</p>
      ) : (
       members.map(m => (
        <MemberAccessRow
@@ -126,6 +129,7 @@ function ProjectBlock({ project, members, projPerms }) {
 }
 
 export default function ProjectAccessManager({ members }) {
+  const { t } = useI18n();
  const queryClient = useQueryClient();
  const [search, setSearch] = useState('');
  const [syncDialog, setSyncDialog] = useState(false);
@@ -140,7 +144,7 @@ export default function ProjectAccessManager({ members }) {
    queryClient.invalidateQueries({ queryKey: ['projects'] });
    queryClient.invalidateQueries({ queryKey: ['projectPermissions'] });
   },
-  onError: () => toast.error('הסנכרון נכשל'),
+  onError: () => toast.error(t("הסנכרון נכשל")),
  });
 
  const filtered = projects.filter(p =>
@@ -153,14 +157,14 @@ export default function ProjectAccessManager({ members }) {
     <div className="flex items-center gap-2.5">
      <div className="w-9 h-9 rounded-lg bg-accent flex items-center justify-center"><CubeIcon className="w-[18px] h-[18px] text-primary"/></div>
      <div>
-      <h3 className="text-sm font-bold text-foreground">גישה לפי פרויקט</h3>
-      <p className="text-[11px] text-muted-foreground">לחץ על פרויקט כדי להעניק או להסיר גישה מלאה</p>
+      <h3 className="text-sm font-bold text-foreground">{t("גישה לפי פרויקט")}</h3>
+      <p className="text-[11px] text-muted-foreground">{t("לחץ על פרויקט כדי להעניק או להסיר גישה מלאה")}</p>
      </div>
     </div>
     <div className="flex items-center gap-2 w-full sm:w-auto">
      <div className="relative flex-1 sm:w-56">
       <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground"/>
-      <Input value={search} onChange={e => setSearch(e.target.value)} placeholder="חיפוש פרויקט..."className="h-9 pe-9 rounded-full text-sm"/>
+      <Input value={search} onChange={e => setSearch(e.target.value)} placeholder={t("חיפוש פרויקט...")}className="h-9 pe-9 rounded-full text-sm"/>
      </div>
      <Button
       variant="outline"
@@ -169,7 +173,7 @@ export default function ProjectAccessManager({ members }) {
       className="rounded-full h-9 px-4 text-sm gap-1.5 flex-shrink-0"
      >
       {syncMutation.isPending ? <Loader2 className="w-3.5 h-3.5 animate-spin"/> : <RefreshCw className="w-3.5 h-3.5"/>}
-      <span className="hidden sm:inline">סנכרן הרשאות</span>
+      <span className="hidden sm:inline">{t("סנכרן הרשאות")}</span>
      </Button>
     </div>
    </div>
@@ -177,7 +181,7 @@ export default function ProjectAccessManager({ members }) {
    {lp || lpp ? (
     <div className="flex items-center justify-center py-10"><Loader2 className="w-5 h-5 animate-spin text-muted-foreground"/></div>
    ) : filtered.length === 0 ? (
-    <p className="text-sm text-muted-foreground text-center py-8">אין פרויקטים.</p>
+    <p className="text-sm text-muted-foreground text-center py-8">{t("אין פרויקטים.")}</p>
    ) : (
     <div className="space-y-2">
      {filtered.map(p => (
@@ -189,12 +193,12 @@ export default function ProjectAccessManager({ members }) {
    <AlertDialog open={syncDialog} onOpenChange={setSyncDialog}>
     <AlertDialogContent className="rounded-lg">
      <AlertDialogHeader>
-      <AlertDialogTitle>סנכרון הרשאות מחדש</AlertDialogTitle>
-      <AlertDialogDescription>הפעולה תבנה מחדש את כל מערכי ההרשאות בכל הפרויקטים והרשומות מתוך רשומות ההרשאה הנוכחיות. להמשיך?</AlertDialogDescription>
+      <AlertDialogTitle>{t("סנכרון הרשאות מחדש")}</AlertDialogTitle>
+      <AlertDialogDescription>{t("הפעולה תבנה מחדש את כל מערכי ההרשאות בכל הפרויקטים והרשומות מתוך רשומות ההרשאה הנוכחיות. להמשיך?")}</AlertDialogDescription>
      </AlertDialogHeader>
      <AlertDialogFooter className="flex-row-reverse gap-2">
-      <AlertDialogCancel className="rounded-full mt-0">ביטול</AlertDialogCancel>
-      <AlertDialogAction className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-full"onClick={() => { setSyncDialog(false); syncMutation.mutate(); }}>סנכרן</AlertDialogAction>
+      <AlertDialogCancel className="rounded-full mt-0">{t("ביטול")}</AlertDialogCancel>
+      <AlertDialogAction className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-full"onClick={() => { setSyncDialog(false); syncMutation.mutate(); }}>{t("סנכרן")}</AlertDialogAction>
      </AlertDialogFooter>
     </AlertDialogContent>
    </AlertDialog>

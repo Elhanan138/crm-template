@@ -5,13 +5,15 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Sparkles, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
+import { useI18n } from '@/lib/i18n';
 
 export default function PopupAIAssistant({ onGenerated }) {
+  const { t } = useI18n();
   const [prompt, setPrompt] = useState('');
   const [loading, setLoading] = useState(false);
 
   const handleGenerate = async () => {
-    if (!prompt.trim()) { toast.error('כתוב תיאור ליצירת הפופאפ'); return; }
+    if (!prompt.trim()) { toast.error(t("כתוב תיאור ליצירת הפופאפ")); return; }
     setLoading(true);
     try {
       const res = await api.integrations.Core.InvokeLLM({
@@ -36,9 +38,9 @@ Requirements:
         },
       });
       onGenerated(res);
-      toast.success('התוכן נוצר — ניתן לערוך ולשמור');
+      toast.success(t("התוכן נוצר — ניתן לערוך ולשמור"));
     } catch (e) {
-      toast.error('יצירת התוכן נכשלה');
+      toast.error(t("יצירת התוכן נכשלה"));
     } finally {
       setLoading(false);
     }
@@ -50,7 +52,7 @@ Requirements:
         value={prompt}
         onChange={(e) => setPrompt(e.target.value)}
         onKeyDown={(e) => { if (e.key === 'Enter' && !loading) handleGenerate(); }}
-        placeholder="תאר את הפופאפ שתרצה ליצור..."
+        placeholder={t("תאר את הפופאפ שתרצה ליצור...")}
         className="h-9 rounded-lg flex-1"
       />
       <Button

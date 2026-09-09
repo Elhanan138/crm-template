@@ -23,8 +23,10 @@ import ProjectAccessManager from '@/components/settings/ProjectAccessManager';
 import EmptyState from '@/components/shared/EmptyState';
 import ListSkeleton from '@/components/shared/ListSkeleton';
 import UserRow from '@/components/settings/UserRow';
+import { useI18n } from '@/lib/i18n';
 
 export default function UserManagementPanel() {
+  const { t } = useI18n();
  const queryClient = useQueryClient();
  const [dialog, setDialog] = useState({ open: false, member: null });
  const [deleteDialog, setDeleteDialog] = useState({ open: false, member: null });
@@ -44,7 +46,7 @@ export default function UserManagementPanel() {
    queryClient.invalidateQueries({ queryKey: ['projects'] });
    queryClient.invalidateQueries({ queryKey: ['currentUser'] });
    setDeleteDialog({ open: false, member: null });
-   toast.success('חבר הוסר — הגישה לכל הפרויקטים הוסרה');
+   toast.success(t("חבר הוסר — הגישה לכל הפרויקטים הוסרה"));
    recordAudit({ area: 'users', action: 'הסרת משתמש', target: removed?.name || removed?.email || '' });
   },
   onError: (err) => {
@@ -88,17 +90,17 @@ export default function UserManagementPanel() {
               <Users className="w-5 h-5 text-accent-foreground"/>
       </div>
       <div>
-       <h2 className="text-section-title text-foreground">משתמשים והרשאות</h2>
+       <h2 className="text-section-title text-foreground">{t("משתמשים והרשאות")}</h2>
        <p className="text-caption">{members.length} חברי צוות במערכת — לחץ על שורה לעריכה</p>
       </div>
      </div>
      <div className="flex items-center gap-2">
       <div className="relative flex-1 sm:w-48">
        <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground"/>
-       <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="חיפוש..."className="h-9 pe-9 rounded-full text-sm"/>
+       <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder={t("חיפוש...")}className="h-9 pe-9 rounded-full text-sm"/>
       </div>
       <Button type="button"onClick={() => setDialog({ open: true, member: null })} className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-full h-9 px-5 text-sm shadow-none gap-1.5 flex-shrink-0">
-       <Plus className="w-4 h-4"/> <span className="hidden sm:inline">הוסף חבר</span>
+       <Plus className="w-4 h-4"/> <span className="hidden sm:inline">{t("הוסף חבר")}</span>
       </Button>
      </div>
     </div>
@@ -112,7 +114,7 @@ export default function UserManagementPanel() {
       description={search ? 'נסה לחפש בשם, אימייל או תפקיד אחר' : 'הוסף את חבר הצוות הראשון כדי להתחיל'}
       action={!search ? (
        <Button type="button"onClick={() => setDialog({ open: true, member: null })} className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-full h-9 px-5 text-sm gap-2">
-        <Plus className="w-4 h-4"/> הוסף חבר
+        <Plus className="w-4 h-4"/> {t("הוסף חבר")}
        </Button>
       ) : undefined}
      />
@@ -120,9 +122,9 @@ export default function UserManagementPanel() {
      <>
       {/* Table header — desktop */}
       <div className="hidden sm:grid grid-cols-[2fr_1fr_auto_auto] gap-4 px-4 py-2 bg-muted/20 border-b border-border text-[11px] font-semibold text-muted-foreground">
-       <div>חבר צוות</div>
-       <div className="text-right">תפקיד</div>
-       <div>הרשאה</div>
+       <div>{t("חבר צוות")}</div>
+       <div className="text-right">{t("תפקיד")}</div>
+       <div>{t("הרשאה")}</div>
        <div />
       </div>
       {/* Rows */}
@@ -143,7 +145,7 @@ export default function UserManagementPanel() {
     {/* Info note */}
     <div className="flex items-start gap-2 px-4 py-3 bg-muted/30 border-t border-border text-[11px] text-muted-foreground">
      <Info className="w-3.5 h-3.5 flex-shrink-0 mt-0.5"/>
-     <p>יש שני סוגי הרשאות בלבד: אדמין (גישה מלאה לכל המערכת) או הרשאות פר פרויקט, שנשלטות בחלק התחתון. יוצר הפרויקט שומר על גישה מלאה אליו.</p>
+     <p>{t("יש שני סוגי הרשאות בלבד: אדמין (גישה מלאה לכל המערכת) או הרשאות פר פרויקט, שנשלטות בחלק התחתון. יוצר הפרויקט שומר על גישה מלאה אליו.")}</p>
     </div>
    </div>
 
@@ -167,7 +169,7 @@ export default function UserManagementPanel() {
     open={deleteDialog.open}
     onOpenChange={(open) => { if (!open) setDeleteDialog({ open: false, member: null }); }}
     onConfirm={() => deleteMutation.mutate(deleteDialog.member?.id)}
-    title="הסרת חבר צוות"
+    title={t("הסרת חבר צוות")}
     confirmLabel="הסר"
     description={`האם להסיר את "${deleteDialog.member?.name}"? הגישה לכל הפרויקטים תוסר מיד.`}
    />
@@ -176,6 +178,7 @@ export default function UserManagementPanel() {
 }
 
 function MemberEditDrawer({ member, members = [], onClose, onDelete }) {
+ const { t } = useI18n();
  const queryClient = useQueryClient();
  const [name, setName] = useState(member?.name || '');
  const [email, setEmail] = useState(member?.email || '');
@@ -198,7 +201,7 @@ function MemberEditDrawer({ member, members = [], onClose, onDelete }) {
   onSuccess: (_r, data) => {
    queryClient.invalidateQueries({ queryKey: ['teamMembers'] });
    queryClient.invalidateQueries({ queryKey: ['currentUser'] });
-   toast.success('חבר נוסף');
+   toast.success(t("חבר נוסף"));
    recordAudit({ area: 'users', action: 'הוספת משתמש', target: data.email || data.name, after: data.is_admin ? 'אדמין' : (data.role || 'משתמש') });
    onClose();
   },
@@ -214,7 +217,7 @@ function MemberEditDrawer({ member, members = [], onClose, onDelete }) {
    queryClient.invalidateQueries({ queryKey: ['projectPermissions'] });
    queryClient.invalidateQueries({ queryKey: ['projects'] });
    queryClient.invalidateQueries({ queryKey: ['currentUser'] });
-   toast.success('עודכן');
+   toast.success(t("עודכן"));
    // Only an actual change of standing is worth a line; renaming someone is not.
    if (!!data.is_admin !== wasAdmin) {
     recordAudit({
@@ -243,7 +246,7 @@ function MemberEditDrawer({ member, members = [], onClose, onDelete }) {
 
  const handleSubmit = async (e) => {
   e.preventDefault();
-  if (!name.trim()) { toast.error('שם חובה'); return; }
+  if (!name.trim()) { toast.error(t("שם חובה")); return; }
 
   const usernameError = validateUsername(username, members, member?.id);
   if (usernameError) { toast.error(usernameError); return; }
@@ -272,27 +275,27 @@ function MemberEditDrawer({ member, members = [], onClose, onDelete }) {
    <form onSubmit={handleSubmit} className="px-6 py-5 space-y-4">
     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
      <div className="space-y-1.5">
-      <Label className="text-xs font-medium text-muted-foreground">שם מלא *</Label>
-      <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="שם מלא"className="h-9 rounded-lg"autoFocus />
+      <Label className="text-xs font-medium text-muted-foreground">{t("שם מלא *")}</Label>
+      <Input value={name} onChange={(e) => setName(e.target.value)} placeholder={t("שם מלא")}className="h-9 rounded-lg"autoFocus />
      </div>
      <div className="space-y-1.5">
-      <Label className="text-xs font-medium text-muted-foreground">אימייל</Label>
-      <Input value={email} onChange={(e) => setEmail(e.target.value)} placeholder="כתובת מייל"className="h-9 rounded-lg"dir="ltr"/>
+      <Label className="text-xs font-medium text-muted-foreground">{t("אימייל")}</Label>
+      <Input value={email} onChange={(e) => setEmail(e.target.value)} placeholder={t("כתובת מייל")}className="h-9 rounded-lg"dir="ltr"/>
      </div>
     </div>
     <div className="space-y-1.5">
-     <Label className="text-xs font-medium text-muted-foreground">תפקיד</Label>
-     <Input value={role} onChange={(e) => setRole(e.target.value)} placeholder="מנהל פרויקט, מפתח..."className="h-9 rounded-lg"/>
+     <Label className="text-xs font-medium text-muted-foreground">{t("תפקיד")}</Label>
+     <Input value={role} onChange={(e) => setRole(e.target.value)} placeholder={t("מנהל פרויקט, מפתח...")}className="h-9 rounded-lg"/>
     </div>
 
     <div className="space-y-1.5">
-     <Label className="text-xs font-medium text-muted-foreground">מנהלת צוות</Label>
+     <Label className="text-xs font-medium text-muted-foreground">{t("מנהלת צוות")}</Label>
      <Select value={managerEmail || 'none'} onValueChange={(v) => setManagerEmail(v === 'none' ? '' : v)}>
       <SelectTrigger className="h-9 rounded-lg">
-       <SelectValue placeholder="ללא"/>
+       <SelectValue placeholder={t("ללא")}/>
       </SelectTrigger>
       <SelectContent>
-       <SelectItem value="none">ללא</SelectItem>
+       <SelectItem value="none">{t("ללא")}</SelectItem>
        {members
         .filter(m => cleanEmail(m.email) !== cleanEmail(member?.email))
         .map(m => (
@@ -307,11 +310,11 @@ function MemberEditDrawer({ member, members = [], onClose, onDelete }) {
     <div className="space-y-3 pt-3 border-t border-border">
      <div className="flex items-center gap-2">
       <KeyRound className="w-3.5 h-3.5 text-muted-foreground" />
-      <Label className="text-xs font-medium text-muted-foreground">כניסה למערכת</Label>
+      <Label className="text-xs font-medium text-muted-foreground">{t("כניסה למערכת")}</Label>
      </div>
 
      <div className="space-y-1.5">
-      <Label className="text-xs font-medium text-muted-foreground">שם משתמש</Label>
+      <Label className="text-xs font-medium text-muted-foreground">{t("שם משתמש")}</Label>
       <Input
        value={username}
        onChange={(e) => setUsername(e.target.value)}
@@ -320,7 +323,7 @@ function MemberEditDrawer({ member, members = [], onClose, onDelete }) {
        autoComplete="off"
        className="h-9 rounded-lg"
       />
-      <p className="text-[11px] text-muted-foreground">3–32 תווים באנגלית, ספרות, נקודה, מקף או קו תחתון. אופציונלי.</p>
+      <p className="text-[11px] text-muted-foreground">{t("3–32 תווים באנגלית, ספרות, נקודה, מקף או קו תחתון. אופציונלי.")}</p>
      </div>
 
      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -349,7 +352,7 @@ function MemberEditDrawer({ member, members = [], onClose, onDelete }) {
        </div>
       </div>
       <div className="space-y-1.5">
-       <Label className="text-xs font-medium text-muted-foreground">אימות סיסמה</Label>
+       <Label className="text-xs font-medium text-muted-foreground">{t("אימות סיסמה")}</Label>
        <Input
         type={showPassword ? 'text' : 'password'}
         value={passwordConfirm}
@@ -373,7 +376,7 @@ function MemberEditDrawer({ member, members = [], onClose, onDelete }) {
      {hasPassword && !password && (
       <label className="flex items-center gap-2 text-xs cursor-pointer">
        <Checkbox checked={clearCredentials} onCheckedChange={(v) => setClearCredentials(v === true)} />
-       <span>בטל את הסיסמה הקיימת</span>
+       <span>{t("בטל את הסיסמה הקיימת")}</span>
       </label>
      )}
 
@@ -383,24 +386,24 @@ function MemberEditDrawer({ member, members = [], onClose, onDelete }) {
     </div>
 
     <div className="space-y-2 pt-2 border-t border-border">
-     <Label className="text-xs font-medium text-muted-foreground">סוג הרשאה</Label>
+     <Label className="text-xs font-medium text-muted-foreground">{t("סוג הרשאה")}</Label>
      <div className="grid grid-cols-1 gap-2">
       <button type="button"onClick={handleSelectAdmin}
        className={`flex items-center gap-2.5 px-3 py-3 rounded-lg border text-sm font-medium transition-all text-right ${isAdmin ? 'bg-accent text-accent-foreground' : 'bg-card border-border text-muted-foreground hover:border-primary/20'}`}>
        <ShieldCheck className="w-4 h-4 flex-shrink-0"/>
        <div>
-        <p className="font-semibold">אדמין</p>
-        <p className="text-[11px] font-normal opacity-80">גישה מלאה לכל המערכת — כל הפרויקטים, ההגדרות והנתונים</p>
+        <p className="font-semibold">{t("אדמין")}</p>
+        <p className="text-[11px] font-normal opacity-80">{t("גישה מלאה לכל המערכת — כל הפרויקטים, ההגדרות והנתונים")}</p>
        </div>
       </button>
       {isOwner ? (
-       <span title="לא ניתן להוריד אדמין מבעל המערכת"className="block">
+       <span title={t("לא ניתן להוריד אדמין מבעל המערכת")}className="block">
         <button type="button"disabled
          className="w-full flex items-center gap-2.5 px-3 py-3 rounded-lg border text-sm font-medium bg-card border-border text-muted-foreground opacity-50 cursor-not-allowed text-right">
          <CubeIcon className="w-4 h-4 flex-shrink-0"/>
          <div>
-          <p className="font-semibold">הרשאות פר פרויקט</p>
-          <p className="text-[11px] font-normal opacity-80">לא ניתן להוריד אדמין מבעל המערכת</p>
+          <p className="font-semibold">{t("הרשאות פר פרויקט")}</p>
+          <p className="text-[11px] font-normal opacity-80">{t("לא ניתן להוריד אדמין מבעל המערכת")}</p>
          </div>
         </button>
        </span>
@@ -409,8 +412,8 @@ function MemberEditDrawer({ member, members = [], onClose, onDelete }) {
         className={`flex items-center gap-2.5 px-3 py-3 rounded-lg border text-sm font-medium transition-all text-right ${!isAdmin ? 'bg-accent text-accent-foreground' : 'bg-card border-border text-muted-foreground hover:border-primary/20'}`}>
         <CubeIcon className="w-4 h-4 flex-shrink-0"/>
         <div>
-         <p className="font-semibold">הרשאות פר פרויקט</p>
-         <p className="text-[11px] font-normal opacity-80">גישה רק לפרויקטים שהוגדרו לו בחלק "גישה לפרויקטים"</p>
+         <p className="font-semibold">{t("הרשאות פר פרויקט")}</p>
+         <p className="text-[11px] font-normal opacity-80">{t("גישה רק לפרויקטים שהוגדרו לו בחלק \"גישה לפרויקטים\"")}</p>
         </div>
        </button>
       )}
@@ -422,10 +425,10 @@ function MemberEditDrawer({ member, members = [], onClose, onDelete }) {
       {busy && <Loader2 className="w-3.5 h-3.5 animate-spin"/>}
       {member ? 'עדכן' : 'הוסף חבר'}
      </Button>
-     <Button type="button"variant="outline"onClick={onClose} className="rounded-full h-9 px-4 text-sm">ביטול</Button>
+     <Button type="button"variant="outline"onClick={onClose} className="rounded-full h-9 px-4 text-sm">{t("ביטול")}</Button>
      {member && !isOwner && (
       <Button type="button"variant="ghost"onClick={() => onDelete(member)} className="rounded-full h-9 px-4 text-sm text-destructive hover:text-destructive hover:bg-destructive/10 ms-auto">
-       <Trash2 className="w-3.5 h-3.5"/> הסר
+       <Trash2 className="w-3.5 h-3.5"/> {t("הסר")}
       </Button>
      )}
     </div>
@@ -435,11 +438,11 @@ function MemberEditDrawer({ member, members = [], onClose, onDelete }) {
    <AlertDialog open={adminConfirm} onOpenChange={setAdminConfirm}>
     <AlertDialogContent className="rounded-lg">
      <AlertDialogHeader>
-      <AlertDialogTitle>הפיכת משתמש לאדמין</AlertDialogTitle>
-      <AlertDialogDescription>המשתמש יקבל גישה מלאה לכל הפרויקטים והנתונים במערכת</AlertDialogDescription>
+      <AlertDialogTitle>{t("הפיכת משתמש לאדמין")}</AlertDialogTitle>
+      <AlertDialogDescription>{t("המשתמש יקבל גישה מלאה לכל הפרויקטים והנתונים במערכת")}</AlertDialogDescription>
      </AlertDialogHeader>
      <AlertDialogFooter className="flex-row-reverse gap-2">
-      <AlertDialogCancel className="rounded-full mt-0">ביטול</AlertDialogCancel>
+      <AlertDialogCancel className="rounded-full mt-0">{t("ביטול")}</AlertDialogCancel>
       <AlertDialogAction
        className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-full"
        onClick={() => { setIsAdmin(true); setAdminConfirm(false); }}

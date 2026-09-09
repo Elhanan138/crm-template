@@ -10,6 +10,7 @@ import EmptyState from '@/components/shared/EmptyState';
 import TableSkeleton from '@/components/shared/TableSkeleton';
 import StatusBadge from '@/components/shared/StatusBadge';
 import { formatDate } from '@/lib/formatDate';
+import { useI18n } from '@/lib/i18n';
 import {
   AUDIT_ENTITY, AUDIT_AREAS, areaMeta, sortAudit, matchesAudit, auditToCsv,
 } from '@/lib/auditLog';
@@ -20,6 +21,7 @@ import {
 // ─────────────────────────────────────────────────────────────────────────────
 
 export default function AuditLogPanel() {
+  const { t } = useI18n();
   const [query, setQuery] = useState('');
   const [area, setArea] = useState('all');
 
@@ -51,19 +53,19 @@ export default function AuditLogPanel() {
           <Input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="חיפוש לפי פעולה, מי ביצע או על מה"
+            placeholder={t("חיפוש לפי פעולה, מי ביצע או על מה")}
             className="ps-9 h-9 rounded-lg"
-            aria-label="חיפוש ביומן"
+            aria-label={t("חיפוש ביומן")}
           />
         </div>
         <Select value={area} onValueChange={setArea}>
-          <SelectTrigger className="h-9 w-full sm:w-52 rounded-lg" aria-label="סינון לפי תחום">
+          <SelectTrigger className="h-9 w-full sm:w-52 rounded-lg" aria-label={t("סינון לפי תחום")}>
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">כל התחומים</SelectItem>
+            <SelectItem value="all">{t("כל התחומים")}</SelectItem>
             {AUDIT_AREAS.map((a) => (
-              <SelectItem key={a.value} value={a.value}>{a.label}</SelectItem>
+              <SelectItem key={a.value} value={a.value}>{t(a.label)}</SelectItem>
             ))}
           </SelectContent>
         </Select>
@@ -71,7 +73,7 @@ export default function AuditLogPanel() {
           variant="outline" size="sm" className="h-9 gap-1.5"
           onClick={download} disabled={visible.length === 0}
         >
-          <Download className="w-3.5 h-3.5" /> ייצוא CSV
+          <Download className="w-3.5 h-3.5" /> {t("ייצוא CSV")}
         </Button>
       </div>
 
@@ -92,11 +94,11 @@ export default function AuditLogPanel() {
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-border bg-muted/40 text-start">
-                  <th className="text-start font-semibold px-3 py-2.5 w-40">מתי</th>
-                  <th className="text-start font-semibold px-3 py-2.5 w-36">מי</th>
-                  <th className="text-start font-semibold px-3 py-2.5 w-36">תחום</th>
-                  <th className="text-start font-semibold px-3 py-2.5">מה נעשה</th>
-                  <th className="text-start font-semibold px-3 py-2.5 w-56">שינוי</th>
+                  <th className="text-start font-semibold px-3 py-2.5 w-40">{t("מתי")}</th>
+                  <th className="text-start font-semibold px-3 py-2.5 w-36">{t("מי")}</th>
+                  <th className="text-start font-semibold px-3 py-2.5 w-36">{t("תחום")}</th>
+                  <th className="text-start font-semibold px-3 py-2.5">{t("מה נעשה")}</th>
+                  <th className="text-start font-semibold px-3 py-2.5 w-56">{t("שינוי")}</th>
                 </tr>
               </thead>
               <tbody>

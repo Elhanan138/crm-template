@@ -11,6 +11,7 @@ import {
 import { toast } from 'sonner';
 import { CRM_SCHEMAS } from '@/lib/crm/schemas';
 import { supabaseSchemaSql, SUPABASE_SETTING_KEY, validateSupabaseConfig } from '@/lib/supabase';
+import { useI18n } from '@/lib/i18n';
 
 const CONTROL = 'h-9 rounded-lg border-border bg-background text-sm';
 
@@ -39,6 +40,7 @@ function Card({ icon: Icon, title, hint, children, action }) {
 }
 
 export default function SupabasePanel() {
+  const { t } = useI18n();
   const queryClient = useQueryClient();
   const [showKey, setShowKey] = useState(false);
   const [testing, setTesting] = useState(false);
@@ -66,7 +68,7 @@ export default function SupabasePanel() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['supabase-config'] });
       setForm(null);
-      toast.success('הגדרות Supabase נשמרו');
+      toast.success(t("הגדרות Supabase נשמרו"));
     },
     onError: (e) => toast.error(e?.message || 'השמירה נכשלה'),
   });
@@ -104,9 +106,9 @@ export default function SupabasePanel() {
   const copySql = async () => {
     try {
       await navigator.clipboard.writeText(sql);
-      toast.success('ה-SQL הועתק');
+      toast.success(t("ה-SQL הועתק"));
     } catch {
-      toast.error('ההעתקה נכשלה — סמן והעתק ידנית');
+      toast.error(t("ההעתקה נכשלה — סמן והעתק ידנית"));
     }
   };
 
@@ -118,8 +120,8 @@ export default function SupabasePanel() {
     <div className="space-y-4">
       <Card
         icon={Database}
-        title="חיבור ל-Supabase"
-        hint="הגדרת הפרויקט, בדיקת חיבור והפקת סכימה — הכל מתוך המערכת."
+        title={t("חיבור ל-Supabase")}
+        hint={t("הגדרת הפרויקט, בדיקת חיבור והפקת סכימה — הכל מתוך המערכת.")}
         action={
           <Button onClick={save} disabled={saveMutation.isPending} size="sm" className="h-8 text-xs gap-1.5 flex-shrink-0">
             {saveMutation.isPending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : null}
@@ -152,7 +154,7 @@ export default function SupabasePanel() {
               </button>
             </div>
             <p className="text-[11px] text-muted-foreground">
-              רק המפתח הציבורי. אין להזין כאן <span dir="ltr">service_role</span> — הוא חושף את כל הנתונים.
+              רק המפתח הציבורי. אין להזין כאן <span dir="ltr">service_role</span> {t("— הוא חושף את כל הנתונים.")}
             </p>
           </div>
           <div className="space-y-1">
@@ -160,7 +162,7 @@ export default function SupabasePanel() {
             <Input value={config.schema} dir="ltr" onChange={(e) => set({ schema: e.target.value })} className={CONTROL} />
           </div>
           <div className="space-y-1">
-            <Label className="text-xs text-muted-foreground">קידומת טבלאות</Label>
+            <Label className="text-xs text-muted-foreground">{t("קידומת טבלאות")}</Label>
             <Input
               value={config.table_prefix} dir="ltr" placeholder="oss_"
               onChange={(e) => set({ table_prefix: e.target.value })} className={CONTROL}
@@ -202,17 +204,16 @@ export default function SupabasePanel() {
 
       <Card
         icon={Database}
-        title="סכימת בסיס הנתונים"
+        title={t("סכימת בסיס הנתונים")}
         hint={`${Object.keys(CRM_SCHEMAS).length} טבלאות נגזרות מהמודולים שבבנייה הזו`}
         action={
           <Button onClick={copySql} variant="outline" size="sm" className="h-8 text-xs gap-1.5 flex-shrink-0">
-            <Copy className="w-3.5 h-3.5" /> העתק SQL
+            <Copy className="w-3.5 h-3.5" /> {t("העתק SQL")}
           </Button>
         }
       >
         <p className="text-[11px] text-muted-foreground">
-          הרץ ב-<span dir="ltr">SQL Editor</span> של הפרויקט. כולל <span dir="ltr">RLS</span> מופעל
-          וכן מדיניות בסיסית לפי <span dir="ltr">owner_email</span>.
+          {t('הרץ ב-SQL Editor של הפרויקט. כולל RLS מופעל ומדיניות בסיסית לפי owner_email.')}
         </p>
         <pre
           dir="ltr"

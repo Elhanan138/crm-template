@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import { Monitor, Smartphone } from 'lucide-react';
 import PopupContent from '@/components/shared/PopupContent';
+import { useI18n } from '@/lib/i18n';
 
 export default function PopupLivePreview({ popup }) {
+  const { t } = useI18n();
   const [device, setDevice] = useState('desktop');
 
   return (
@@ -12,13 +14,13 @@ export default function PopupLivePreview({ popup }) {
           onClick={() => setDevice('desktop')}
           className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all ${device === 'desktop' ? 'bg-card text-primary shadow-sm' : 'text-muted-foreground'}`}
         >
-          <Monitor className="w-3.5 h-3.5" /> דסקטופ
+          <Monitor className="w-3.5 h-3.5" /> {t("דסקטופ")}
         </button>
         <button
           onClick={() => setDevice('mobile')}
           className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all ${device === 'mobile' ? 'bg-card text-primary shadow-sm' : 'text-muted-foreground'}`}
         >
-          <Smartphone className="w-3.5 h-3.5" /> מובייל
+          <Smartphone className="w-3.5 h-3.5" /> {t("מובייל")}
         </button>
       </div>
       <div className={`mx-auto overflow-hidden rounded-lg border border-border shadow-sm bg-background transition-all ${device === 'desktop' ? 'w-full max-w-md' : 'w-[320px]'}`}>

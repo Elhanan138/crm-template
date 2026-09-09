@@ -7,6 +7,7 @@ import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Clock, Save } from 'lucide-react';
 import { toast } from 'sonner';
+import { useI18n } from '@/lib/i18n';
 
 const DAY_LABELS = [
   { value: 0, label: 'א' },
@@ -19,6 +20,7 @@ const DAY_LABELS = [
 ];
 
 export default function AlertHeartbeatSection() {
+  const { t } = useI18n();
   const [config, setConfig] = useState({
     enabled: true,
     start_hour: 8,
@@ -77,9 +79,9 @@ export default function AlertHeartbeatSection() {
         const created = await api.entities.AppSetting.create({ key: 'alerts_heartbeat_config', value: payload });
         if (created) setSettingId(created.id);
       }
-      toast.success('הגדרות פעימות ההתראות נשמרו בהצלחה');
+      toast.success(t("הגדרות פעימות ההתראות נשמרו בהצלחה"));
     } catch (e) {
-      toast.error('שמירת ההגדרות נכשלה', { description: e?.message || 'אנא נסה שוב' });
+      toast.error(t("שמירת ההגדרות נכשלה"), { description: e?.message || 'אנא נסה שוב' });
     } finally {
       setSaving(false);
     }
@@ -108,7 +110,7 @@ export default function AlertHeartbeatSection() {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Clock className="w-4 h-4 text-primary" />
-            <CardTitle className="text-sm">פעימות התראות אוטומטיות</CardTitle>
+            <CardTitle className="text-sm">{t("פעימות התראות אוטומטיות")}</CardTitle>
           </div>
           <Switch
             checked={config.enabled}
@@ -122,7 +124,7 @@ export default function AlertHeartbeatSection() {
         </p>
 
         <div className="space-y-1.5">
-          <Label className="text-xs">תדירות בדיקה (בדקות)</Label>
+          <Label className="text-xs">{t("תדירות בדיקה (בדקות)")}</Label>
           <input
             type="number"
             min={1}
@@ -136,7 +138,7 @@ export default function AlertHeartbeatSection() {
 
         <div className="grid grid-cols-2 gap-3">
           <div className="space-y-1.5">
-            <Label className="text-xs">שעת התחלה</Label>
+            <Label className="text-xs">{t("שעת התחלה")}</Label>
             <Select
               value={String(config.start_hour)}
               onValueChange={(v) => setConfig({ ...config, start_hour: Number(v) })}
@@ -151,7 +153,7 @@ export default function AlertHeartbeatSection() {
             </Select>
           </div>
           <div className="space-y-1.5">
-            <Label className="text-xs">שעת סיום</Label>
+            <Label className="text-xs">{t("שעת סיום")}</Label>
             <Select
               value={String(config.end_hour)}
               onValueChange={(v) => setConfig({ ...config, end_hour: Number(v) })}
@@ -168,7 +170,7 @@ export default function AlertHeartbeatSection() {
         </div>
 
         <div className="space-y-1.5">
-          <Label className="text-xs">ימי פעילות</Label>
+          <Label className="text-xs">{t("ימי פעילות")}</Label>
           <div className="flex flex-wrap gap-1.5">
             {DAY_LABELS.map(day => (
               <button
@@ -182,7 +184,7 @@ export default function AlertHeartbeatSection() {
                     : 'bg-transparent text-muted-foreground border-input hover:bg-accent'
                 } ${!config.enabled ? 'opacity-50 cursor-not-allowed' : ''}`}
               >
-                {day.label}
+                {t(day.label)}
               </button>
             ))}
           </div>
