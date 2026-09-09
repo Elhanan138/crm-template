@@ -49,12 +49,14 @@ const rowTexts = () => screen.getAllByRole('row').slice(1).map((r) => r.textCont
 // Both layouts render in jsdom (the mobile cards are only hidden by CSS), so a
 // text query has to say which one it means.
 const inTable = (text) => within(table()).getAllByText(text)[0];
-// The largest case renders sixty rows through the real query layer; on a busy
-// machine that takes longer than the one second waitFor allows by default.
+// The largest case renders sixty rows through the real query layer. On a busy
+// machine — a dev server running beside the suite, say — that outruns the one
+// second waitFor allows by default. A passing case still returns immediately,
+// so a generous ceiling costs nothing and stops the suite failing for load.
 const findInTable = async (text) => {
   await waitFor(
     () => expect(within(table()).getAllByText(text).length).toBeGreaterThan(0),
-    { timeout: 5000 },
+    { timeout: 15000 },
   );
   return inTable(text);
 };

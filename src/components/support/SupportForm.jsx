@@ -223,6 +223,8 @@ export default function SupportForm({ user, compact = false, onSuccess }) {
             </div>
           </Field>
 
+          <EntityCustomFields entity="SupportTicket" anchor="urgency" values={form.custom_fields} onChange={v => setForm(f => ({ ...f, custom_fields: v }))} />
+
           {/* Title */}
           <Field label="כותרת" htmlFor="sf-title" required>
             <Input
@@ -234,6 +236,8 @@ export default function SupportForm({ user, compact = false, onSuccess }) {
               className="h-10"
             />
           </Field>
+
+          <EntityCustomFields entity="SupportTicket" anchor="title" values={form.custom_fields} onChange={v => setForm(f => ({ ...f, custom_fields: v }))} />
 
           {/* Description */}
           <Field label="תיאור מפורט" htmlFor="sf-desc" required>
@@ -252,6 +256,8 @@ export default function SupportForm({ user, compact = false, onSuccess }) {
               </span>
             </div>
           </Field>
+
+          <EntityCustomFields entity="SupportTicket" anchor="description" values={form.custom_fields} onChange={v => setForm(f => ({ ...f, custom_fields: v }))} />
 
           {/* Attachments — dropzone-style */}
           <Field label="צילומי מסך" help="אופציונלי — תמונה שווה אלף מילים">
@@ -285,6 +291,9 @@ export default function SupportForm({ user, compact = false, onSuccess }) {
             )}
           </Field>
 
+          <EntityCustomFields entity="SupportTicket" anchor="image_urls" values={form.custom_fields} onChange={v => setForm(f => ({ ...f, custom_fields: v }))} />
+
+          {/* Everything that was never given a position, at the foot as before. */}
           <EntityCustomFields
             entity="SupportTicket"
             values={form.custom_fields}

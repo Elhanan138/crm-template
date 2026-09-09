@@ -1,10 +1,8 @@
 import React, { useMemo, useState } from 'react';
 import { GripVertical, Lock, SlidersHorizontal } from 'lucide-react';
-import { CRM_SCHEMAS } from '@/lib/crm/schemas';
 import { useI18n } from '@/lib/i18n';
-import { isDerived } from '@/lib/crm/derived';
 import {
-  FIELD_TYPE_MAP, LAYOUT_START, LAYOUT_END, layoutSlots, placeField,
+  FIELD_TYPE_MAP, LAYOUT_START, LAYOUT_END, layoutSlots, placeField, formFieldsOf,
 } from '@/lib/customFields';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -22,15 +20,6 @@ import {
 // Drag and drop is the browser's own (draggable + dataTransfer). A library for
 // this would be a dependency for one screen.
 // ─────────────────────────────────────────────────────────────────────────────
-
-/** The form the chosen entity actually renders, in the order it renders it. */
-export function formFieldsOf(entity) {
-  const schema = Object.values(CRM_SCHEMAS).find((s) => s.entity === entity);
-  if (!schema) return [];
-  // A derived field has no input, so nothing can sit "after" it in a way a
-  // person would recognise. It is left out of the slots entirely.
-  return schema.fields.filter((f) => !isDerived(f));
-}
 
 // A two-pixel gap is not a drop target anyone can hit. The lines open up to a
 // real target while something is being dragged, and collapse again after.
@@ -58,9 +47,6 @@ export default function FormLayoutEditor({ entity, fields, onPlace, busy }) {
   const formFields = useMemo(() => formFieldsOf(entity), [entity]);
   const slots = useMemo(() => layoutSlots(formFields, fields), [formFields, fields]);
 
-  // An entity with no schema (the three that predate it) has no built-in form
-  // to place fields against; there the order of the custom fields is the layout.
-  if (formFields.length === 0) return null;
 
   // The id travels in the dataTransfer, which is what it is for. Reading it
   // from React state instead would depend on a re-render having happened
@@ -114,6 +100,11 @@ export default function FormLayoutEditor({ entity, fields, onPlace, busy }) {
         </p>
       </div>
 
+      {formFields.length === 0 ? (
+        <p className="text-[11px] text-muted-foreground rounded-lg border border-dashed border-border px-3 py-4 text-center">
+          {t('אין תיאור טופס לישות הזו, כך שאין מיקומים לבחור מהם. השדות יופיעו בסוף הטופס.')}
+        </p>
+      ) : (
       <div className="rounded-lg border border-border p-2 space-y-1 max-h-[26rem] overflow-y-auto">
         {/* Each slot renders what is in it, then the line that means "drop here
             to sit after this". The first slot has no field of its own, so its
@@ -152,6 +143,7 @@ export default function FormLayoutEditor({ entity, fields, onPlace, busy }) {
           </p>
         )}
       </div>
+      )}
 
       <p className="text-[11px] text-muted-foreground">
         {t('שדה שלא הוזז מופיע בסוף הטופס, כמו קודם.')}

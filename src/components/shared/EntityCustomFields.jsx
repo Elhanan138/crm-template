@@ -2,27 +2,39 @@ import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { api } from '@/api/client';
 import CustomFieldsRenderer from '@/components/shared/CustomFieldsRenderer';
-import { sortFields } from '@/lib/customFields';
+import { sortFields, layoutSlots, formFieldsOf, LAYOUT_END } from '@/lib/customFields';
+import { useI18n } from '@/lib/i18n';
 
 /**
- * Drop-in block that renders the admin-defined fields for one entity.
- * Every form that supports custom fields uses this, so a field created in
- * הגדרות → אדמין → שדות מותאמים shows up without touching the form again.
+ * The admin-defined fields for one entity, rendered where they were placed.
+ *
+ * Called with an `anchor`, it renders only the fields dropped after that point
+ * in the form — so a form places one of these at each of its own positions, and
+ * a field dragged in הגדרות → שדות מותאמים lands where the administrator put it.
+ *
+ * Called without one, it keeps its original behaviour: the block at the foot of
+ * the form, holding everything that was never given a position. That is why a
+ * form which has not been taught about anchors still shows every field.
  */
-export default function EntityCustomFields({ entity, values, onChange, columns = 2, title = 'שדות נוספים' }) {
-  const { data: all = [] } = useQuery({
-    queryKey: ['custom-fields'],
-    queryFn: () => api.entities.CustomField.list(),
-    staleTime: 60000,
-  });
+export default function EntityCustomFields({
+  entity, values, onChange, columns = 2, title, anchor = LAYOUT_END,
+}) {
+  const { t } = useI18n();
+  const fields = useEntityCustomFields(entity);
+  const slot = layoutSlots(formFieldsOf(entity), fields).find((s) => s.key === anchor);
+  const placed = slot?.custom || [];
+  if (placed.length === 0) return null;
 
-  const fields = sortFields(all.filter((f) => f.entity === entity));
-  if (fields.length === 0) return null;
+  // Only the trailing block earns a heading; a field placed mid-form belongs to
+  // the question above it, and a heading there would read as a new section.
+  const showTitle = anchor === LAYOUT_END;
 
   return (
-    <div className="space-y-2 pt-3 border-t border-border">
-      <p className="text-xs font-semibold text-muted-foreground">{title}</p>
-      <CustomFieldsRenderer fields={fields} values={values || {}} onChange={onChange} columns={columns} />
+    <div className={showTitle ? 'space-y-2 pt-3 border-t border-border' : 'space-y-2'}>
+      {showTitle && (
+        <p className="text-xs font-semibold text-muted-foreground">{title || t('שדות נוספים')}</p>
+      )}
+      <CustomFieldsRenderer fields={placed} values={values || {}} onChange={onChange} columns={columns} />
     </div>
   );
 }

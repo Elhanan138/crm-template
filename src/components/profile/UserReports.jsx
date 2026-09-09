@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { api } from '@/api/client';
 import { useAccessControl } from '@/hooks/useAccessControl';
-import { CheckSquare, LifeBuoy, Clock, FileText, Settings2, X, BarChart3, ChevronLeft } from 'lucide-react';
+import { CheckSquare, LifeBuoy, FileText, Settings2, X, BarChart3, ChevronLeft } from 'lucide-react';
 import { CubeIcon } from '@radix-ui/react-icons';
 import { Button } from '@/components/ui/button';
 import ReportCard from '@/components/development/ReportCard';
@@ -78,7 +78,6 @@ export default function UserReports() {
 
  const doneTasks = myTasks.filter(t => t.status === 'done').length;
  const openTickets = myTickets.filter(t => t.status !== 'resolved').length;
- const totalHours = myTasks.reduce((sum, t) => sum + (Number(t.hours_spent) || 0), 0);
  const projectNames = useMemo(() => {
   const map = {};
   projects.forEach(p => { map[p.id] = p.client_name || p.name; });
@@ -114,11 +113,10 @@ export default function UserReports() {
     <ChevronLeft className="w-5 h-5 text-primary group-hover:-translate-x-1 transition-transform flex-shrink-0"/>
    </button>
 
-   <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+   <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
     <KpiCard icon={CubeIcon} value={myProjects.length} label="הפרויקטים שלי"tone="primary"density="compact"/>
     <KpiCard icon={CheckSquare} value={myTasks.length} label="המשימות שלי"sub={`${doneTasks} הושלמו`} tone="success"density="compact"/>
     <KpiCard icon={LifeBuoy} value={openTickets} label="פניות פתוחות"sub={`מתוך ${myTickets.length}`} tone="warning"density="compact"/>
-    <KpiCard icon={Clock} value={totalHours.toFixed(1)} label="שעות שרשמתי"sub={`על ${myTasks.length} משימות`} tone="info"density="compact"/>
    </div>
 
    <div className="flex items-center justify-between gap-3">

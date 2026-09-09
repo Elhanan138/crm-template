@@ -3,18 +3,17 @@ import { useQuery } from '@tanstack/react-query';
 import { api } from '@/api/client';
 import ClientHighlightsSection from './ClientHighlightsSection';
 import KpiCard from '@/components/shared/KpiCard';
-import { KPI_ICONS, formatKpi, resolveTone } from '@/lib/kpi';
+import { KPI_ICONS, formatKpi } from '@/lib/kpi';
 import { isFixedPrice } from '@/lib/pricingModel';
 
 export default function OverviewTab({ project, tasks, canEditCustom = false, onNavigate }) {
   const openTasks = tasks.filter(t => t.status !== 'done').length;
   const urgentTasks = tasks.filter(t => t.priority === 'urgent' && t.status !== 'done').length;
 
-  // Hours used are the hours booked on the project's tasks. They used to be
-  // derived from meeting records; the work itself is the honest source.
+  // The hours field was removed from the task form, so nothing books hours any
+  // more. A "hours used" KPI would read zero for ever, which is worse than not
+  // asking the question: the hours bank is stated on the project itself.
   const purchasedHours = project.training_hours_purchased || 0;
-  const usedHours = tasks.reduce((s, t) => s + (Number(t.hours_spent) || 0), 0);
-  const remainingHours = purchasedHours - usedHours;
 
   const { data: projectStages = [] } = useQuery({
     queryKey: ['project-stages-overview', project.id],
@@ -61,24 +60,13 @@ export default function OverviewTab({ project, tasks, canEditCustom = false, onN
           density="compact"
           onClick={() => onNavigate('tasks')}
         />
-        {purchasedHours > 0 && !isFixedPrice(project.pricing_model) ? (
+        {purchasedHours > 0 && !isFixedPrice(project.pricing_model) && (
           <KpiCard
-            label="מאזן שעות הדרכה"
-            value={formatKpi([usedHours, purchasedHours], 'ratio')}
-            sub={remainingHours < purchasedHours * 0.2 ? 'נגמר בקרוב' : `נותרו ${Math.max(0, remainingHours).toFixed(1)} שע׳`}
-            icon={KPI_ICONS.hours}
-            tone={resolveTone({ metric: 'hours', value: purchasedHours > 0 ? (usedHours / purchasedHours) * 100 : 0, threshold: { warning: 80, destructive: 90 } })}
-            density="compact"
-            onClick={() => onNavigate('tasks')}
-          />
-        ) : (
-          <KpiCard
-            label="שעות שנרשמו"
-            value={formatKpi(usedHours, 'count')}
+            label="שעות הדרכה שנרכשו"
+            value={formatKpi(purchasedHours, 'count')}
             icon={KPI_ICONS.hours}
             tone="neutral"
             density="compact"
-            onClick={() => onNavigate('tasks')}
           />
         )}
         <KpiCard

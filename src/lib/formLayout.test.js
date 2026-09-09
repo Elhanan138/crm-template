@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import {
-  LAYOUT_START, LAYOUT_END, layoutSlots, trailingFields, hasPlacedFields, placeField,
+  LAYOUT_START, LAYOUT_END, layoutSlots, trailingFields, hasPlacedFields, placeField, formFieldsOf,
 } from './customFields';
 
 // A small stand-in for a schema's fields: name, amount, notes.
@@ -123,5 +123,47 @@ describe('dragging a field to a new position', () => {
     const slots = layoutSlots(FORM, list);
     expect(slots.find((s) => s.key === 'name').custom.map((f) => f.id)).toEqual(['b']);
     expect(slots[slots.length - 1].custom.map((f) => f.id)).toEqual(['a']);
+  });
+});
+
+describe('which form an entity has', () => {
+  it('describes the three entities that predate the schema engine', () => {
+    // Without these the editor had nothing to place against and showed an
+    // empty box — and a task is the first thing anyone adds a field to.
+    for (const entity of ['Task', 'SupportTicket', 'Project']) {
+      expect(formFieldsOf(entity).length, entity).toBeGreaterThan(0);
+    }
+  });
+
+  it('reads a schema-driven module straight from its schema', () => {
+    const leadKeys = formFieldsOf('Lead').map((f) => f.key);
+    expect(leadKeys).toContain('name');
+    expect(leadKeys).toContain('value');
+  });
+
+  it('leaves derived columns out — nothing can sit after a number nobody types', () => {
+    // weighted_value is computed from stage and value.
+    expect(formFieldsOf('Lead').map((f) => f.key)).not.toContain('weighted_value');
+  });
+
+  it('gives every anchor a key and a label to show', () => {
+    for (const entity of ['Task', 'SupportTicket', 'Project', 'Lead', 'Invoice']) {
+      for (const field of formFieldsOf(entity)) {
+        expect(field.key, entity).toBeTruthy();
+        expect(field.label, `${entity}.${field.key}`).toBeTruthy();
+      }
+    }
+  });
+
+  it('says an entity it has never heard of has no form, rather than throwing', () => {
+    expect(formFieldsOf('NotARecord')).toEqual([]);
+    expect(formFieldsOf(undefined)).toEqual([]);
+  });
+
+  it('places a task field against the anchors the task form actually renders', () => {
+    const field = { id: 'c1', label: 'תעדוף מנהל', order: 0, after: 'priority' };
+    const slot = layoutSlots(formFieldsOf('Task'), [field]).find((s) => s.key === 'priority');
+    expect(slot).toBeTruthy();
+    expect(slot.custom.map((f) => f.id)).toEqual(['c1']);
   });
 });

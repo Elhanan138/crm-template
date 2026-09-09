@@ -163,6 +163,50 @@ export const validateVisibleCustomFields = (fields, values = {}) =>
 export const LAYOUT_START = '__start__';
 export const LAYOUT_END = '__end__';
 
+// The three entities that predate the schema engine have no schema to read, so
+// their forms are described here — the same fields those screens render, in the
+// order they render them. Without this the layout editor had nothing to place
+// against and showed an empty box, which is exactly the case someone reaches
+// first: a task is the most obvious thing to add a field to.
+//
+// These keys are anchors, not storage. They name the block a custom field
+// should follow; the forms themselves are unchanged.
+const LEGACY_FORM_FIELDS = {
+  Task: [
+    { key: 'title', label: 'כותרת המשימה' },
+    { key: 'checklist', label: 'צ׳קליסט' },
+    { key: 'project_id', label: 'פרויקט' },
+    { key: 'priority', label: 'עדיפות' },
+    { key: 'status', label: 'סטטוס' },
+    { key: 'details', label: 'אחראי ותאריך יעד' },
+  ],
+  SupportTicket: [
+    { key: 'urgency', label: 'דחיפות' },
+    { key: 'title', label: 'כותרת' },
+    { key: 'description', label: 'תיאור מפורט' },
+    { key: 'image_urls', label: 'צילומי מסך' },
+  ],
+  Project: [
+    { key: 'client_name', label: 'שם הלקוח' },
+    { key: 'contract_value', label: 'שווי חוזה' },
+  ],
+};
+
+/**
+ * The form an entity actually renders, in the order it renders it.
+ *
+ * Schema-driven modules describe themselves; the three that predate the engine
+ * are described above. Either way this is the one answer to "what are the
+ * positions in this form", so the editor and the form cannot disagree.
+ */
+export function formFieldsOf(entity) {
+  const schema = Object.values(CRM_SCHEMAS).find((s) => s.entity === entity);
+  // A derived field has no input, so nothing can sit "after" it in a way a
+  // person would recognise. It is left out of the anchors entirely.
+  if (schema) return schema.fields.filter((f) => !f.derive);
+  return LEGACY_FORM_FIELDS[entity] || [];
+}
+
 /**
  * The form as a list of slots: each built-in field, with whatever custom fields
  * were placed after it.

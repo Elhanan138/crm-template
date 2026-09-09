@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import EntityCustomFields from '@/components/shared/EntityCustomFields';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Loader2, User, Check, MessageCircle, ChevronDown, ChevronUp, GanttChart, Clock } from 'lucide-react';
+import { Loader2, User, Check, MessageCircle, ChevronDown, ChevronUp, GanttChart } from 'lucide-react';
 import { toast } from 'sonner';
 import TaskComments from '@/components/tasks/TaskComments';
 import TaskChecklist from '@/components/tasks/TaskChecklist';
@@ -73,7 +73,6 @@ export default function TaskEditSheet({ open, task, projectId, onClose }) {
    priority: task?.priority || 'medium',
    status: task?.status || 'not_started',
    checklist: task?.checklist || [],
-   hours_spent: task?.hours_spent ?? '',
    show_in_gantt: task?.show_in_gantt || false,
    project_id: task?.project_id || projectId || '',
    custom_fields: task?.custom_fields || {},
@@ -184,6 +183,8 @@ export default function TaskEditSheet({ open, task, projectId, onClose }) {
     </SheetHeader>
 
     <div className="flex-1 overflow-y-auto px-5 py-4 space-y-4">
+     <EntityCustomFields entity="Task" anchor="__start__" values={form.custom_fields} onChange={v => set('custom_fields', v)} />
+
      {/* Title */}
      <Input
       value={form.title || ''}
@@ -192,6 +193,8 @@ export default function TaskEditSheet({ open, task, projectId, onClose }) {
       className="h-11 rounded-xl text-right font-medium"
      />
 
+     <EntityCustomFields entity="Task" anchor="title" values={form.custom_fields} onChange={v => set('custom_fields', v)} />
+
      {/* Checklist — right below title, edit only */}
      {isEditing && (
       <TaskChecklist
@@ -199,6 +202,8 @@ export default function TaskEditSheet({ open, task, projectId, onClose }) {
        onChange={items => set('checklist', items)}
       />
      )}
+
+     <EntityCustomFields entity="Task" anchor="checklist" values={form.custom_fields} onChange={v => set('custom_fields', v)} />
 
      {/* Project selector — only for new tasks without projectId */}
      {!isEditing && !projectId && (
@@ -210,6 +215,8 @@ export default function TaskEditSheet({ open, task, projectId, onClose }) {
        </SelectContent>
       </Select>
      )}
+
+     <EntityCustomFields entity="Task" anchor="project_id" values={form.custom_fields} onChange={v => set('custom_fields', v)} />
 
      {/* Priority selector — segmented control with dots */}
      <div className="space-y-1.5">
@@ -232,6 +239,8 @@ export default function TaskEditSheet({ open, task, projectId, onClose }) {
       </div>
      </div>
 
+     <EntityCustomFields entity="Task" anchor="priority" values={form.custom_fields} onChange={v => set('custom_fields', v)} />
+
      {/* Status selector — segmented control with dots */}
      <div className="space-y-1.5">
       <span className="text-[11px] font-medium text-muted-foreground">סטטוס</span>
@@ -252,6 +261,8 @@ export default function TaskEditSheet({ open, task, projectId, onClose }) {
        })}
       </div>
      </div>
+
+     <EntityCustomFields entity="Task" anchor="status" values={form.custom_fields} onChange={v => set('custom_fields', v)} />
 
      {/* Meta row: assignee + date + gantt toggle */}
      <div className="flex items-center gap-2 flex-wrap">
@@ -281,23 +292,11 @@ export default function TaskEditSheet({ open, task, projectId, onClose }) {
        clearable
        className="h-8 px-2.5 text-xs w-[150px]"
       />
-      {/* Hours booked on the work itself — the project's hours bank is their sum. */}
-      <div className="flex items-center gap-1.5 ms-auto">
-       <Clock className="w-3.5 h-3.5 text-muted-foreground flex-shrink-0"/>
-       <Input
-        type="number"
-        inputMode="decimal"
-        min="0"
-        step="0.25"
-        dir="ltr"
-        value={form.hours_spent ?? ''}
-        onChange={e => set('hours_spent', e.target.value === '' ? '' : Number(e.target.value))}
-        placeholder="שעות"
-        className="h-8 w-20 text-xs px-2"
-       />
-      </div>
      </div>
 
+     <EntityCustomFields entity="Task" anchor="details" values={form.custom_fields} onChange={v => set('custom_fields', v)} />
+
+     {/* Everything that was never given a position, at the foot as before. */}
      <EntityCustomFields
       entity="Task"
       values={form.custom_fields}

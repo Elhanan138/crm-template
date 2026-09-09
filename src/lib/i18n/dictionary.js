@@ -904,6 +904,16 @@ export const EN = {
   "עדכון המיקום נכשל": "Updating the position failed",
   "שדה שלא הוזז מופיע בסוף הטופס, כמו קודם.": "A field you have not moved appears at the end of the form, as before.",
   "שדות נוספים": "Additional fields",
+
+  // ── Settings screens ──────────────────────────────────────────────────────
+  "אין תיאור טופס לישות הזו, כך שאין מיקומים לבחור מהם. השדות יופיעו בסוף הטופס.": "This record type has no described form, so there are no positions to choose from. Its fields appear at the end of the form.",
+  "כותרת המשימה": "Task title",
+  "צ׳קליסט": "Checklist",
+  "אחראי ותאריך יעד": "Owner and due date",
+  "תיאור מפורט": "Full description",
+  "צילומי מסך": "Screenshots",
+  "שווי חוזה": "Contract value",
+  "שעות הדרכה שנרכשו": "Training hours purchased",
 };
 
 /** Every language the switcher offers. */
