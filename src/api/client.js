@@ -10,7 +10,7 @@ import { OWNER_EMAIL, OWNER_NAME } from '@/lib/owner';
 
 const STORAGE_PREFIX = 'oss_data_';
 
-const ADMIN_USER = {
+const BASE_ADMIN_USER = {
   id: 'local-admin-001',
   email: OWNER_EMAIL,
   full_name: OWNER_NAME,
@@ -20,6 +20,30 @@ const ADMIN_USER = {
   ui_prefs: {},
   project_order: [],
 };
+
+// Everything the owner has changed about their own profile — the onboarding
+// stamp, their preferences, their picture. It used to live in a module-level
+// object mutated in place, which had two consequences: a refresh threw the
+// changes away (so the opening wizard came back every time), and `me()` kept
+// returning the SAME object reference, so React saw no change and the screen
+// that was waiting on it never re-rendered.
+const PROFILE_KEY = 'oss_current_user';
+
+const readProfile = () => {
+  try { return JSON.parse(localStorage.getItem(PROFILE_KEY) || '{}') || {}; } catch { return {}; }
+};
+
+// A fresh object every time: identity is what tells React something changed.
+const currentUser = () => ({ ...BASE_ADMIN_USER, ...readProfile() });
+
+const writeProfile = (patch) => {
+  const next = { ...readProfile(), ...patch };
+  try { localStorage.setItem(PROFILE_KEY, JSON.stringify(next)); } catch { /* private mode */ }
+  return { ...BASE_ADMIN_USER, ...next };
+};
+
+// Kept for the code that reads the owner's identity synchronously.
+const ADMIN_USER = BASE_ADMIN_USER;
 
 function getCollection(name) {
   try {
@@ -237,7 +261,7 @@ const integrations = {
 
 const localClient = {
   auth: {
-    me: async () => ADMIN_USER,
+    me: async () => currentUser(),
     isAuthenticated: () => true,
     logout: async () => {
       // Local mode — no-op, stay logged in
@@ -245,10 +269,7 @@ const localClient = {
     redirectToLogin: () => {
       // Local mode — always authenticated, no-op
     },
-    updateMe: async (data) => {
-      Object.assign(ADMIN_USER, data);
-      return ADMIN_USER;
-    },
+    updateMe: async (data) => writeProfile(data),
   },
   integrations,
   entities: new Proxy({}, {
@@ -281,9 +302,10 @@ const localClient = {
       }
       try {
         const result = invokeLocalFunction(name, body);
-        // Sync ADMIN_USER email if the updated member's old email matched
-        if (oldMemberEmail && oldMemberEmail.trim().toLowerCase() === ADMIN_USER.email.trim().toLowerCase()) {
-          ADMIN_USER.email = body.data.email;
+        // The owner renamed their own address: carry it into the stored
+        // profile, so it survives a refresh like every other profile change.
+        if (oldMemberEmail && oldMemberEmail.trim().toLowerCase() === currentUser().email.trim().toLowerCase()) {
+          writeProfile({ email: body.data.email });
         }
         return result;
       } catch (err) {

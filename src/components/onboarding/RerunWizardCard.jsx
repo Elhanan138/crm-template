@@ -7,6 +7,7 @@ import SectionCard from '@/components/shared/SectionCard';
 import { api } from '@/api/client';
 import { useI18n } from '@/lib/i18n';
 import { ONBOARDING_KEY } from '@/components/onboarding/OnboardingWizard';
+import { useAuth } from '@/lib/AuthContext';
 
 /**
  * Run the opening wizard again.
@@ -17,9 +18,14 @@ import { ONBOARDING_KEY } from '@/components/onboarding/OnboardingWizard';
 export default function RerunWizardCard() {
   const { t } = useI18n();
   const queryClient = useQueryClient();
+  const { updateUser } = useAuth();
 
   const rerun = useMutation({
-    mutationFn: () => api.auth.updateMe({ [ONBOARDING_KEY]: null }),
+    mutationFn: async () => {
+      await api.auth.updateMe({ [ONBOARDING_KEY]: null });
+      // Same reason as the wizard: the gate reads the auth context.
+      updateUser({ [ONBOARDING_KEY]: null });
+    },
     onSuccess: () => {
       queryClient.invalidateQueries();
       toast.success(t('אשף הפתיחה ייפתח מחדש'));

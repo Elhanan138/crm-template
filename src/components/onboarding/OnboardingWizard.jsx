@@ -15,6 +15,7 @@ import { PACKAGES, capabilityValuesFor, modulesOf, coverageOf } from '@/lib/onbo
 import { BRAND_PRESETS } from '@/lib/brandPresets';
 import { MODULES } from '@/lib/modules';
 import { useSeedMockData } from '@/hooks/useMockFixtures';
+import { useAuth } from '@/lib/AuthContext';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // OPENING WIZARD
@@ -51,6 +52,7 @@ const Field = ({ label, children, hint }) => (
 export default function OnboardingWizard({ onDone }) {
   const { t } = useI18n();
   const queryClient = useQueryClient();
+  const { updateUser } = useAuth();
   const { setSystemName, setSystemSubtitle, setBrandColor, setLogo, logoUrl, isCustom } = useLogo();
   const seedMock = useSeedMockData();
 
@@ -114,7 +116,13 @@ export default function OnboardingWizard({ onDone }) {
         } catch { /* the wizard still finishes; the summary says what happened */ }
       }
 
-      await api.auth.updateMe({ [ONBOARDING_KEY]: new Date().toISOString() });
+      // The stamp that closes the wizard. It has to reach BOTH the stored
+      // profile and the auth context: the gate reads the context, and the
+      // context is loaded once at startup, so a write that only persists
+      // leaves the wizard on screen with no way out of it.
+      const stamp = new Date().toISOString();
+      await api.auth.updateMe({ [ONBOARDING_KEY]: stamp });
+      updateUser({ [ONBOARDING_KEY]: stamp });
       return { invited, requested: emails.length, seeded, wantedDemo: wantDemo };
     },
     onSuccess: ({ invited, requested, seeded, wantedDemo }) => {
@@ -132,7 +140,11 @@ export default function OnboardingWizard({ onDone }) {
   });
 
   const skip = useMutation({
-    mutationFn: () => api.auth.updateMe({ [ONBOARDING_KEY]: new Date().toISOString() }),
+    mutationFn: async () => {
+      const stamp = new Date().toISOString();
+      await api.auth.updateMe({ [ONBOARDING_KEY]: stamp });
+      updateUser({ [ONBOARDING_KEY]: stamp });
+    },
     onSuccess: () => { queryClient.invalidateQueries(); onDone?.(); },
     onError: (e) => toast.error(e?.message || t('הדילוג נכשל')),
   });
