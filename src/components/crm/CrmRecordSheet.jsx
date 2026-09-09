@@ -19,6 +19,8 @@ import { formatValue } from '@/lib/crm/useCrmRecords';
 import PersonSelect from '@/components/shared/PersonSelect';
 import DateField from '@/components/ui/date-field';
 import { validateCustomFields } from '@/lib/customFields';
+import LineItemsEditor from '@/components/crm/LineItemsEditor';
+import { LINE_FIELD, lineSourceFor, lineTotals, cleanLines } from '@/lib/crm/lineItems';
 
 const CONTROL = 'h-9 rounded-lg border-border bg-background text-sm';
 
@@ -44,6 +46,20 @@ export default function CrmRecordSheet({
     setErrors((e) => (e[key] ? { ...e, [key]: undefined } : e));
   };
 
+  // Documents that carry lines: the total is what the lines come to, always.
+  // Two places holding the same number is two places that can disagree, and the
+  // one people trust is the one they can see itemised.
+  const lineSource = lineSourceFor(moduleId);
+  const setLines = (lines) => {
+    setForm((f) => {
+      const next = { ...f, [LINE_FIELD]: lines };
+      const totals = lineTotals(lines, lineSource.vatField ? f[lineSource.vatField] : 0);
+      if (lines.length > 0) next[lineSource.totalField] = totals.subtotal;
+      return next;
+    });
+    setErrors((e) => (e[lineSource.totalField] ? { ...e, [lineSource.totalField]: undefined } : e));
+  };
+
   const submit = () => {
     const next = {};
     for (const field of schema.fields) {
@@ -67,6 +83,7 @@ export default function CrmRecordSheet({
     // number that must keep tracking its inputs.
     const stored = { ...form };
     for (const field of schema.fields) if (isDerived(field)) delete stored[field.key];
+    if (lineSource) stored[LINE_FIELD] = cleanLines(form[LINE_FIELD]);
     onSave(stored);
   };
 
@@ -97,6 +114,9 @@ export default function CrmRecordSheet({
     const value = form[field.key] ?? (field.type === 'checkbox' ? false : '');
     const error = errors[field.key];
     const wide = field.type === 'textarea';
+    // Once there are lines, the total is theirs to state.
+    const ownedByLines = lineSource && field.key === lineSource.totalField
+      && (form[LINE_FIELD] || []).length > 0;
 
     if (field.type === 'checkbox') {
       return (
@@ -169,7 +189,12 @@ export default function CrmRecordSheet({
         <Label className="text-xs font-medium text-muted-foreground">
           {field.label}{field.required && <span className="text-destructive"> *</span>}
         </Label>
-        {control}
+        {ownedByLines ? (
+          <div className="h-9 flex items-center px-3 rounded-lg border border-dashed border-border bg-muted/30 text-sm">
+            <span dir="ltr">{formatValue(field, value)}</span>
+          </div>
+        ) : control}
+        {ownedByLines && <p className="text-[11px] text-muted-foreground">{t('מחושב מהשורות')}</p>}
         {error
           ? <p className="text-[11px] text-destructive">{error}</p>
           : field.help && <p className="text-[11px] text-muted-foreground">{field.help}</p>}
@@ -192,6 +217,15 @@ export default function CrmRecordSheet({
         <div className="flex-1 overflow-y-auto px-5 py-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {schema.fields.map(renderField)}
+            {lineSource && (
+              <LineItemsEditor
+                source={lineSource}
+                value={form[LINE_FIELD] || []}
+                onChange={setLines}
+                vatPercent={lineSource.vatField ? Number(form[lineSource.vatField]) || 0 : 0}
+                readOnly={readOnly}
+              />
+            )}
           </div>
 
           {/* Hand-offs to another module — only those this build can serve. */}

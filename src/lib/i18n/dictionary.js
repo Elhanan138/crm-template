@@ -545,6 +545,16 @@ export const EN = {
   "תבנית ריקה": "Blank template",
   "ללא שם": "unnamed",
   "טביעת אצבע": "Fingerprint",
+
+  // ── Line items ────────────────────────────────────────────────────────────
+  "מחושב מהשורות": "Calculated from the lines",
+  "שורות החשבונית": "Invoice lines",
+  "שורות ההזמנה": "Order lines",
+  "מהקטלוג": "From catalog",
+  "שורה": "Line",
+  "כמות": "Qty",
+  "מחיר": "Price",
+  "סכום ביניים": "Subtotal",
 };
 
 /** Every language the switcher offers. */
