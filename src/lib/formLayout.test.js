@@ -1,135 +1,161 @@
 import { describe, it, expect } from 'vitest';
-import {
-  LAYOUT_START, LAYOUT_END, layoutSlots, trailingFields, hasPlacedFields, placeField, formFieldsOf,
-} from './customFields';
+import { resolveLayout, moveInLayout, isCustomised, orderFor } from './formLayout';
+import { formFieldsOf } from './customFields';
 
-// A small stand-in for a schema's fields: name, amount, notes.
-const FORM = [
-  { key: 'name', label: 'שם' },
-  { key: 'amount', label: 'סכום' },
-  { key: 'notes', label: 'הערות' },
-];
+const keysOf = (items) => items.map((i) => i.key);
 
 const custom = (over = {}) => ({ id: 'c1', key: 'po', label: 'מספר הזמנה', type: 'text', order: 0, ...over });
 
-describe('where a custom field sits', () => {
-  it('puts a field with no position at the end, exactly as before', () => {
-    const slots = layoutSlots(FORM, [custom()]);
-    expect(slots[slots.length - 1].custom.map((f) => f.id)).toEqual(['c1']);
-    expect(trailingFields(FORM, [custom()])).toHaveLength(1);
-    expect(hasPlacedFields(FORM, [custom()])).toBe(false);
+describe('the order a form is asked in', () => {
+  it('is the form as written, then the custom fields, until someone changes it', () => {
+    const natural = keysOf(resolveLayout('Task', [custom()], []));
+    expect(natural).toEqual([...formFieldsOf('Task').map((f) => f.key), 'po']);
   });
 
-  it('puts a placed field after the built-in field it names', () => {
-    const slots = layoutSlots(FORM, [custom({ after: 'amount' })]);
-    const amount = slots.find((s) => s.key === 'amount');
-    expect(amount.custom.map((f) => f.id)).toEqual(['c1']);
-    expect(trailingFields(FORM, [custom({ after: 'amount' })])).toEqual([]);
-    expect(hasPlacedFields(FORM, [custom({ after: 'amount' })])).toBe(true);
+  it('follows a stored order exactly', () => {
+    const order = ['po', 'status', 'title'];
+    const items = keysOf(resolveLayout('Task', [custom()], order));
+    expect(items.slice(0, 3)).toEqual(order);
   });
 
-  it('can put a field before everything else', () => {
-    const slots = layoutSlots(FORM, [custom({ after: LAYOUT_START })]);
-    expect(slots[0].key).toBe(LAYOUT_START);
-    expect(slots[0].custom.map((f) => f.id)).toEqual(['c1']);
+  it('moves built-in fields too, not only custom ones', () => {
+    const items = keysOf(resolveLayout('Task', [], ['status', 'title']));
+    expect(items[0]).toBe('status');
+    expect(items[1]).toBe('title');
   });
 
-  it('returns a slot for every built-in field, plus a start and an end', () => {
-    const slots = layoutSlots(FORM, []);
-    expect(slots.map((s) => s.key)).toEqual([LAYOUT_START, 'name', 'amount', 'notes', LAYOUT_END]);
+  it('marks which entry is which, so a form knows how to render it', () => {
+    const items = resolveLayout('Task', [custom()], []);
+    expect(items.find((i) => i.key === 'title').kind).toBe('builtin');
+    expect(items.find((i) => i.key === 'po').kind).toBe('custom');
+    expect(items.find((i) => i.key === 'po').field.label).toBe('מספר הזמנה');
   });
 
-  it('does not lose a field pinned to something the schema no longer has', () => {
-    // The built-in field was renamed or removed in a later version.
-    const slots = layoutSlots(FORM, [custom({ after: 'legacy_column' })]);
-    expect(slots[slots.length - 1].custom.map((f) => f.id)).toEqual(['c1']);
+  it('skips a stored key for a field that no longer exists', () => {
+    const items = keysOf(resolveLayout('Task', [], ['status', 'a_field_we_removed', 'title']));
+    expect(items).not.toContain('a_field_we_removed');
+    expect(items.slice(0, 2)).toEqual(['status', 'title']);
   });
 
-  it('keeps two fields in the same slot in their stored order', () => {
-    const fields = [
-      custom({ id: 'b', label: 'שני', after: 'amount', order: 2 }),
-      custom({ id: 'a', label: 'ראשון', after: 'amount', order: 1 }),
-    ];
-    const amount = layoutSlots(FORM, fields).find((s) => s.key === 'amount');
-    expect(amount.custom.map((f) => f.id)).toEqual(['a', 'b']);
+  it('keeps a field added since the order was stored', () => {
+    // The stored order predates the custom field entirely.
+    const order = formFieldsOf('Task').map((f) => f.key);
+    const items = keysOf(resolveLayout('Task', [custom()], order));
+    expect(items).toContain('po');
+    expect(items).toHaveLength(order.length + 1);
   });
 
-  it('leaves a hidden field out of the form entirely', () => {
-    const slots = layoutSlots(FORM, [custom({ hidden: true, after: 'amount' })]);
-    expect(slots.every((s) => s.custom.length === 0)).toBe(true);
+  it('puts a field the stored order never mentioned at the end, where it can be seen', () => {
+    // An upgrade adds fields to a form whose stored order predates them.
+    // Guessing a position in the middle would silently rearrange a form
+    // somebody had already arranged.
+    const order = ['title', 'priority'];
+    const items = keysOf(resolveLayout('Task', [], order));
+    expect(items.slice(0, 2)).toEqual(order);
+    expect(items).toContain('status');
+    expect(items.indexOf('status')).toBeGreaterThan(1);
   });
 
-  it('answers for a form with no fields and for no custom fields at all', () => {
-    expect(layoutSlots([], []).map((s) => s.key)).toEqual([LAYOUT_START, LAYOUT_END]);
-    expect(layoutSlots(FORM).every((s) => s.custom.length === 0)).toBe(true);
+  it('ignores a key repeated in the stored order', () => {
+    const items = keysOf(resolveLayout('Task', [], ['title', 'title', 'status']));
+    expect(items.filter((k) => k === 'title')).toHaveLength(1);
+  });
+
+  it('leaves a hidden custom field out of the form entirely', () => {
+    expect(keysOf(resolveLayout('Task', [custom({ hidden: true })], []))).not.toContain('po');
+  });
+
+  it('answers for an entity it has never heard of rather than throwing', () => {
+    expect(resolveLayout('NotARecord', [], [])).toEqual([]);
+    expect(resolveLayout('Task', undefined, undefined).length).toBeGreaterThan(0);
   });
 });
 
-describe('dragging a field to a new position', () => {
-  const fields = [
-    { id: 'a', label: 'א', order: 0 },
-    { id: 'b', label: 'ב', order: 1 },
-    { id: 'c', label: 'ג', order: 2 },
+describe('moving a field', () => {
+  const items = ['a', 'b', 'c', 'd'].map((key) => ({ key }));
+
+  it('moves a field down to the gap that was clicked', () => {
+    // Gap 3 is between 'c' and 'd'.
+    expect(moveInLayout(items, 'a', 3)).toEqual(['b', 'c', 'a', 'd']);
+  });
+
+  it('moves a field up to the gap that was clicked', () => {
+    expect(moveInLayout(items, 'd', 1)).toEqual(['a', 'd', 'b', 'c']);
+  });
+
+  it('takes a field to the very top and to the very bottom', () => {
+    expect(moveInLayout(items, 'c', 0)).toEqual(['c', 'a', 'b', 'd']);
+    expect(moveInLayout(items, 'a', 4)).toEqual(['b', 'c', 'd', 'a']);
+  });
+
+  it('is a no-op when the field is dropped back where it already was', () => {
+    expect(moveInLayout(items, 'b', 1)).toEqual(['a', 'b', 'c', 'd']);
+    expect(moveInLayout(items, 'b', 2)).toEqual(['a', 'b', 'c', 'd']);
+  });
+
+  it('clamps a gap outside the list instead of dropping the field', () => {
+    expect(moveInLayout(items, 'a', 99)).toEqual(['b', 'c', 'd', 'a']);
+    expect(moveInLayout(items, 'd', -5)).toEqual(['d', 'a', 'b', 'c']);
+  });
+
+  it('never loses or duplicates a field, wherever it is dropped', () => {
+    for (let gap = 0; gap <= items.length; gap += 1) {
+      for (const key of ['a', 'b', 'c', 'd']) {
+        const next = moveInLayout(items, key, gap);
+        expect(next).toHaveLength(4);
+        expect(new Set(next).size).toBe(4);
+      }
+    }
+  });
+
+  it('says nothing happened for a key that is not in the list', () => {
+    expect(moveInLayout(items, 'zz', 2)).toEqual(['a', 'b', 'c', 'd']);
+  });
+
+  it('round-trips: what moveInLayout writes is what resolveLayout reads back', () => {
+    const start = resolveLayout('Task', [custom()], []);
+    const next = moveInLayout(start, 'po', 0);
+    expect(keysOf(resolveLayout('Task', [custom()], next))[0]).toBe('po');
+  });
+});
+
+describe('telling a changed order from the original', () => {
+  it('says nothing was changed when there is no stored order', () => {
+    expect(isCustomised('Task', [custom()], [])).toBe(false);
+    expect(isCustomised('Task', [custom()], undefined)).toBe(false);
+  });
+
+  it('says nothing was changed when the stored order matches the natural one', () => {
+    const natural = keysOf(resolveLayout('Task', [custom()], []));
+    expect(isCustomised('Task', [custom()], natural)).toBe(false);
+  });
+
+  it('notices a real change', () => {
+    const natural = keysOf(resolveLayout('Task', [custom()], []));
+    const moved = moveInLayout(natural.map((key) => ({ key })), 'po', 0);
+    expect(isCustomised('Task', [custom()], moved)).toBe(true);
+  });
+});
+
+describe('finding the order for one entity', () => {
+  const layouts = [
+    { entity: 'Task', order: ['status', 'title'] },
+    { entity: 'Lead', order: ['value'] },
   ];
 
-  it('records the new anchor', () => {
-    const changes = placeField(fields, 'b', 'amount');
-    const moved = changes.find((c) => c.id === 'b');
-    expect(moved.after).toBe('amount');
+  it('picks the right record', () => {
+    expect(orderFor(layouts, 'Task')).toEqual(['status', 'title']);
+    expect(orderFor(layouts, 'Lead')).toEqual(['value']);
   });
 
-  it('writes only what actually moved', () => {
-    const changes = placeField(fields, 'c', 'amount');
-    // 'c' was already last; only its anchor changed.
-    expect(changes.map((c) => c.id)).toEqual(['c']);
-  });
-
-  it('renumbers so the stored order matches what is shown', () => {
-    const changes = placeField(fields, 'a', 'amount');
-    const byId = Object.fromEntries(changes.map((c) => [c.id, c]));
-    // 'b' and 'c' close the gap 'a' left behind.
-    expect(byId.b.order).toBe(0);
-    expect(byId.c.order).toBe(1);
-    expect(byId.a.order).toBe(2);
-  });
-
-  it('drops into a chosen position within the slot, not always at the end', () => {
-    const placed = [
-      { id: 'x', after: 'amount', order: 0 },
-      { id: 'y', after: 'amount', order: 1 },
-      { id: 'z', order: 2 },
-    ];
-    const changes = placeField(placed, 'z', 'amount', 0);
-    const byId = Object.fromEntries(changes.map((c) => [c.id, c]));
-    expect(byId.z.order).toBe(0);
-    expect(byId.x.order).toBe(1);
-    expect(byId.y.order).toBe(2);
-  });
-
-  it('clamps a position that does not exist rather than throwing', () => {
-    expect(() => placeField(fields, 'a', 'amount', 99)).not.toThrow();
-    expect(() => placeField(fields, 'a', 'amount', -5)).not.toThrow();
-  });
-
-  it('says nothing happened when the field is not one of these', () => {
-    expect(placeField(fields, 'nope', 'amount')).toEqual([]);
-  });
-
-  it('round-trips: what placeField writes is what layoutSlots reads back', () => {
-    let list = [{ id: 'a', label: 'א', order: 0 }, { id: 'b', label: 'ב', order: 1 }];
-    const changes = placeField(list, 'b', 'name');
-    list = list.map((f) => ({ ...f, ...(changes.find((c) => c.id === f.id) || {}) }));
-
-    const slots = layoutSlots(FORM, list);
-    expect(slots.find((s) => s.key === 'name').custom.map((f) => f.id)).toEqual(['b']);
-    expect(slots[slots.length - 1].custom.map((f) => f.id)).toEqual(['a']);
+  it('reports no order rather than throwing, for an entity with none', () => {
+    expect(orderFor(layouts, 'Invoice')).toEqual([]);
+    expect(orderFor(undefined, 'Task')).toEqual([]);
   });
 });
 
-describe('which form an entity has', () => {
+describe('which fields a form has', () => {
   it('describes the three entities that predate the schema engine', () => {
-    // Without these the editor had nothing to place against and showed an
-    // empty box — and a task is the first thing anyone adds a field to.
     for (const entity of ['Task', 'SupportTicket', 'Project']) {
       expect(formFieldsOf(entity).length, entity).toBeGreaterThan(0);
     }
@@ -141,12 +167,11 @@ describe('which form an entity has', () => {
     expect(leadKeys).toContain('value');
   });
 
-  it('leaves derived columns out — nothing can sit after a number nobody types', () => {
-    // weighted_value is computed from stage and value.
+  it('leaves derived columns out — nothing to place for a number nobody types', () => {
     expect(formFieldsOf('Lead').map((f) => f.key)).not.toContain('weighted_value');
   });
 
-  it('gives every anchor a key and a label to show', () => {
+  it('gives every entry a key and a label to show', () => {
     for (const entity of ['Task', 'SupportTicket', 'Project', 'Lead', 'Invoice']) {
       for (const field of formFieldsOf(entity)) {
         expect(field.key, entity).toBeTruthy();
@@ -158,12 +183,5 @@ describe('which form an entity has', () => {
   it('says an entity it has never heard of has no form, rather than throwing', () => {
     expect(formFieldsOf('NotARecord')).toEqual([]);
     expect(formFieldsOf(undefined)).toEqual([]);
-  });
-
-  it('places a task field against the anchors the task form actually renders', () => {
-    const field = { id: 'c1', label: 'תעדוף מנהל', order: 0, after: 'priority' };
-    const slot = layoutSlots(formFieldsOf('Task'), [field]).find((s) => s.key === 'priority');
-    expect(slot).toBeTruthy();
-    expect(slot.custom.map((f) => f.id)).toEqual(['c1']);
   });
 });

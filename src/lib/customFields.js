@@ -143,34 +143,20 @@ export const validateVisibleCustomFields = (fields, values = {}) =>
   validateCustomFields(visibleFields(fields, values), values);
 
 // ─────────────────────────────────────────────────────────────────────────────
-// FORM LAYOUT
+// WHAT A FORM CONTAINS
 //
-// A custom field used to appear in one place only: a block at the bottom of the
-// form, under "שדות נוספים". That is fine for one afterthought and wrong for a
-// field that belongs in the middle of the story — a PO number belongs beside
-// the amount, not three sections below it.
-//
-// A field may therefore declare `after`: the key of the built-in field it
-// should follow. `LAYOUT_START` puts it first, and a field with no `after` (or
-// one naming a field that no longer exists) falls back to the end — which is
-// exactly the old behaviour, so nothing that exists today moves.
-//
-// Only the position is stored. The built-in fields are not reordered and not
-// copied anywhere: they come from the schema, and the schema stays the one
-// description of what a record is.
+// The order fields are rendered in is a preference, and lives in
+// src/lib/formLayout.js. This is only the answer to "which fields does this
+// entity's form have, and what are they called".
 // ─────────────────────────────────────────────────────────────────────────────
 
-export const LAYOUT_START = '__start__';
-export const LAYOUT_END = '__end__';
-
 // The three entities that predate the schema engine have no schema to read, so
-// their forms are described here — the same fields those screens render, in the
-// order they render them. Without this the layout editor had nothing to place
-// against and showed an empty box, which is exactly the case someone reaches
-// first: a task is the most obvious thing to add a field to.
+// their forms are described here — the same blocks those screens render, in the
+// order they render them by default. Without this the layout editor had nothing
+// to show at all, which is exactly the case someone reaches first: a task is the
+// most obvious thing to add a field to.
 //
-// These keys are anchors, not storage. They name the block a custom field
-// should follow; the forms themselves are unchanged.
+// Each key names a block the form renders, so a stored order can address it.
 const LEGACY_FORM_FIELDS = {
   Task: [
     { key: 'title', label: 'כותרת המשימה' },
@@ -196,87 +182,13 @@ const LEGACY_FORM_FIELDS = {
  * The form an entity actually renders, in the order it renders it.
  *
  * Schema-driven modules describe themselves; the three that predate the engine
- * are described above. Either way this is the one answer to "what are the
- * positions in this form", so the editor and the form cannot disagree.
+ * are described above. Either way this is the one answer to "what is in this
+ * form", so the editor and the form itself cannot disagree.
  */
 export function formFieldsOf(entity) {
   const schema = Object.values(CRM_SCHEMAS).find((s) => s.entity === entity);
-  // A derived field has no input, so nothing can sit "after" it in a way a
-  // person would recognise. It is left out of the anchors entirely.
+  // A derived field has no input — it is the answer to the others — so there is
+  // nothing to place, and it is left out.
   if (schema) return schema.fields.filter((f) => !f.derive);
   return LEGACY_FORM_FIELDS[entity] || [];
-}
-
-/**
- * The form as a list of slots: each built-in field, with whatever custom fields
- * were placed after it.
- *
- * @param {Array} formFields   the built-in fields, in schema order
- * @param {Array} customFields the admin-defined fields for the same entity
- * @returns {Array<{ key, field, custom: Array }>} one entry per slot
- */
-export function layoutSlots(formFields = [], customFields = []) {
-  const known = new Set(formFields.map((f) => f.key));
-  const sorted = sortFields(customFields).filter((f) => !f.hidden);
-
-  const anchorOf = (field) => {
-    if (field.after === LAYOUT_START) return LAYOUT_START;
-    // A field pinned after something that has since been removed from the
-    // schema is not lost — it goes back to the end, where it can be seen.
-    return known.has(field.after) ? field.after : LAYOUT_END;
-  };
-
-  const slots = [
-    { key: LAYOUT_START, field: null, custom: [] },
-    ...formFields.map((field) => ({ key: field.key, field, custom: [] })),
-    { key: LAYOUT_END, field: null, custom: [] },
-  ];
-  const byKey = new Map(slots.map((s) => [s.key, s]));
-  for (const field of sorted) byKey.get(anchorOf(field)).custom.push(field);
-  return slots;
-}
-
-/** The custom fields that were never given a position — rendered at the end. */
-export const trailingFields = (formFields = [], customFields = []) => {
-  const slots = layoutSlots(formFields, customFields);
-  return slots[slots.length - 1].custom;
-};
-
-/** True when at least one field asked to sit somewhere in particular. */
-export const hasPlacedFields = (formFields = [], customFields = []) =>
-  layoutSlots(formFields, customFields).slice(0, -1).some((s) => s.custom.length > 0);
-
-/**
- * Move a custom field to a new anchor, and renumber so the order within a slot
- * is the order it is displayed in.
- *
- * Returns only the fields whose stored values actually changed, so a drag that
- * moves one field writes one record rather than all of them.
- */
-export function placeField(customFields, fieldId, after, index = null) {
-  const sorted = sortFields(customFields);
-  const moving = sorted.find((f) => f.id === fieldId);
-  if (!moving) return [];
-
-  const slotOf = (field) => field.after || LAYOUT_END;
-  const rest = sorted.filter((f) => f.id !== fieldId);
-
-  // The target slot, with the moved field dropped into place.
-  const target = rest.filter((f) => slotOf(f) === after);
-  const at = index === null || index > target.length ? target.length : Math.max(0, index);
-  target.splice(at, 0, { ...moving, after });
-
-  // `order` stays a total order across the entity, so two fields in the same
-  // slot always come out in the same sequence they were left in.
-  const others = rest.filter((f) => slotOf(f) !== after);
-  const final = [...others, ...target];
-
-  const changes = [];
-  final.forEach((field, i) => {
-    const original = sorted.find((f) => f.id === field.id);
-    if (original.order !== i || slotOf(original) !== slotOf(field)) {
-      changes.push({ id: field.id, order: i, after: slotOf(field) });
-    }
-  });
-  return changes;
 }

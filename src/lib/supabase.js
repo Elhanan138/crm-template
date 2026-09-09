@@ -54,6 +54,11 @@ const SUPPORT_TABLES = [
     columns: ['entity text not null', 'record_id text not null', 'file_name text', 'file_url text', 'file_size numeric', 'mime_type text', 'actor_email text'],
   },
   {
+    entity: 'FormLayout',
+    // One row per record type: the order its form asks its questions in.
+    columns: ['entity text not null', `field_order jsonb default '[]'::jsonb`],
+  },
+  {
     entity: 'AuditLog',
     // Append-only on purpose: a log anyone can edit answers no question.
     appendOnly: true,

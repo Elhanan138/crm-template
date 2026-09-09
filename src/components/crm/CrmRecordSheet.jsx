@@ -18,7 +18,8 @@ import RecordTrail from '@/components/crm/RecordTrail';
 import { formatValue } from '@/lib/crm/useCrmRecords';
 import PersonSelect from '@/components/shared/PersonSelect';
 import DateField from '@/components/ui/date-field';
-import { validateCustomFields, layoutSlots, LAYOUT_END } from '@/lib/customFields';
+import { validateCustomFields } from '@/lib/customFields';
+import { useFormLayout } from '@/lib/useFormLayout';
 import LineItemsEditor from '@/components/crm/LineItemsEditor';
 import { LINE_FIELD, lineSourceFor, lineTotals, cleanLines } from '@/lib/crm/lineItems';
 
@@ -87,11 +88,10 @@ export default function CrmRecordSheet({
     onSave(stored);
   };
 
-  // Where each custom field sits inside this form. A field that was never
-  // dragged anywhere lands in the last slot, which is the block at the foot —
-  // exactly where custom fields have always appeared.
-  const formSlots = layoutSlots(schema.fields, customFields);
-  const trailingCustom = formSlots[formSlots.length - 1].custom;
+  // The order this form asks its questions in, as set in
+  // הגדרות → שדות מותאמים. Untouched, it is the schema's own order followed by
+  // the custom fields — which is what it has always been.
+  const layout = useFormLayout(schema.entity, customFields);
 
   const renderField = (field) => {
     // A derived field has no input: it is the answer to the other fields, and it
@@ -222,20 +222,18 @@ export default function CrmRecordSheet({
 
         <div className="flex-1 overflow-y-auto px-5 py-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            {formSlots.filter((slot) => slot.key !== LAYOUT_END).map((slot) => (
-              <React.Fragment key={slot.key}>
-                {slot.field && renderField(slot.field)}
-                {slot.custom.length > 0 && (
-                  <div className="sm:col-span-2">
-                    <CustomFieldsRenderer
-                      fields={slot.custom}
-                      values={form.custom_fields || {}}
-                      onChange={(v) => set('custom_fields', v)}
-                    />
-                  </div>
-                )}
-              </React.Fragment>
-            ))}
+            {layout.map((item) => (item.kind === 'builtin'
+              ? renderField(item.field)
+              : (
+                <div key={item.key} className={item.field.type === 'textarea' ? 'sm:col-span-2' : ''}>
+                  <CustomFieldsRenderer
+                    fields={[item.field]}
+                    values={form.custom_fields || {}}
+                    onChange={(v) => set('custom_fields', { ...(form.custom_fields || {}), ...v })}
+                    columns={1}
+                  />
+                </div>
+              )))}
             {lineSource && (
               <LineItemsEditor
                 source={lineSource}
@@ -271,16 +269,6 @@ export default function CrmRecordSheet({
           {/* What changed, what people did, what is attached. */}
           {record?.id && <RecordTrail schema={schema} entity={schema.entity} record={record} />}
 
-          {trailingCustom.length > 0 && (
-            <div className="mt-4 pt-4 border-t border-border space-y-3">
-              <p className="text-xs font-semibold text-muted-foreground">{t('שדות נוספים')}</p>
-              <CustomFieldsRenderer
-                fields={trailingCustom}
-                values={form.custom_fields || {}}
-                onChange={(v) => set('custom_fields', v)}
-              />
-            </div>
-          )}
         </div>
 
         {!readOnly && (

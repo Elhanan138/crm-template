@@ -914,6 +914,19 @@ export const EN = {
   "צילומי מסך": "Screenshots",
   "שווי חוזה": "Contract value",
   "שעות הדרכה שנרכשו": "Training hours purchased",
+
+  // ── Settings screens ──────────────────────────────────────────────────────
+  "אין תיאור טופס לישות הזו, כך שאין מה לסדר.": "This record type has no described form, so there is nothing to arrange.",
+  "גררו כל שדה למקום שבו הוא צריך להופיע. כך בדיוק ייראה הטופס.": "Drag any field to where it belongs. This is exactly how the form will look.",
+  "החזרת הסדר נכשלה": "Restoring the original order failed",
+  "הסדר המקורי הוחזר": "The original order is back",
+  "הסדר נשמר מיד ומשפיע על הטופס עצמו — יצירה ועריכה כאחד.": "The order saves immediately and applies to the form itself — both creating and editing.",
+  "מותאם": "Custom",
+  "סדר הטופס": "Form order",
+  "סדר הטופס נשמר": "Form order saved",
+  "סדר מקורי": "Original order",
+  "שדה מותאם": "Custom field",
+  "שמירת סדר הטופס נכשלה": "Saving the form order failed",
 };
 
 /** Every language the switcher offers. */

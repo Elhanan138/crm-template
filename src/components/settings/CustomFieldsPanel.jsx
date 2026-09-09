@@ -17,6 +17,7 @@ import {
   VISIBILITY_OPERATORS,
 } from '@/lib/customFields';
 import FormLayoutEditor from '@/components/settings/FormLayoutEditor';
+import { LAYOUT_ENTITY, orderFor } from '@/lib/formLayout';
 
 const INPUT = 'h-9 rounded-lg text-sm';
 
@@ -172,14 +173,33 @@ export default function CustomFieldsPanel() {
     onError: (e) => toast.error(e?.message || 'מחיקת השדה נכשלה'),
   });
 
-  // A drag writes only what actually moved — one record, usually.
-  const placeMutation = useMutation({
-    mutationFn: async (changes) => {
-      for (const { id, ...patch } of changes) await api.entities.CustomField.update(id, patch);
-      return changes.length;
+  // The order of a form is one record per entity: a list of keys, and nothing
+  // else. It is a preference over the schema, never a copy of it.
+  const { data: layouts = [] } = useQuery({
+    queryKey: ['form-layouts'],
+    queryFn: () => api.entities[LAYOUT_ENTITY].list(),
+  });
+  const layout = layouts.find((l) => l.entity === entity);
+  const order = orderFor(layouts, entity);
+
+  const reorderMutation = useMutation({
+    mutationFn: (next) => (layout
+      ? api.entities[LAYOUT_ENTITY].update(layout.id, { order: next })
+      : api.entities[LAYOUT_ENTITY].create({ entity, order: next })),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['form-layouts'] });
+      toast.success(t('סדר הטופס נשמר'));
     },
-    onSuccess: (count) => { invalidate(); toast.success(`${t('מיקום השדה עודכן')} (${count})`); },
-    onError: (e) => toast.error(e?.message || t('עדכון המיקום נכשל')),
+    onError: (e) => toast.error(e?.message || t('שמירת סדר הטופס נכשלה')),
+  });
+
+  const resetMutation = useMutation({
+    mutationFn: () => (layout ? api.entities[LAYOUT_ENTITY].delete(layout.id) : Promise.resolve()),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['form-layouts'] });
+      toast.success(t('הסדר המקורי הוחזר'));
+    },
+    onError: (e) => toast.error(e?.message || t('החזרת הסדר נכשלה')),
   });
 
   const move = (field, delta) => {
@@ -270,17 +290,17 @@ export default function CustomFieldsPanel() {
         )}
       </div>
 
-      {/* Where each field sits inside the real form */}
-      {fields.length > 0 && (
-        <div className="bg-card rounded-xl border border-border shadow-sm p-5">
-          <FormLayoutEditor
-            entity={entity}
-            fields={fields}
-            busy={placeMutation.isPending}
-            onPlace={(changes) => placeMutation.mutate(changes)}
-          />
-        </div>
-      )}
+      {/* The form itself, in the order it will be asked */}
+      <div className="bg-card rounded-xl border border-border shadow-sm p-5">
+        <FormLayoutEditor
+          entity={entity}
+          fields={fields}
+          order={order}
+          busy={reorderMutation.isPending || resetMutation.isPending}
+          onReorder={(next) => reorderMutation.mutate(next)}
+          onReset={() => resetMutation.mutate()}
+        />
+      </div>
 
       {dialogOpen && (
         <FieldDialog
