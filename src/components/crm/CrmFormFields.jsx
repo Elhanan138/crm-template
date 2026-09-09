@@ -1,6 +1,6 @@
 import React from 'react';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import Field from '@/components/shared/Field';
 import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -24,7 +24,8 @@ import { LINE_FIELD } from '@/lib/crm/lineItems';
 // real form passes nothing and gets the plain fields.
 // ─────────────────────────────────────────────────────────────────────────────
 
-const CONTROL = 'h-9 rounded-lg border-border bg-background text-sm';
+// DESIGN_SYSTEM §7: h-10 in a full form. This one lives in a Sheet.
+const CONTROL = 'h-10 rounded-lg border-border bg-background text-sm';
 const NONE = '__none__';
 
 export default function CrmFormFields({
@@ -40,9 +41,8 @@ export default function CrmFormFields({
       const derivedValue = readField(field, form);
       const meta = field.options?.find((o) => String(o.value) === String(derivedValue));
       return (
-        <div className="space-y-1">
-          <Label className="text-xs font-medium text-muted-foreground">{field.label}</Label>
-          <div className="h-9 flex items-center px-3 rounded-lg border border-dashed border-border bg-muted/30 text-sm">
+        <Field label={field.label} help={t('מחושב אוטומטית')}>
+          <div className="h-10 flex items-center px-3 rounded-lg border border-dashed border-border bg-muted/30 text-sm">
             {meta ? (
               <span className="text-xs font-semibold">{meta.label}</span>
             ) : (
@@ -51,8 +51,7 @@ export default function CrmFormFields({
               </span>
             )}
           </div>
-          <p className="text-[11px] text-muted-foreground">{t('מחושב אוטומטית')}</p>
-        </div>
+        </Field>
       );
     }
 
@@ -64,7 +63,7 @@ export default function CrmFormFields({
 
     if (field.type === 'checkbox') {
       return (
-        <label className="flex items-center gap-2 cursor-pointer rounded-lg border border-border bg-background px-3 h-9">
+        <label className="flex items-center gap-2 cursor-pointer rounded-lg border border-border bg-background px-3 h-10">
           <Checkbox checked={!!value} disabled={readOnly} onCheckedChange={(v) => set(field.key, v === true)} />
           <span className="text-sm">{field.label}</span>
         </label>
@@ -84,7 +83,7 @@ export default function CrmFormFields({
         <Textarea
           value={value} rows={3} disabled={readOnly}
           onChange={(e) => set(field.key, e.target.value)}
-          className="rounded-lg border-border bg-background text-sm"
+          className="rounded-lg border-border bg-background resize-none text-sm"
         />
       );
     } else if (field.type === 'select') {
@@ -126,20 +125,18 @@ export default function CrmFormFields({
     }
 
     return (
-      <div className="space-y-1">
-        <Label className="text-xs font-medium text-muted-foreground">
-          {field.label}{field.required && <span className="text-destructive"> *</span>}
-        </Label>
+      <Field
+        label={field.label}
+        required={field.required}
+        error={error}
+        help={ownedByLines ? t('מחושב מהשורות') : field.help}
+      >
         {ownedByLines ? (
-          <div className="h-9 flex items-center px-3 rounded-lg border border-dashed border-border bg-muted/30 text-sm">
+          <div className="h-10 flex items-center px-3 rounded-lg border border-dashed border-border bg-muted/30 text-sm">
             <span dir="ltr">{formatValue(field, value)}</span>
           </div>
         ) : control}
-        {ownedByLines && <p className="text-[11px] text-muted-foreground">{t('מחושב מהשורות')}</p>}
-        {error
-          ? <p className="text-[11px] text-destructive">{error}</p>
-          : field.help && <p className="text-[11px] text-muted-foreground">{field.help}</p>}
-      </div>
+      </Field>
     );
   };
 

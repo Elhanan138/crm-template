@@ -174,7 +174,8 @@ export default function TaskEditSheet({ open, task, projectId, onClose }) {
     <div className="flex-1 overflow-y-auto px-5 py-4 space-y-4">
      {/* The same renderer the layout preview uses, so what is arranged in
          הגדרות → שדות מותאמים is exactly what is rendered here. */}
-     <TaskFormFields
+     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+      <TaskFormFields
       form={form}
       set={set}
       layout={layout}
@@ -183,7 +184,8 @@ export default function TaskEditSheet({ open, task, projectId, onClose }) {
       projectId={projectId}
       allProjects={allProjects}
       teamMembers={teamMembers}
-     />
+      />
+     </div>
 
      {/* Create button — only for new tasks */}
      {!isEditing && (

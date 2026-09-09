@@ -164,7 +164,9 @@ const LEGACY_FORM_FIELDS = {
     { key: 'project_id', label: 'פרויקט' },
     { key: 'priority', label: 'עדיפות' },
     { key: 'status', label: 'סטטוס' },
-    { key: 'details', label: 'אחראי ותאריך יעד' },
+    { key: 'assigned_to', label: 'אחראי' },
+    { key: 'due_date', label: 'תאריך יעד' },
+    { key: 'show_in_gantt', label: 'גאנט' },
   ],
   SupportTicket: [
     { key: 'urgency', label: 'דחיפות' },

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import Field from '@/components/shared/Field';
 import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -8,8 +8,10 @@ import { sortFields, visibleFields, pruneHiddenValues } from '@/lib/customFields
 import PersonSelect from '@/components/shared/PersonSelect';
 import DateField from '@/components/ui/date-field';
 
+// DESIGN_SYSTEM §7: h-10 in a full form. A custom field is drawn exactly like a
+// declared one — on the form it is another question, not an annex to it.
 const INPUT_CLASS =
-  'h-9 rounded-lg border-border bg-background focus:ring-2 focus:ring-primary/30 focus:border-primary text-sm';
+  'h-10 rounded-lg border-border bg-background focus:ring-2 focus:ring-primary/30 focus:border-primary text-sm';
 
 /**
  * Renders the fields an administrator generated for an entity.
@@ -39,7 +41,7 @@ export default function CustomFieldsRenderer({ fields, values = {}, onChange, co
           return (
             <label
               key={field.key}
-              className="flex items-center gap-2 cursor-pointer rounded-lg border border-border bg-background px-3 h-9"
+              className="flex items-center gap-2 cursor-pointer rounded-lg border border-border bg-background px-3 h-10"
             >
               <Checkbox checked={!!value} onCheckedChange={(v) => set(field.key, v === true)} />
               <span className="text-sm">{field.label}</span>
@@ -49,11 +51,13 @@ export default function CustomFieldsRenderer({ fields, values = {}, onChange, co
         }
 
         return (
-          <div key={field.key} className={`space-y-1 ${wide ? 'sm:col-span-2' : ''}`}>
-            <Label className="text-xs font-medium text-muted-foreground">
-              {field.label}
-              {field.required && <span className="text-destructive"> *</span>}
-            </Label>
+          <Field
+            key={field.key}
+            label={field.label}
+            required={field.required}
+            help={field.help}
+            className={wide ? 'sm:col-span-2' : ''}
+          >
 
             {field.type === 'textarea' && (
               <Textarea
@@ -61,7 +65,7 @@ export default function CustomFieldsRenderer({ fields, values = {}, onChange, co
                 onChange={(e) => set(field.key, e.target.value)}
                 placeholder={field.placeholder || ''}
                 rows={3}
-                className="rounded-lg border-border bg-background text-sm"
+                className="rounded-lg border-border bg-background resize-none text-sm"
               />
             )}
 
@@ -98,8 +102,7 @@ export default function CustomFieldsRenderer({ fields, values = {}, onChange, co
               />
             )}
 
-            {field.help && <p className="text-[11px] text-muted-foreground">{field.help}</p>}
-          </div>
+          </Field>
         );
       })}
     </div>

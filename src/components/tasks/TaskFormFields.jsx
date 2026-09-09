@@ -5,6 +5,11 @@ import { User, GanttChart } from 'lucide-react';
 import TaskChecklist from '@/components/tasks/TaskChecklist';
 import DateField from '@/components/ui/date-field';
 import CustomFieldsRenderer from '@/components/shared/CustomFieldsRenderer';
+import Field from '@/components/shared/Field';
+import SegmentedField from '@/components/shared/SegmentedField';
+
+// DESIGN_SYSTEM §7: h-10 in a full form.
+const CONTROL = 'h-10 rounded-lg border-border bg-background text-sm';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // The fields of the task form.
@@ -34,6 +39,10 @@ const STATUSES = [
 
 export { PRIORITIES, STATUSES };
 
+// Blocks that need the full width: a title, a checklist, and the segmented
+// controls, which cannot fit four options into half a row.
+const WIDE = new Set(['title', 'checklist', 'priority', 'status']);
+
 export default function TaskFormFields({
  form, set, layout, customFields = [], isEditing, projectId, allProjects = [], teamMembers = [], wrap,
 }) {
@@ -50,96 +59,87 @@ export default function TaskFormFields({
 
  const blocks = {
   title: (
-   <Input
-    value={form.title || ''}
-    onChange={e => set('title', e.target.value)}
-    placeholder="כותרת המשימה"
-    className="h-11 rounded-xl text-right font-medium"
-   />
+   <Field label="כותרת המשימה" required>
+    <Input
+     value={form.title || ''}
+     onChange={e => set('title', e.target.value)}
+     className={CONTROL}
+    />
+   </Field>
   ),
   checklist: isEditing ? (
-   <TaskChecklist items={form.checklist || []} onChange={items => set('checklist', items)} />
+   <Field label="צ׳קליסט">
+    <TaskChecklist items={form.checklist || []} onChange={items => set('checklist', items)} />
+   </Field>
   ) : null,
   project_id: (!isEditing && !projectId) ? (
-   <Select value={form.project_id || '__none__'} onValueChange={v => set('project_id', v === '__none__' ? '' : v)}>
-    <SelectTrigger className="h-9 rounded-xl text-sm text-right"><SelectValue placeholder="פרויקט"/></SelectTrigger>
-    <SelectContent>
-     <SelectItem value="__none__">שוטף (ללא פרויקט)</SelectItem>
-     {allProjects.map(p => <SelectItem key={p.id} value={p.id}>{p.client_name || p.name}</SelectItem>)}
-    </SelectContent>
-   </Select>
+   <Field label="פרויקט">
+    <Select value={form.project_id || '__none__'} onValueChange={v => set('project_id', v === '__none__' ? '' : v)}>
+     <SelectTrigger className={CONTROL}><SelectValue placeholder="שוטף (ללא פרויקט)"/></SelectTrigger>
+     <SelectContent>
+      <SelectItem value="__none__">שוטף (ללא פרויקט)</SelectItem>
+      {allProjects.map(p => <SelectItem key={p.id} value={p.id}>{p.client_name || p.name}</SelectItem>)}
+     </SelectContent>
+    </Select>
+   </Field>
   ) : null,
   priority: (
-   <div className="space-y-1.5">
-    <span className="text-[11px] font-medium text-muted-foreground">עדיפות</span>
-    <div className="flex items-center gap-1 bg-muted/50 rounded-lg p-1">
-     {PRIORITIES.map(p => {
-      const isActive = form.priority === p.id;
-      return (
-       <button
-        key={p.id}
-        type="button"
-        onClick={() => set('priority', p.id)}
-        className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-md text-[11px] font-semibold transition-all ${isActive ? p.active + ' shadow-sm' : 'text-muted-foreground hover:text-foreground hover:bg-card/60'}`}
-       >
-        <span className={`w-1.5 h-1.5 rounded-full ${p.dot}`} />
-        {p.label}
-       </button>
-      );
-     })}
-    </div>
-   </div>
+   <Field label="עדיפות">
+    <SegmentedField
+     value={form.priority}
+     onChange={v => set('priority', v)}
+     options={PRIORITIES}
+     ariaLabel="עדיפות"
+    />
+   </Field>
   ),
   status: (
-   <div className="space-y-1.5">
-    <span className="text-[11px] font-medium text-muted-foreground">סטטוס</span>
-    <div className="flex items-center gap-1 bg-muted/50 rounded-lg p-1">
-     {STATUSES.map(st => {
-      const isActive = form.status === st.id;
-      return (
-       <button
-        key={st.id}
-        type="button"
-        onClick={() => set('status', st.id)}
-        className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-md text-[11px] font-semibold transition-all ${isActive ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground hover:bg-card/60'}`}
-       >
-        <span className={`w-1.5 h-1.5 rounded-full ${st.dot}`} />
-        {st.label}
-       </button>
-      );
-     })}
-    </div>
-   </div>
+   <Field label="סטטוס">
+    <SegmentedField
+     value={form.status}
+     onChange={v => set('status', v)}
+     options={STATUSES}
+     ariaLabel="סטטוס"
+    />
+   </Field>
   ),
-  details: (
-   <div className="flex items-center gap-2 flex-wrap">
-    <button
-     type="button"
-     onClick={() => set('show_in_gantt', !form.show_in_gantt)}
-     className={`flex items-center gap-1 rounded-full border h-8 px-2.5 text-xs transition-colors ${form.show_in_gantt ? 'border-primary/40 bg-accent text-primary' : 'border-border bg-card text-muted-foreground hover:text-foreground'}`}
-     title="הצג בגאנט הפרויקט"
-    >
-     <GanttChart className="w-3.5 h-3.5"/>
-     גאנט
-    </button>
+  assigned_to: (
+   <Field label="אחראי">
     <Select value={form.assigned_to || '__none__'} onValueChange={v => set('assigned_to', v === '__none__' ? '' : v)}>
-     <SelectTrigger className="h-8 rounded-full text-xs w-fit gap-1.5 px-3">
-      <User className="w-3.5 h-3.5"/>
-      <SelectValue placeholder="אחראי"/>
+     <SelectTrigger className={CONTROL}>
+      <User className="w-3.5 h-3.5 flex-shrink-0"/>
+      <SelectValue placeholder="ללא אחראי"/>
      </SelectTrigger>
      <SelectContent>
       <SelectItem value="__none__">— ללא אחראי —</SelectItem>
       {teamMembers.map(m => <SelectItem key={m.id} value={m.name}>{m.name}</SelectItem>)}
      </SelectContent>
     </Select>
+   </Field>
+  ),
+  due_date: (
+   <Field label="תאריך יעד">
     <DateField
      value={form.due_date || ''}
      onChange={v => set('due_date', v)}
      placeholder="ללא תאריך"
      clearable
-     className="h-8 px-2.5 text-xs w-[150px]"
+     className={CONTROL}
     />
-   </div>
+   </Field>
+  ),
+  show_in_gantt: (
+   <Field label="גאנט" help="הצגת המשימה בגאנט הפרויקט">
+    <button
+     type="button"
+     onClick={() => set('show_in_gantt', !form.show_in_gantt)}
+     aria-pressed={!!form.show_in_gantt}
+     className={`flex items-center gap-2 rounded-lg border px-3 h-10 w-full text-sm transition-colors ${form.show_in_gantt ? 'border-primary/40 bg-accent text-primary' : 'border-border bg-background text-muted-foreground hover:text-foreground'}`}
+    >
+     <GanttChart className="w-3.5 h-3.5 flex-shrink-0"/>
+     {form.show_in_gantt ? 'מוצגת בגאנט' : 'לא מוצגת בגאנט'}
+    </button>
+   </Field>
   ),
   ...Object.fromEntries(customFields.map(field => [field.key, custom(field)])),
  };
@@ -147,7 +147,7 @@ export default function TaskFormFields({
  return layout.map((item, index) => {
   const node = blocks[item.key];
   if (!node) return null;
-  if (wrap) return wrap({ item, index, wide: true, node });
-  return <React.Fragment key={item.key}>{node}</React.Fragment>;
+  if (wrap) return wrap({ item, index, wide: WIDE.has(item.key), node });
+  return <div key={item.key} className={WIDE.has(item.key) ? 'sm:col-span-2' : ''}>{node}</div>;
  });
 }

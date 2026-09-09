@@ -227,3 +227,46 @@ describe('the preview and the form are the same code', () => {
     }
   });
 });
+
+describe('every form is drawn the same way', () => {
+  // DESIGN_SYSTEM §7: Field wraps every field; h-10 in a full form. Three of
+  // these forms had drifted into their own label markup, their own control
+  // heights and three separate copies of the same segmented control.
+  const RENDERERS = [
+    'src/components/crm/CrmFormFields.jsx',
+    'src/components/tasks/TaskFormFields.jsx',
+    'src/components/support/SupportFormFields.jsx',
+    'src/components/project/wizard/ProjectFormFields.jsx',
+    'src/components/shared/CustomFieldsRenderer.jsx',
+  ];
+  const read = (path) => readFileSync(path, 'utf8');
+
+  it('wraps its fields in the one shared Field', () => {
+    for (const file of RENDERERS) {
+      expect(read(file), `${file} should use Field`).toContain("from '@/components/shared/Field'");
+      expect(read(file), `${file} should render <Field>`).toContain('<Field');
+    }
+  });
+
+  it('never rolls its own label markup beside it', () => {
+    for (const file of RENDERERS) {
+      expect(read(file), `${file} still renders a bare Label`).not.toContain('<Label');
+    }
+  });
+
+  it('sizes its controls at h-10, not at three different heights', () => {
+    for (const file of RENDERERS) {
+      const src = read(file);
+      expect(src, `${file} still has an h-9 control`).not.toMatch(/className="[^"]*\bh-9\b/);
+      expect(src, `${file} still has an h-11 control`).not.toMatch(/className="[^"]*\bh-11\b/);
+    }
+  });
+
+  it('draws a segmented choice through the one shared control', () => {
+    for (const file of ['src/components/tasks/TaskFormFields.jsx', 'src/components/support/SupportFormFields.jsx']) {
+      expect(read(file), `${file} should use SegmentedField`).toContain('<SegmentedField');
+      // The tell-tale of a hand-rolled copy: mapping options into buttons.
+      expect(read(file), `${file} still draws its own segments`).not.toMatch(/role="radiogroup"/);
+    }
+  });
+});

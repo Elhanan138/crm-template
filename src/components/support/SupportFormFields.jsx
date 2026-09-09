@@ -4,6 +4,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { ImagePlus, Loader2, X } from 'lucide-react';
 import CustomFieldsRenderer from '@/components/shared/CustomFieldsRenderer';
 import Field from '@/components/shared/Field';
+import SegmentedField from '@/components/shared/SegmentedField';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // The fields of the support form.
@@ -13,9 +14,9 @@ import Field from '@/components/shared/Field';
 // ─────────────────────────────────────────────────────────────────────────────
 
 const URGENCY = [
-  { key: 'low', label: 'נמוכה', dot: 'bg-muted-foreground' },
-  { key: 'medium', label: 'בינונית', dot: 'bg-warning' },
-  { key: 'high', label: 'גבוהה / חוסם', dot: 'bg-destructive' },
+  { key: 'low', label: 'נמוכה', dot: 'bg-muted-foreground/40', active: 'bg-muted text-foreground' },
+  { key: 'medium', label: 'בינונית', dot: 'bg-warning', active: 'bg-warning-muted text-warning' },
+  { key: 'high', label: 'גבוהה / חוסם', dot: 'bg-destructive', active: 'bg-destructive/10 text-destructive' },
 ];
 
 export { URGENCY };
@@ -29,36 +30,17 @@ export default function SupportFormFields({
   // One entry per block this form can render.
   const blocks = {
     urgency: (
-      <>
-          {/* Urgency — segmented control */}
           <Field label="דחיפות">
-            <div className="grid grid-cols-3 gap-0 rounded-lg border border-input overflow-hidden" role="radiogroup" aria-label="דחיפות">
-              {URGENCY.map((u, i) => {
-                const active = form.priority === u.key;
-                return (
-                  <button
-                    key={u.key}
-                    type="button"
-                    role="radio"
-                    aria-checked={active}
-                    onClick={() => setForm(f => ({ ...f, priority: u.key }))}
-                    className={`flex items-center justify-center gap-1.5 h-10 px-2 text-xs sm:text-sm font-medium transition-colors ${
-                      i > 0 ? 'border-s border-input' : ''
-                    } ${active ? 'bg-accent text-accent-foreground font-semibold' : 'bg-card text-muted-foreground hover:bg-muted/40'}`}
-                  >
-                    <span className={`w-2 h-2 rounded-full flex-shrink-0 ${u.dot}`} />
-                    <span className="truncate">{u.label}</span>
-                  </button>
-                );
-              })}
-            </div>
+            <SegmentedField
+              value={form.priority}
+              onChange={v => setForm(f => ({ ...f, priority: v }))}
+              options={URGENCY}
+              idOf={o => o.key}
+              ariaLabel="דחיפות"
+            />
           </Field>
-
-      </>
     ),
     title: (
-      <>
-          {/* Title */}
           <Field label="כותרת" htmlFor="sf-title" required>
             <Input
               id="sf-title"
@@ -69,12 +51,8 @@ export default function SupportFormFields({
               className="h-10"
             />
           </Field>
-
-      </>
     ),
     description: (
-      <>
-          {/* Description */}
           <Field label="תיאור מפורט" htmlFor="sf-desc" required>
             <div className="relative">
               <Textarea
@@ -91,12 +69,8 @@ export default function SupportFormFields({
               </span>
             </div>
           </Field>
-
-      </>
     ),
     image_urls: (
-      <>
-          {/* Attachments — dropzone-style */}
           <Field label="צילומי מסך" help="אופציונלי — תמונה שווה אלף מילים">
             <label className={`flex flex-col items-center justify-center gap-1.5 py-5 px-4 rounded-lg border border-dashed cursor-pointer transition-all ${
               uploading ? 'border-input bg-muted/40 cursor-wait' : 'border-input bg-muted/20 hover:border-ring/50 hover:bg-accent/30'
@@ -127,8 +101,6 @@ export default function SupportFormFields({
               </div>
             )}
           </Field>
-
-      </>
     ),
     ...Object.fromEntries(customFields.map(field => [field.key, (
       <CustomFieldsRenderer fields={[field]} values={form.custom_fields || {}} onChange={setCustom} columns={1} />
