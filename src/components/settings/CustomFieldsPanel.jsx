@@ -16,6 +16,7 @@ import {
   FIELD_TYPES, FIELD_TYPE_MAP, CUSTOM_FIELD_ENTITIES, fieldKeyFrom, sortFields,
   VISIBILITY_OPERATORS,
 } from '@/lib/customFields';
+import FormLayoutEditor from '@/components/settings/FormLayoutEditor';
 
 const INPUT = 'h-9 rounded-lg text-sm';
 
@@ -171,6 +172,16 @@ export default function CustomFieldsPanel() {
     onError: (e) => toast.error(e?.message || 'מחיקת השדה נכשלה'),
   });
 
+  // A drag writes only what actually moved — one record, usually.
+  const placeMutation = useMutation({
+    mutationFn: async (changes) => {
+      for (const { id, ...patch } of changes) await api.entities.CustomField.update(id, patch);
+      return changes.length;
+    },
+    onSuccess: (count) => { invalidate(); toast.success(`${t('מיקום השדה עודכן')} (${count})`); },
+    onError: (e) => toast.error(e?.message || t('עדכון המיקום נכשל')),
+  });
+
   const move = (field, delta) => {
     const ordered = sortFields(fields);
     const i = ordered.findIndex((f) => f.id === field.id);
@@ -258,6 +269,18 @@ export default function CustomFieldsPanel() {
           </div>
         )}
       </div>
+
+      {/* Where each field sits inside the real form */}
+      {fields.length > 0 && (
+        <div className="bg-card rounded-xl border border-border shadow-sm p-5">
+          <FormLayoutEditor
+            entity={entity}
+            fields={fields}
+            busy={placeMutation.isPending}
+            onPlace={(changes) => placeMutation.mutate(changes)}
+          />
+        </div>
+      )}
 
       {dialogOpen && (
         <FieldDialog

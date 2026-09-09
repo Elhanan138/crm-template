@@ -892,6 +892,18 @@ export const EN = {
   "קישור": "Link",
   "שדה": "Field",
   "תגית": "Tag",
+
+  // ── Settings screens ──────────────────────────────────────────────────────
+  "אין עדיין שדות מותאמים לישות הזו": "No custom fields for this record type yet",
+  "גררו שדה מותאם למקום שבו הוא צריך להופיע בטופס. השדות המובנים קבועים.": "Drag a custom field to where it belongs in the form. The built-in fields are fixed.",
+  "מיקום אחרי": "Place after",
+  "מיקום בטופס": "Position in the form",
+  "מיקום בסוף הטופס": "Place at the end of the form",
+  "מיקום בתחילת הטופס": "Place at the start of the form",
+  "מיקום השדה עודכן": "Field position updated",
+  "עדכון המיקום נכשל": "Updating the position failed",
+  "שדה שלא הוזז מופיע בסוף הטופס, כמו קודם.": "A field you have not moved appears at the end of the form, as before.",
+  "שדות נוספים": "Additional fields",
 };
 
 /** Every language the switcher offers. */
