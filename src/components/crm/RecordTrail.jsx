@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useQueries, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import {
@@ -23,11 +23,14 @@ import { TONE_CLASS } from '@/lib/crm/schemas';
 // works for any module without the module declaring anything.
 // ─────────────────────────────────────────────────────────────────────────────
 
-const TABS = [
+// Exported so the form's header can offer the same three, as icons. One list,
+// so a tab cannot exist in the header and not in the panel.
+export const TRAIL_TABS = [
   { id: 'history', label: 'היסטוריה', icon: History },
   { id: 'activity', label: 'פעילות', icon: MessageSquarePlus },
   { id: 'files', label: 'קבצים', icon: Paperclip },
 ];
+const TABS = TRAIL_TABS;
 
 const byNewest = (a, b) => String(b.created_date || '').localeCompare(String(a.created_date || ''));
 
@@ -35,10 +38,19 @@ const Empty = ({ children }) => (
   <p className="text-xs text-muted-foreground text-center py-6">{children}</p>
 );
 
-export default function RecordTrail({ schema, entity, record }) {
+/**
+ * @param {string}   [activeTab] when given, the caller owns which tab is open
+ *                               and renders the switches itself.
+ * @param {Function} [onCounts]  reports how much there is of each, so a header
+ *                               button can carry the number.
+ */
+export default function RecordTrail({ schema, entity, record, activeTab, onCounts }) {
   const { t, dir } = useI18n();
   const queryClient = useQueryClient();
-  const [tab, setTab] = useState('history');
+  const [ownTab, setOwnTab] = useState('history');
+  const controlled = activeTab !== undefined;
+  const tab = controlled ? activeTab : ownTab;
+  const setTab = setOwnTab;
   const [note, setNote] = useState('');
   const [noteType, setNoteType] = useState('note');
   const [uploading, setUploading] = useState(false);
@@ -84,7 +96,6 @@ export default function RecordTrail({ schema, entity, record }) {
     onError: (e) => toast.error(e?.message || t('הסרת הקובץ נכשלה')),
   });
 
-  if (!recordId) return null;
 
   const submitNote = () => {
     const text = note.trim();
@@ -119,9 +130,17 @@ export default function RecordTrail({ schema, entity, record }) {
     files: files.data?.length || 0,
   };
 
+  // Reported upwards so a header switch can show how much is behind it.
+  const countsKey = `${counts.history}|${counts.activity}|${counts.files}`;
+  useEffect(() => { onCounts?.(counts); }, [countsKey]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // A record that was never saved has no trail. The guard sits below the hooks
+  // so the order of hooks is the same on every render.
+  if (!recordId) return null;
+
   return (
-    <div className="pt-3 mt-3 border-t border-border">
-      <div className="flex items-center gap-1 mb-3">
+    <div className={controlled ? '' : 'pt-3 mt-3 border-t border-border'}>
+      <div className={`flex items-center gap-1 mb-3 ${controlled ? 'hidden' : ''}`}>
         {TABS.map((item) => {
           const active = item.id === tab;
           return (

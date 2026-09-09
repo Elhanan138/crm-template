@@ -132,9 +132,13 @@ export function RelativeDayNote({ value }) {
  */
 export function CurrencyField({ value, onChange, disabled, className }) {
   const n = Number(value);
-  const grouped = Number.isFinite(n) && String(value ?? '') !== ''
+  const raw = String(value ?? '');
+  const formatted = Number.isFinite(n) && raw !== ''
     ? n.toLocaleString('he-IL', { maximumFractionDigits: 2 })
     : null;
+  // Below a thousand the grouped form is the typed form, and showing it twice
+  // is noise sitting on top of the number it repeats.
+  const grouped = formatted && formatted !== raw ? formatted : null;
   return (
     <div className="relative">
       <span className="absolute inset-y-0 start-3 flex items-center text-xs text-muted-foreground pointer-events-none">₪</span>

@@ -15,7 +15,7 @@ import SegmentedField from '@/components/shared/SegmentedField';
 import {
   ToneDot, ScaleField, PercentField, CurrencyField, RelativeDayNote, PersonAvatar,
 } from '@/components/shared/fieldControls';
-import { toneOfOption, textFor, normalizeTone, toneForNumber } from '@/lib/tones';
+import { textFor, normalizeTone, toneForNumber } from '@/lib/tones';
 
 // A short list is easier to read laid out than hidden behind a menu. Four is
 // the point where the row starts to crowd on a phone.
@@ -66,25 +66,29 @@ export default function CrmFormFields({
       const meta = field.options?.find((o) => String(o.value) === String(derivedValue));
       // A derived value is the answer the form is working towards, so it says
       // what it means: a balance owed reads as owed, an overdue count as late.
+      //
+      // It is a read-out, not a field: one line, label and value together. As a
+      // boxed field it cost three rows apiece — and the dashed, uneditable
+      // surface already says "calculated" without a caption repeating it.
       const tone = meta
         ? normalizeTone(meta.tone)
         : toneForDerived(field.key, derivedValue);
       return (
-        <Field label={field.label} help={t('מחושב אוטומטית')}>
-          <div className="h-10 flex items-center gap-2 px-3 rounded-lg border border-dashed border-border bg-muted/30 text-sm">
+        <div
+          title={t('מחושב אוטומטית')}
+          className="flex items-center justify-between gap-2 h-10 px-3 rounded-lg border border-dashed border-border bg-muted/30"
+        >
+          <span className="text-xs font-medium text-muted-foreground truncate">{field.label}</span>
+          <span className="inline-flex items-center gap-1.5 flex-shrink-0">
             {tone !== 'neutral' && <ToneDot tone={tone} />}
-            {meta ? (
-              <span className={`text-xs font-semibold ${textFor(tone)}`}>{meta.label}</span>
-            ) : (
-              <span
-                className={`font-semibold tabular-nums ${textFor(tone)}`}
-                dir={['currency', 'number', 'percent'].includes(field.type) ? 'ltr' : undefined}
-              >
-                {formatValue(field, derivedValue)}
-              </span>
-            )}
-          </div>
-        </Field>
+            <span
+              className={`text-sm font-semibold tabular-nums ${textFor(tone)}`}
+              dir={['currency', 'number', 'percent'].includes(field.type) ? 'ltr' : undefined}
+            >
+              {meta ? meta.label : formatValue(field, derivedValue)}
+            </span>
+          </span>
+        </div>
       );
     }
 
@@ -174,9 +178,9 @@ export default function CrmFormFields({
       ) : (
         <Select value={value === '' ? undefined : String(value)} disabled={readOnly}
           onValueChange={(v) => set(field.key, options.find((o) => String(o.value) === v)?.value ?? v)}>
+          {/* SelectValue renders the chosen item's own markup, dot included —
+              adding one to the trigger would draw the same dot twice. */}
           <SelectTrigger className={CONTROL}>
-            {/* The chosen option keeps its colour outside the menu too. */}
-            {toned && value !== '' && <ToneDot tone={toneOfOption(options, value)} />}
             <SelectValue placeholder="בחר..." />
           </SelectTrigger>
           <SelectContent>
