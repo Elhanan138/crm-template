@@ -12,19 +12,11 @@ import { OPTIONAL_FEATURES } from '../../../tools/export-core.js';
 import { describePlan } from '../../../tools/export-manifest.js';
 import { ACTIVE_MODULE_IDS } from '@/lib/moduleRegistry';
 import { currentBuild, advanceBuild } from '@/lib/exportBuild';
+import { SETTINGS_CATALOG } from '@/lib/settingsCatalog';
+import { recordAudit } from '@/lib/auditLog';
 
-const SETTINGS_SECTIONS = [
-  { id: 'users', label: 'משתמשים והרשאות' },
-  { id: 'capabilities', label: 'יכולות המערכת' },
-  { id: 'system-features', label: 'תכונות מערכת' },
-  { id: 'custom-fields', label: 'שדות מותאמים' },
-  { id: 'integrations', label: 'אינטגרציות' },
-  { id: 'supabase', label: 'חיבור Supabase' },
-  { id: 'project-tabs', label: 'תתי-עמודים בפרויקטים' },
-  { id: 'popups', label: 'פופאפים והכרזות' },
-  { id: 'notifications', label: 'מרכז התראות' },
-  { id: 'branding', label: 'מיתוג ולוגו' },
-];
+// The same catalog the settings page and the export planner read.
+const SETTINGS_SECTIONS = SETTINGS_CATALOG.map((s) => ({ id: s.id, label: s.label }));
 
 export default function ExportDialog({ open, onOpenChange }) {
   // Only modules actually present in this bundle can be exported.
@@ -150,6 +142,7 @@ export default function ExportDialog({ open, onOpenChange }) {
         onProgress: setPublishing,
       });
       setPublished(result);
+      recordAudit({ area: 'export', action: 'דחיפת חבילה ל-GitHub', target: gh.repo, after: gh.branch || 'main' });
       advanceBuild();
       setBuildTick((n) => n + 1);
       setGh((g) => ({ ...g, token: '' }));
@@ -171,6 +164,10 @@ export default function ExportDialog({ open, onOpenChange }) {
       const { blob, meta } = await buildZipInBrowser(exportOptions());
       downloadBlob(blob);
       setResult({ ...meta, size: blob.size });
+      recordAudit({
+        area: 'export', action: 'הורדת חבילת ייצוא',
+        target: `${meta.modules.length} מודולים · ${meta.files} קבצים`, after: meta.version,
+      });
       advanceBuild();
       setBuildTick((n) => n + 1);
     } catch (e) {

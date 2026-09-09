@@ -10,6 +10,7 @@ import {
 import { toast } from 'sonner';
 import BrandMark from '@/components/shared/BrandMark';
 import { BRAND_PRESETS, presetForColor } from '@/lib/brandPresets';
+import { recordAudit } from '@/lib/auditLog';
 
 function extractColors(dataUrl, maxColors = 6) {
   return new Promise((resolve) => {
@@ -188,6 +189,7 @@ export default function BrandingPanel() {
     try {
       importBranding(JSON.parse(await file.text()));
       toast.success('המיתוג יובא והוחל');
+      recordAudit({ area: 'branding', action: 'ייבוא קובץ מיתוג', target: file.name });
     } catch (err) {
       toast.error(err?.message || 'קובץ המיתוג לא תקין');
     }
@@ -196,6 +198,7 @@ export default function BrandingPanel() {
   const doReset = () => {
     resetBranding();
     toast.success('המיתוג אופס לברירת המחדל');
+    recordAudit({ area: 'branding', action: 'איפוס מיתוג לברירת המחדל', before: systemName });
   };
 
   return (

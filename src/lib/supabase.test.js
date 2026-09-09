@@ -38,7 +38,23 @@ describe('generated schema', () => {
     for (const table of expectedTables()) {
       expect(sql, `missing table ${table}`).toContain(`create table if not exists ${table} (`);
     }
-    expect(expectedTables()).toHaveLength(Object.keys(CRM_SCHEMAS).length);
+    for (const schema of Object.values(CRM_SCHEMAS)) {
+      expect(expectedTables()).toContain(schema.entity.replace(/([a-z0-9])([A-Z])/g, '$1_$2').toLowerCase());
+    }
+  });
+
+  it('also creates the tables that belong to no module', () => {
+    // The record trail and the audit log are written by every module and
+    // declared by none, so nothing else would put them in the database.
+    for (const table of ['record_history', 'record_activity', 'record_file', 'audit_log']) {
+      expect(sql, `missing table ${table}`).toContain(`create table if not exists ${table} (`);
+      expect(expectedTables()).toContain(table);
+    }
+  });
+
+  it('makes the audit log append-only — a log anyone can edit proves nothing', () => {
+    expect(sql).toContain('create policy "audit_log_append" on audit_log for insert');
+    expect(sql).not.toContain('audit_log for all');
   });
 
   it('enables row level security on every table', () => {

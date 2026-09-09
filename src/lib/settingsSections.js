@@ -9,7 +9,8 @@ export const ENABLED_SETTINGS_SECTIONS = [
   "project-tabs",
   "popups",
   "notifications",
-  "branding"
+  "branding",
+  "audit"
 ];
 
 export const isSectionEnabled = (id) => ENABLED_SETTINGS_SECTIONS.includes(id);

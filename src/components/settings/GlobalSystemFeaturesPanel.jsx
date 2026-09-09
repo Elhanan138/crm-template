@@ -2,6 +2,7 @@ import React from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/api/client';
 import { toast } from 'sonner';
+import { recordAudit } from '@/lib/auditLog';
 import RerunWizardCard from '@/components/onboarding/RerunWizardCard';
 import { Bot, Bell, Loader2, Mail, FolderKanban, BarChart3 } from 'lucide-react';
 import { isFeatureEnabled } from '@/lib/features';
@@ -51,10 +52,11 @@ export default function GlobalSystemFeaturesPanel() {
   mutationFn: ({ tabId, enabled }) => api.functions.invoke('globalTabVisibility', { action: 'set', settingKey: 'global_system_features', tabId, enabled }),
   // A switch that changes what a whole organisation can reach must say so.
   // Silence here reads as "it did not save", and the setting gets toggled twice.
-  onSuccess: (_r, { label, enabled }) => {
+  onSuccess: (_r, { label, enabled, tabId }) => {
    queryClient.invalidateQueries({ queryKey: ['global-system-features'] });
    const state = ACCESS_STATES.find(s => s.value === enabled)?.label || enabled;
    toast.success(`${label || 'היכולת'} — ${state}`);
+   recordAudit({ area: 'features', action: 'שינוי תכונת מערכת', target: label || tabId, after: state });
   },
   onError: (e) => toast.error(e?.message || 'שינוי ההרשאה נכשל'),
  });
@@ -71,9 +73,10 @@ export default function GlobalSystemFeaturesPanel() {
 
  const alertsModeMutation = useMutation({
   mutationFn: (mode) => api.functions.invoke('globalTabVisibility', { action: 'set', settingKey: 'project_alerts_mode', tabId: 'project_alerts_mode', enabled: mode }),
-  onSuccess: () => {
+  onSuccess: (_r, mode) => {
    queryClient.invalidateQueries({ queryKey: ['project-alerts-mode'] });
    toast.success('מצב ההתראות עודכן');
+   recordAudit({ area: 'features', action: 'שינוי מצב התראות פרויקטים', after: mode });
   },
   onError: (e) => toast.error(e?.message || 'עדכון מצב ההתראות נכשל'),
  });

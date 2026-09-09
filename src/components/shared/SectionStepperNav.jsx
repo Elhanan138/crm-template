@@ -14,14 +14,36 @@ export default function SectionStepperNav({
 }) {
  const [query, setQuery] = useState('');
 
+ // Searching only the top-level labels made the box useless here: the settings
+ // page has two top-level tabs and ten sub-sections, so typing "מיתוג" — the
+ // name of an actual section — matched nothing. A search over a tree has to
+ // look inside the tree, and show the branch that holds the hit.
+ const q = query.trim().toLowerCase();
+ const matches = (item) =>
+  !q || [item.label, item.hint].filter(Boolean).some(t => String(t).toLowerCase().includes(q));
+
  const filtered = useMemo(() => {
-  if (!query.trim()) return sections;
-  const q = query.trim().toLowerCase();
-  return sections.filter(s => s.label.toLowerCase().includes(q));
- }, [sections, query]);
+  if (!q) return sections;
+  return sections
+   .map(section => {
+    if (matches(section)) return section;
+    const children = (section.children || []).filter(matches);
+    return children.length ? { ...section, children } : null;
+   })
+   .filter(Boolean);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+ }, [sections, q]);
 
  const activeSection = sections.find(s => s.key === activeKey);
  const hasChildren = !!activeSection?.children?.length && activeChildKey !== undefined && !!onSelectChild;
+
+ // Jumping straight to a sub-section from a search result: select the branch
+ // and the leaf together, then clear the query so the tree is readable again.
+ const goToChild = (sectionKey, childKey) => {
+  if (sectionKey !== activeKey) onSelect(sectionKey);
+  onSelectChild?.(childKey);
+  setQuery('');
+ };
 
  return (
   <div className="space-y-3">
@@ -66,11 +88,15 @@ export default function SectionStepperNav({
      {filtered.map(section => {
       const isActive = activeKey === section.key;
       const Icon = section.icon;
-      const showChildren = isActive && hasChildren;
+      // While searching, every branch that holds a hit is open — otherwise the
+      // result is invisible until you guess which tab it lives under.
+      const showChildren = !!section.children?.length && !!onSelectChild
+       && (q ? true : (isActive && hasChildren));
       return (
        <div key={section.key}>
         <button
          onClick={() => onSelect(section.key)}
+         title={section.hint || undefined}
          className={`relative w-full flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 ${
           isActive
            ? 'bg-accent text-accent-foreground font-semibold'
@@ -91,12 +117,13 @@ export default function SectionStepperNav({
         {showChildren && section.children && (
          <div className="me-6 space-y-0.5 mt-0.5">
           {section.children.map(child => {
-           const childActive = activeChildKey === child.key;
+           const childActive = isActive && activeChildKey === child.key;
            const ChildIcon = child.icon;
            return (
             <button
              key={child.key}
-             onClick={() => onSelectChild(child.key)}
+             onClick={() => goToChild(section.key, child.key)}
+             title={child.hint || undefined}
              className={`relative w-full flex items-center gap-2 rounded-lg px-3 py-1.5 text-[13px] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 ${
               childActive
                ? 'bg-accent text-accent-foreground font-semibold'
@@ -116,6 +143,9 @@ export default function SectionStepperNav({
        </div>
       );
      })}
+     {q && filtered.length === 0 && (
+      <p className="text-xs text-muted-foreground px-3 py-2">אין הגדרה שתואמת "{query}"</p>
+     )}
     </div>
    </div>
   </div>

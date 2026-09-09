@@ -16,6 +16,7 @@ import {
 
 import { CubeIcon } from '@radix-ui/react-icons';
 import { toast } from 'sonner';
+import { recordAudit } from '@/lib/auditLog';
 import { cleanEmail } from '@/lib/permissions';
 import ProjectAccessManager from '@/components/settings/ProjectAccessManager';
 
@@ -36,13 +37,15 @@ export default function UserManagementPanel() {
 
  const deleteMutation = useMutation({
   mutationFn: (memberId) => api.functions.invoke('manageTeamMember', { action: 'delete', memberId }),
-  onSuccess: () => {
+  onSuccess: (_r, memberId) => {
+   const removed = (members || []).find((m) => m.id === memberId);
    queryClient.invalidateQueries({ queryKey: ['teamMembers'] });
    queryClient.invalidateQueries({ queryKey: ['projectPermissions'] });
    queryClient.invalidateQueries({ queryKey: ['projects'] });
    queryClient.invalidateQueries({ queryKey: ['currentUser'] });
    setDeleteDialog({ open: false, member: null });
    toast.success('חבר הוסר — הגישה לכל הפרויקטים הוסרה');
+   recordAudit({ area: 'users', action: 'הסרת משתמש', target: removed?.name || removed?.email || '' });
   },
   onError: (err) => {
    const msg = err?.response?.data?.error || err?.data?.error || 'המחיקה נכשלה';
@@ -192,10 +195,11 @@ function MemberEditDrawer({ member, members = [], onClose, onDelete }) {
 
  const createMutation = useMutation({
   mutationFn: (data) => api.functions.invoke('manageTeamMember', { action: 'create', data }),
-  onSuccess: () => {
+  onSuccess: (_r, data) => {
    queryClient.invalidateQueries({ queryKey: ['teamMembers'] });
    queryClient.invalidateQueries({ queryKey: ['currentUser'] });
    toast.success('חבר נוסף');
+   recordAudit({ area: 'users', action: 'הוספת משתמש', target: data.email || data.name, after: data.is_admin ? 'אדמין' : (data.role || 'משתמש') });
    onClose();
   },
   onError: (err) => {
@@ -205,12 +209,19 @@ function MemberEditDrawer({ member, members = [], onClose, onDelete }) {
  });
  const updateMutation = useMutation({
   mutationFn: (data) => api.functions.invoke('manageTeamMember', { action: 'update', memberId: member.id, data }),
-  onSuccess: () => {
+  onSuccess: (_r, data) => {
    queryClient.invalidateQueries({ queryKey: ['teamMembers'] });
    queryClient.invalidateQueries({ queryKey: ['projectPermissions'] });
    queryClient.invalidateQueries({ queryKey: ['projects'] });
    queryClient.invalidateQueries({ queryKey: ['currentUser'] });
    toast.success('עודכן');
+   // Only an actual change of standing is worth a line; renaming someone is not.
+   if (!!data.is_admin !== wasAdmin) {
+    recordAudit({
+     area: 'users', action: 'שינוי הרשאת אדמין', target: data.email || data.name,
+     before: wasAdmin ? 'אדמין' : 'משתמש', after: data.is_admin ? 'אדמין' : 'משתמש',
+    });
+   }
    onClose();
   },
   onError: (err) => {

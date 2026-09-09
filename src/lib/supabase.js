@@ -36,6 +36,31 @@ export function validateSupabaseConfig(config = {}) {
   return null;
 }
 
+// Tables that belong to no module: the trail a record leaves, and the trail the
+// administration leaves. They are declared here rather than as schemas because
+// nothing renders them as a module — but they still have to exist in the
+// database, and the SQL is the only place that can say so.
+const SUPPORT_TABLES = [
+  {
+    entity: 'RecordHistory',
+    columns: ['entity text not null', 'record_id text not null', 'field text', 'label text', 'before_value text', 'after_value text', 'actor_email text', 'actor_name text'],
+  },
+  {
+    entity: 'RecordActivity',
+    columns: ['entity text not null', 'record_id text not null', 'type text', 'body text', 'actor_email text', 'actor_name text'],
+  },
+  {
+    entity: 'RecordFile',
+    columns: ['entity text not null', 'record_id text not null', 'file_name text', 'file_url text', 'file_size numeric', 'mime_type text', 'actor_email text'],
+  },
+  {
+    entity: 'AuditLog',
+    // Append-only on purpose: a log anyone can edit answers no question.
+    appendOnly: true,
+    columns: ['area text not null', 'action text not null', 'target text', 'before_value text', 'after_value text', 'actor_email text', 'actor_name text'],
+  },
+];
+
 /** `CREATE TABLE` statements for every module in this build, plus RLS. */
 export function supabaseSchemaSql(prefix = '') {
   const p = snake(prefix || '').replace(/_+$/, '');
@@ -63,16 +88,38 @@ export function supabaseSchemaSql(prefix = '') {
     ].join('\n');
   });
 
+  const supportBlocks = SUPPORT_TABLES.map((spec) => {
+    const table = tableName(spec.entity);
+    return [
+      `create table if not exists ${table} (`,
+      '  id uuid primary key default gen_random_uuid(),',
+      spec.columns.map((c) => `  ${c}`).join(',\n') + ',',
+      '  created_date timestamptz not null default now()',
+      ');',
+      `alter table ${table} enable row level security;`,
+      `create policy "${table}_read" on ${table} for select to authenticated using (true);`,
+      spec.appendOnly
+        ? `create policy "${table}_append" on ${table} for insert to authenticated with check (true);`
+        : `create policy "${table}_write" on ${table} for all to authenticated using (true) with check (true);`,
+    ].join('\n');
+  });
+
   return [
     '-- Generated from the module manifest. Re-generate after adding a module.',
     '-- Run in the Supabase SQL editor.',
     '',
     ...blocks,
+    '-- Cross-module tables: record trail and administration audit log.',
+    ...supportBlocks,
   ].join('\n\n');
 }
 
 /** Tables this build expects to exist. */
 export const expectedTables = (prefix = '') => {
   const p = snake(prefix || '').replace(/_+$/, '');
-  return Object.values(CRM_SCHEMAS).map((s) => `${p ? `${p}_` : ''}${snake(s.entity)}`);
+  const named = (entity) => `${p ? `${p}_` : ''}${snake(entity)}`;
+  return [
+    ...Object.values(CRM_SCHEMAS).map((s) => named(s.entity)),
+    ...SUPPORT_TABLES.map((s) => named(s.entity)),
+  ];
 };

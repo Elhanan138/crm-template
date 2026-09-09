@@ -1,11 +1,12 @@
 import React, { useState, lazy, Suspense } from 'react';
-import { Users, Plug, SlidersHorizontal, ShieldCheck, Route, Bell, Download, Palette, ListPlus, ToggleLeft, Database } from 'lucide-react';
+import { Users, Plug, SlidersHorizontal, ShieldCheck, Route, Bell, Download, Palette, ListPlus, ToggleLeft, Database, ScrollText } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAccessControl } from '@/hooks/useAccessControl';
 import { useSearchParams } from 'react-router-dom';
 import UserManagementPanel from '@/components/settings/UserManagementPanel';
 import AdminPanel, { AVAILABLE_ADMIN_SECTIONS } from '@/components/settings/AdminPanel';
 import { isSectionEnabled } from '@/lib/settingsSections';
+import { SETTINGS_CATALOG, ADMIN_SECTIONS } from '@/lib/settingsCatalog';
 
 import PageHeader from '@/components/shared/PageHeader';
 import { NAV_ICONS } from '@/lib/navIcons';
@@ -21,21 +22,21 @@ const ExportDialog = EXPORT_ENABLED ? lazy(exportLoader) : null;
 
 // Tabs are filtered by what is actually compiled into this build — see
 // src/lib/settingsSections.js. Nothing is stripped from this file at export time.
-const ADMIN_CHILDREN = [
-  { key: 'capabilities', label: 'יכולות המערכת', icon: ToggleLeft },
-  { key: 'system-features', label: 'תכונות מערכת', icon: SlidersHorizontal },
-  { key: 'custom-fields', label: 'שדות מותאמים', icon: ListPlus },
-  { key: 'integrations', label: 'אינטגרציות', icon: Plug },
-  { key: 'supabase', label: 'חיבור Supabase', icon: Database },
-  { key: 'project-tabs', label: 'תתי-עמודים בפרויקטים', icon: Route },
-  { key: 'popups', label: 'פופאפים והכרזות', icon: Bell },
-  { key: 'notifications', label: 'מרכז התראות', icon: Bell },
-  { key: 'branding', label: 'מיתוג ולוגו', icon: Palette },
-].filter((c) => AVAILABLE_ADMIN_SECTIONS.includes(c.key));
+// Icons are named in the catalog and resolved here, so the catalog stays free
+// of imports and can be read by the export planner from Node.
+const SETTINGS_ICONS = {
+  Users, Plug, SlidersHorizontal, Route, Bell, Palette, ListPlus, ToggleLeft, Database, ScrollText,
+};
+
+const ADMIN_CHILDREN = ADMIN_SECTIONS
+  .map((s) => ({ key: s.id, label: s.label, hint: s.hint, icon: SETTINGS_ICONS[s.icon] }))
+  .filter((c) => AVAILABLE_ADMIN_SECTIONS.includes(c.key));
+
+const TOP_LEVEL = SETTINGS_CATALOG.filter((s) => s.topLevel);
 
 const ALL_TABS = [
   { key: 'admin', label: 'אדמין', icon: ShieldCheck, adminOnly: true, hasChildren: true },
-  { key: 'users', label: 'משתמשים והרשאות', icon: Users, adminOnly: true },
+  ...TOP_LEVEL.map((s) => ({ key: s.id, label: s.label, hint: s.hint, icon: SETTINGS_ICONS[s.icon], adminOnly: true })),
 ].filter((t) => (t.key === 'admin' ? ADMIN_CHILDREN.length > 0 : isSectionEnabled(t.key)));
 
 export default function Settings() {

@@ -1,21 +1,13 @@
 import React, { lazy, Suspense } from 'react';
 import { isSectionEnabled } from '@/lib/settingsSections';
+import { ADMIN_SECTIONS } from '@/lib/settingsCatalog';
 
 // Lazily resolved against the files present in the build. A section that was
 // dropped from the export simply has no loader — no dangling import, no crash.
 const panelLoaders = import.meta.glob('/src/components/settings/*Panel.jsx');
 
-const PANELS = {
-  'system-features': 'GlobalSystemFeaturesPanel',
-  'capabilities': 'CapabilitiesPanel',
-  'custom-fields': 'CustomFieldsPanel',
-  'integrations': 'IntegrationsPanel',
-  'supabase': 'SupabasePanel',
-  'project-tabs': 'GlobalTabVisibilityPanel',
-  'popups': 'PopupManagementPanel',
-  'notifications': 'NotificationsCenterPanel',
-  'branding': 'BrandingPanel',
-};
+// One entry per admin sub-section, taken straight from the catalog.
+const PANELS = Object.fromEntries(ADMIN_SECTIONS.map((s) => [s.id, s.panel]));
 
 const resolved = Object.fromEntries(
   Object.entries(PANELS)

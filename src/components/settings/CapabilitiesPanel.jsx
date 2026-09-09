@@ -4,6 +4,7 @@ import { api } from '@/api/client';
 import { Button } from '@/components/ui/button';
 import { Loader2, ToggleLeft, RotateCcw } from 'lucide-react';
 import { toast } from 'sonner';
+import { recordAudit } from '@/lib/auditLog';
 import { buildCapabilityCatalogue, ACCESS_LEVELS, SETTINGS_KEY, accessOf } from '@/lib/capabilities';
 
 const CATALOGUE = buildCapabilityCatalogue();
@@ -67,13 +68,21 @@ export default function CapabilitiesPanel() {
       api.functions.invoke('globalTabVisibility', {
         action: 'set', settingKey: SETTINGS_KEY, tabId: key, enabled: level,
       }),
-    onSuccess: invalidate,
+    onSuccess: (_r, { key, level, label, previous }) => {
+      invalidate();
+      // A capability switch changes what an entire organisation can reach.
+      recordAudit({ area: 'capabilities', action: 'שינוי מצב יכולת', target: label || key, before: previous, after: level });
+    },
     onError: (e) => toast.error(e?.message || 'העדכון נכשל'),
   });
 
   const resetMutation = useMutation({
     mutationFn: () => api.functions.invoke('globalTabVisibility', { action: 'reset', settingKey: SETTINGS_KEY }),
-    onSuccess: () => { invalidate(); toast.success('הכל הוחזר לפתוח'); },
+    onSuccess: () => {
+      invalidate();
+      toast.success('הכל הוחזר לפתוח');
+      recordAudit({ area: 'capabilities', action: 'איפוס כל היכולות לפתוח' });
+    },
     onError: (e) => toast.error(e?.message || 'האיפוס נכשל'),
   });
 
@@ -122,7 +131,7 @@ export default function CapabilitiesPanel() {
               {group.parent && (
                 <Segmented
                   value={parentLevel}
-                  onChange={(level) => setMutation.mutate({ key: group.parent.key, level })}
+                  onChange={(level) => setMutation.mutate({ key: group.parent.key, level, label: group.label, previous: parentLevel })}
                 />
               )}
             </div>
@@ -134,7 +143,7 @@ export default function CapabilitiesPanel() {
                   muted={parentClosed}
                   disabled={parentClosed}
                   value={accessOf(values, item.key)}
-                  onChange={(level) => setMutation.mutate({ key: item.key, level })}
+                  onChange={(level) => setMutation.mutate({ key: item.key, level, label: item.label, previous: accessOf(values, item.key) })}
                 />
               ))}
             </div>

@@ -6,6 +6,7 @@
 import fs from 'fs';
 import path from 'path';
 import { planExport, OPTIONAL_FEATURES, extractSpecifiers, packageNameOf } from './export-core.js';
+import { SETTINGS_SECTION_IDS } from '../src/lib/settingsCatalog.js';
 
 const root = process.cwd();
 const SKIP = new Set(['node_modules', 'dist', '.git', 'coverage']);
@@ -34,8 +35,9 @@ const read = (p) => (pathSet.has(p) ? fs.readFileSync(path.join(root, p), 'utf-8
 const manifest = read('src/lib/modules.js');
 const MODULE_IDS = [...manifest.matchAll(/^ {2}(\w+): \{\n {4}label/gm)].map((m) => m[1]);
 const FEATURES = Object.keys(OPTIONAL_FEATURES);
-const SECTIONS = ['users', 'capabilities', 'system-features', 'custom-fields',
-  'integrations', 'supabase', 'project-tabs', 'popups', 'notifications', 'branding'];
+// From the catalog, not from a copy of it — a section added without being
+// verified across the matrix is exactly the kind of gap this tool exists to catch.
+const SECTIONS = SETTINGS_SECTION_IDS;
 
 let pass = 0;
 const failures = [];

@@ -8,6 +8,7 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 import { hashFiles, exportVersion, changelogFor } from './export-manifest.js';
+import { SETTINGS_PANEL_PATHS } from '../src/lib/settingsCatalog.js';
 
 export const ROOT_FILE_ALLOWLIST = [
   'index.html', 'package.json', 'jsconfig.json', 'components.json',
@@ -56,18 +57,9 @@ export const NEVER_EXPORT_DEPS = new Set([
   'archiver', 'baseline-browser-mapping',
 ]);
 
-export const SETTINGS_PANEL_FILES = {
-  'users': 'src/components/settings/UserManagementPanel.jsx',
-  'system-features': 'src/components/settings/GlobalSystemFeaturesPanel.jsx',
-  'capabilities': 'src/components/settings/CapabilitiesPanel.jsx',
-  'custom-fields': 'src/components/settings/CustomFieldsPanel.jsx',
-  'integrations': 'src/components/settings/IntegrationsPanel.jsx',
-  'supabase': 'src/components/settings/SupabasePanel.jsx',
-  'project-tabs': 'src/components/settings/GlobalTabVisibilityPanel.jsx',
-  'popups': 'src/components/settings/PopupManagementPanel.jsx',
-  'notifications': 'src/components/settings/NotificationsCenterPanel.jsx',
-  'branding': 'src/components/settings/BrandingPanel.jsx',
-};
+// Derived from the settings catalog, so a new section cannot ship a panel the
+// export planner does not know how to carry.
+export const SETTINGS_PANEL_FILES = SETTINGS_PANEL_PATHS;
 
 export const CORE_PAGES = ['Profile', 'Notifications', 'FirstTimeSetup'];
 
