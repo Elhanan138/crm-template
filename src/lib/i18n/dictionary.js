@@ -422,7 +422,8 @@ export const EN = {
   "מי אתכם": "Who is with you",
   "נתוני דוגמה": "Sample data",
   "שם החברה": "Company name",
-  "לדוגמה: אקמה": "e.g. Acme",
+  "שם החברה שלכם": "Your company name",
+  "כתובת מייל": "Email address",
   "לוגו": "Logo",
   "העלאת לוגו": "Upload a logo",
   "ערכת צבעים": "Colour scheme",
@@ -560,7 +561,7 @@ export const EN = {
 /** Every language the switcher offers. */
 export const LANGUAGES = [
   { code: 'he', label: 'עברית', short: 'עב', dir: 'rtl' },
-  { code: 'en', label: 'English', short: 'EN', dir: 'ltr' },
+  { code: 'en', label: 'English', short: 'En', dir: 'ltr' },
 ];
 
 export const DICTIONARIES = { en: EN };

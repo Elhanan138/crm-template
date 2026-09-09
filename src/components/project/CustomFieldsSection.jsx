@@ -116,7 +116,7 @@ function CustomFieldForm({ field, projectId, onClose }) {
   <div className="space-y-4">
    <div className="space-y-1.5">
     <Label className="text-xs font-medium text-muted-foreground text-right">שם השדה *</Label>
-    <Input value={form.label} onChange={e => update('label', e.target.value)} onKeyDown={e => { if (e.key === 'Enter') e.preventDefault(); }} placeholder="לדוגמה: מספר פרויקט, איש קשר טכני..."className="h-10 rounded-lg text-sm"autoFocus />
+    <Input value={form.label} onChange={e => update('label', e.target.value)} onKeyDown={e => { if (e.key === 'Enter') e.preventDefault(); }} placeholder="שם השדה"className="h-10 rounded-lg text-sm"autoFocus />
    </div>
 
    <div className="space-y-1.5">

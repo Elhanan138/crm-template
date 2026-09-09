@@ -181,8 +181,20 @@ export default function Sidebar({ collapsed, onToggle }) {
 
    {/* Footer — system items + logout pinned to bottom */}
    <div className={`mt-auto py-3 border-t border-sidebar-border space-y-0.5 ${isCollapsed ? 'px-2' : 'px-3'}`}>
-    {/* System items (Settings) */}
-    {systemItems.map(item => renderItemLink(item, isCollapsed))}
+    {/* System items (Settings). The language code shares that row, at its far
+        end: it is set once and then never touched, so it belongs beside the
+        settings rather than taking a row of its own. On the icon rail there is
+        no room to share, so it drops below the logout instead. */}
+    {isCollapsed ? (
+     systemItems.map(item => renderItemLink(item, isCollapsed))
+    ) : (
+     <div className="flex items-center gap-1">
+      <div className="flex-1 min-w-0">
+       {systemItems.map(item => renderItemLink(item, isCollapsed))}
+      </div>
+      <LanguageSwitcher isCollapsed={false} />
+     </div>
+    )}
 
     {/* Logout — destructive color from design system */}
     <button
@@ -196,7 +208,7 @@ export default function Sidebar({ collapsed, onToggle }) {
      {!isCollapsed && <span>{t('התנתקות')}</span>}
     </button>
 
-    <LanguageSwitcher isCollapsed={isCollapsed} />
+    {isCollapsed && <LanguageSwitcher isCollapsed />}
    </div>
   </div>
  );

@@ -52,7 +52,7 @@ function FieldDialog({ open, onOpenChange, field, entity, existingKeys, siblings
         <div className="space-y-3">
           <div className="space-y-1">
             <Label className="text-xs text-muted-foreground">שם השדה</Label>
-            <Input value={draft.label} onChange={(e) => set({ label: e.target.value })} className={INPUT} placeholder="לדוגמה: מספר הזמנת רכש" />
+            <Input value={draft.label} onChange={(e) => set({ label: e.target.value })} className={INPUT} placeholder="שם השדה" />
           </div>
 
           <div className="space-y-1">

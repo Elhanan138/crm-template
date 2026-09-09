@@ -93,7 +93,7 @@ function HighlightForm({ highlight, projectId, memberEmails, onClose }) {
    <div className="grid grid-cols-3 gap-2">
     <div className="col-span-2 space-y-1.5">
      <Label className="text-xs font-medium text-muted-foreground">כותרת *</Label>
-     <Input value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value }))} placeholder="לדוגמה: חיוב מיוחד ל-3 חודשים ראשונים"className="h-10 rounded-lg"autoFocus />
+     <Input value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value }))} placeholder="כותרת ההדגשה"className="h-10 rounded-lg"autoFocus />
     </div>
     <div className="space-y-1.5">
      <Label className="text-xs font-medium text-muted-foreground">קטגוריה</Label>

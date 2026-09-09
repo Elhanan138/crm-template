@@ -277,7 +277,7 @@ function MemberEditDrawer({ member, members = [], onClose, onDelete }) {
      </div>
      <div className="space-y-1.5">
       <Label className="text-xs font-medium text-muted-foreground">אימייל</Label>
-      <Input value={email} onChange={(e) => setEmail(e.target.value)} placeholder="email@example.com"className="h-9 rounded-lg"dir="ltr"/>
+      <Input value={email} onChange={(e) => setEmail(e.target.value)} placeholder="כתובת מייל"className="h-9 rounded-lg"dir="ltr"/>
      </div>
     </div>
     <div className="space-y-1.5">

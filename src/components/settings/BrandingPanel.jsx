@@ -280,7 +280,7 @@ export default function BrandingPanel() {
         <div className="grid grid-cols-2 gap-2">
           <Field label="שם המערכת" value={nameInput} onChange={setNameInput} onCommit={() => setSystemName(nameInput)} placeholder={defaults.systemName} />
           <Field label="כותרת משנה" value={subtitleInput} onChange={setSubtitleInput} onCommit={() => setSystemSubtitle(subtitleInput)} placeholder={defaults.systemSubtitle} />
-          <Field label="תת-כותרת מסמכים" value={company.tagline || ''} onChange={(v) => setCompany({ tagline: v })} placeholder="לדוגמה: AI Solutions" />
+          <Field label="תת-כותרת מסמכים" value={company.tagline || ''} onChange={(v) => setCompany({ tagline: v })} placeholder="תת-כותרת שתופיע במסמכים" />
           <Field label="ח.פ / ע.מ" value={company.legalId || ''} onChange={(v) => setCompany({ legalId: v })} dir="ltr" />
           <Field label="כתובת" value={company.address || ''} onChange={(v) => setCompany({ address: v })} className="col-span-2" />
           <Field label="תנאי תשלום" value={company.paymentTerms || ''} onChange={(v) => setCompany({ paymentTerms: v })} placeholder="שוטף + 30" />

@@ -86,7 +86,7 @@ export default function MockFixtureEditSheet({ fixture, open, onOpenChange, onSa
             <Input
               value={scenarioKey}
               onChange={(e) => setScenarioKey(e.target.value)}
-              placeholder="לדוגמה: overrun-hours"
+              placeholder="מזהה באנגלית, במקפים"
               disabled={!isCreate}
             />
           </div>

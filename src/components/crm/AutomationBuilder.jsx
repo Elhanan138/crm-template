@@ -101,7 +101,7 @@ export default function AutomationBuilder({ open, onOpenChange, rule, onSave, sa
           <div className="space-y-1">
             <Label className="text-xs font-medium text-muted-foreground">שם הכלל <span className="text-destructive">*</span></Label>
             <Input value={form.name} onChange={(e) => set({ name: e.target.value })} disabled={readOnly}
-              placeholder="לדוגמה: ליד תקוע 7 ימים" className={CONTROL} />
+              placeholder="מה הכלל עושה" className={CONTROL} />
           </div>
 
           <Block icon={Zap} title="מתי" hint="הישות והאירוע שמפעילים את הכלל">

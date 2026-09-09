@@ -192,7 +192,7 @@ export default function OnboardingWizard({ onDone }) {
               {step === 0 && (
                 <div className="space-y-4">
                   <Field label={t('שם החברה')}>
-                    <Input value={name} onChange={(e) => setName(e.target.value)} placeholder={t('לדוגמה: אקמה')} className="h-10 rounded-lg" />
+                    <Input value={name} onChange={(e) => setName(e.target.value)} placeholder={t('שם החברה שלכם')} className="h-10 rounded-lg" />
                   </Field>
                   <Field label={t('כותרת משנה')} hint={t('שורה אחת שמופיעה מתחת לשם')}>
                     <Input value={subtitle} onChange={(e) => setSubtitle(e.target.value)} className="h-10 rounded-lg" />
@@ -269,7 +269,7 @@ export default function OnboardingWizard({ onDone }) {
                       dir="ltr"
                       value={value}
                       onChange={(e) => setInvites(invites.map((v, j) => (j === i ? e.target.value : v)))}
-                      placeholder="name@company.com"
+                      placeholder={t('כתובת מייל')}
                       className="h-10 rounded-lg"
                     />
                   ))}
