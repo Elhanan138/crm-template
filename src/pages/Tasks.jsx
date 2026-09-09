@@ -47,6 +47,7 @@ export default function Tasks() {
  const [search, setSearch] = useState('');
  const [statusFilter, setStatusFilter] = useState('active');
  const [projectFilter, setProjectFilter] = useState('all');
+ const [scope, setScope] = useState('all');
  const [editTask, setEditTask] = useState(null);
  const [createOpen, setCreateOpen] = useState(false);
  const [reminderDialog, setReminderDialog] = useState({ open: false, task: null });
@@ -105,15 +106,26 @@ export default function Tasks() {
  }, [projects, canViewProject, currentUser, effectiveUser, teamMember, projectPerms]);
  const projectMap = useMemo(() => Object.fromEntries(visibleProjects.map(p => [p.id, p])), [visibleProjects]);
 
- // Unified "my tasks" filter — identical to dashboard's selectMyTasks:
- // (a) assigned_to === my name (normalized), OR
- // (b) unassigned (empty assigned_to) AND in a project I'm PM/liaison of.
+ // This page says "every task from every project", and it used to show only
+ // tasks assigned to your name — unconditionally. Two consequences: a task you
+ // created without naming an owner was invisible the moment you saved it, and
+ // a deployment whose owner has no TeamMember record had no name to match, so
+ // the list was empty however many tasks it held.
+ //
+ // Now "mine" is a filter you choose, and it means what the dashboard means by
+ // it: assigned to me, or unassigned in a project I run.
  const myCleanName = cleanName(myName);
+ const isMine = (t) => {
+  const assignedToName = cleanName(t.assigned_to);
+  if (myCleanName && assignedToName === myCleanName) return true;
+  if (assignedToName) return false;
+  const project = projectMap[t.project_id];
+  return !!project && (project.project_manager === myName || project.current_liaison === myName);
+ };
+
  const filtered = allTasks.filter(t => {
-   if (!t) return false;
-   const assignedToName = cleanName(t.assigned_to);
-   const assignedToMe = myCleanName && assignedToName === myCleanName;
-   if (!assignedToMe) return false;
+  if (!t) return false;
+  if (scope === 'mine' && !isMine(t)) return false;
   if (search && !t.title.toLowerCase().includes(search.toLowerCase())) return false;
   const taskStatus = t.status || 'in_progress';
   if (statusFilter === 'active') {
@@ -124,7 +136,7 @@ export default function Tasks() {
  });
 
   // Reset page when filters change
-  useEffect(() => { setPage(1); }, [search, statusFilter, projectFilter, view]);
+  useEffect(() => { setPage(1); }, [search, statusFilter, projectFilter, scope, view]);
 
   // Paginate filtered tasks
   const paginatedTasks = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
@@ -170,6 +182,13 @@ export default function Tasks() {
       <SelectTrigger className="h-9 rounded-full text-xs w-32"><SelectValue /></SelectTrigger>
       <SelectContent>{STATUS_OPTIONS.map(o => <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>)}</SelectContent>
      </Select>
+     <Select value={scope} onValueChange={setScope}>
+      <SelectTrigger className="h-9 rounded-full text-xs w-28"><SelectValue /></SelectTrigger>
+      <SelectContent>
+       <SelectItem value="all">כל המשימות</SelectItem>
+       <SelectItem value="mine">שלי</SelectItem>
+      </SelectContent>
+     </Select>
      <Select value={projectFilter} onValueChange={setProjectFilter}>
       <SelectTrigger className="h-9 rounded-full text-xs w-40 text-right [&>span]:text-right"><SelectValue /></SelectTrigger>
       <SelectContent>
@@ -184,8 +203,10 @@ export default function Tasks() {
     ) : filtered.length === 0 ? (
      <EmptyState
       icon={NAV_ICONS.tasks}
-      title="אין משימות"
-      description="צור משימה ראשונה כדי להתחיל לעקוב אחר העבודה."
+      title={allTasks.length === 0 ? 'אין משימות' : 'אין משימות שתואמות את הסינון'}
+      description={allTasks.length === 0
+       ? 'צור משימה ראשונה כדי להתחיל לעקוב אחר העבודה.'
+       : 'יש משימות במערכת, אך אף אחת מהן לא תואמת את הסינון הנוכחי.'}
       action={
        <Button onClick={() => setCreateOpen(true)} className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-full px-5 h-9 text-sm font-semibold shadow-none gap-2">
         <CheckSquare className="w-4 h-4"/> צור משימה

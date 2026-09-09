@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import StatusBadge from '@/components/shared/StatusBadge';
+import InlineEditTrigger from '@/components/shared/InlineEditTrigger';
 
 const STATUS_OPTIONS = [
   { value: 'not_started', label: 'טרם התחיל' },
@@ -14,12 +15,9 @@ export default function InlineStatusCell({ value, onChange }) {
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <button
-          onClick={e => e.stopPropagation()}
-          className="rounded-full transition-all duration-150 hover:ring-2 hover:ring-offset-1 hover:ring-primary/20 active:scale-95"
-        >
+        <InlineEditTrigger round onEdit={() => setOpen(true)}>
           <StatusBadge status={value || 'in_progress'} />
-        </button>
+        </InlineEditTrigger>
       </PopoverTrigger>
       <PopoverContent align="center" className="w-36 p-1.5" onClick={e => e.stopPropagation()}>
         <div className="space-y-0.5">

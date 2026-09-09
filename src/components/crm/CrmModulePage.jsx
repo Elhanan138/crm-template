@@ -25,6 +25,7 @@ import BoardView, { StatStrip } from './BoardView';
 import ColumnPicker from './ColumnPicker';
 import DuplicatesDialog from './DuplicatesDialog';
 import InlineEditCell, { canEditInline } from './InlineEditCell';
+import InlineEditTrigger from '@/components/shared/InlineEditTrigger';
 import { useCrmRecords, filterRecords, formatValue, currency } from '@/lib/crm/useCrmRecords';
 import { TONE_CLASS } from '@/lib/crm/schemas';
 import { readField } from '@/lib/crm/derived';
@@ -271,16 +272,7 @@ export default function CrmModulePage({
           const isEditing = editing?.id === record.id && editing?.key === f.key;
           const inlineable = canEditInline(f, editable);
           return (
-            <td
-              key={f.key}
-              className="px-3 py-2.5 truncate"
-              onDoubleClick={(e) => {
-                if (!inlineable) return;
-                e.stopPropagation();
-                setEditing({ id: record.id, key: f.key });
-              }}
-              title={inlineable && !isEditing ? t('לחיצה כפולה לעריכה מהירה') : undefined}
-            >
+            <td key={f.key} className="px-3 py-2.5 truncate">
               {isEditing ? (
                 <InlineEditCell
                   field={f}
@@ -290,10 +282,16 @@ export default function CrmModulePage({
                   onCancel={() => setEditing(null)}
                 />
               ) : (
-                <span className="inline-flex items-center gap-1.5 min-w-0 max-w-full">
-                  {i === 0 && late && <AlertTriangle className="w-3.5 h-3.5 text-destructive flex-shrink-0" />}
-                  <span className="truncate">{cell(f, record)}</span>
-                </span>
+                <InlineEditTrigger
+                  disabled={!inlineable}
+                  title={t('לחיצה לעריכה מהירה')}
+                  onEdit={() => setEditing({ id: record.id, key: f.key })}
+                >
+                  <span className="inline-flex items-center gap-1.5 min-w-0 max-w-full">
+                    {i === 0 && late && <AlertTriangle className="w-3.5 h-3.5 text-destructive flex-shrink-0" />}
+                    <span className="truncate">{cell(f, record)}</span>
+                  </span>
+                </InlineEditTrigger>
               )}
             </td>
           );

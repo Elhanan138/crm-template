@@ -930,6 +930,13 @@ export const EN = {
 
   // ── Settings screens ──────────────────────────────────────────────────────
   "גררו כל שדה למקום שבו הוא צריך להופיע. זה הטופס עצמו, לא הדמיה שלו.": "Drag any field to where it belongs. This is the form itself, not an impression of it.",
+
+  // ── Settings screens ──────────────────────────────────────────────────────
+  "לחיצה לעריכה מהירה": "Click to edit here",
+  "אין פרויקטים שלך": "No projects of yours",
+  "אין משימות שתואמות את הסינון": "No tasks match the filter",
+  "יש משימות במערכת, אך אף אחת מהן לא תואמת את הסינון הנוכחי.": "There are tasks in the system, but none match the current filter.",
+  "כל המשימות": "All tasks",
 };
 
 /** Every language the switcher offers. */

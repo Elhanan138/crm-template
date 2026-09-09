@@ -199,13 +199,16 @@ describe('paging', () => {
 });
 
 describe('inline editing', () => {
-  it('opens an editor on the cell and writes the change through', async () => {
+  const cellWith = (text) => screen.getAllByRole('cell').find((c) => c.textContent === text);
+
+  it('opens an editor on ONE click of the value, and writes the change through', async () => {
+    const user = userEvent.setup();
     seedLeads(1);
     renderLeads();
     await findInTable('Deal 1');
 
-    const valueCell = screen.getAllByRole('cell').find((c) => c.textContent === '₪1,000');
-    fireEvent.doubleClick(valueCell);
+    const valueCell = cellWith('₪1,000');
+    await user.click(within(valueCell).getByRole('button'));
 
     const input = await within(valueCell).findByRole('spinbutton');
     fireEvent.change(input, { target: { value: '5000' } });
@@ -217,15 +220,44 @@ describe('inline editing', () => {
     });
   });
 
+  it('does not open the record sheet when the value is clicked', async () => {
+    const user = userEvent.setup();
+    seedLeads(1);
+    renderLeads();
+    await findInTable('Deal 1');
+
+    await user.click(within(cellWith('₪1,000')).getByRole('button'));
+    // The sheet and the inline editor are alternatives, never both at once.
+    expect(screen.queryByRole('dialog')).toBeNull();
+  });
+
+  it('still opens the record when the row is clicked away from a value', async () => {
+    const user = userEvent.setup();
+    seedLeads(1);
+    renderLeads();
+    await findInTable('Deal 1');
+
+    await user.click(screen.getAllByRole('row')[1]);
+    expect(await screen.findByRole('dialog')).toBeTruthy();
+  });
+
   it('leaves a derived column alone — there is nothing to type into it', async () => {
     seedLeads(1);
     renderLeads();
     await findInTable('Deal 1');
 
-    // 10% of 1,000 for a 'new' deal.
-    const derivedCell = screen.getAllByRole('cell').find((c) => c.textContent === '₪100');
-    fireEvent.doubleClick(derivedCell);
-    expect(within(derivedCell).queryByRole('spinbutton')).toBeNull();
+    // 10% of 1,000 for a 'new' deal. It offers no target to click at all.
+    const derivedCell = cellWith('₪100');
+    expect(within(derivedCell).queryByRole('button')).toBeNull();
+  });
+
+  it('asks for a click, never a double-click', async () => {
+    seedLeads(1);
+    renderLeads();
+    await findInTable('Deal 1');
+
+    const trigger = within(cellWith('₪1,000')).getByRole('button');
+    expect(trigger).toHaveAttribute('title', 'לחיצה לעריכה מהירה');
   });
 });
 

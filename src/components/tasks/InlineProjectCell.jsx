@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import InlineEditTrigger from '@/components/shared/InlineEditTrigger';
 
 export default function InlineProjectCell({ value, onChange, projects = [] }) {
   const [open, setOpen] = useState(false);
@@ -8,12 +9,9 @@ export default function InlineProjectCell({ value, onChange, projects = [] }) {
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <button
-          onClick={e => e.stopPropagation()}
-          className="text-xs text-muted-foreground hover:text-primary transition-colors rounded px-1 py-0.5 hover:bg-muted/50 active:scale-95"
-        >
+        <InlineEditTrigger onEdit={() => setOpen(true)} className="text-xs text-muted-foreground">
           {label}
-        </button>
+        </InlineEditTrigger>
       </PopoverTrigger>
       <PopoverContent align="center" className="w-48 p-1.5 max-h-60 overflow-y-auto" onClick={e => e.stopPropagation()}>
         <div className="space-y-0.5">

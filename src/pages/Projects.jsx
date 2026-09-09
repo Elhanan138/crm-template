@@ -223,8 +223,13 @@ export default function Projects() {
     {scopedProjects.length === 0 ? (
      <EmptyState
       icon={CubeIcon}
-      title="אין פרויקטים עדיין"
-      description={canCreateProject ? "צור את הפרויקט הראשון שלך כדי להתחיל.": "אין לך עדיין גישה לפרויקטים. פנה למנהל המערכת."}
+      // "There are none" and "none of yours" are different answers, and the
+      // counter above already says which. Saying the first when the second is
+      // true reads as a system that lost the data.
+      title={visibleProjects.length > 0 ? 'אין פרויקטים שלך' : 'אין פרויקטים עדיין'}
+      description={visibleProjects.length > 0
+       ? `יש ${visibleProjects.length} פרויקטים במערכת שאינם משויכים אליך — עברו ל"הכל" כדי לראות אותם.`
+       : canCreateProject ? "צור את הפרויקט הראשון שלך כדי להתחיל." : "אין לך עדיין גישה לפרויקטים. פנה למנהל המערכת."}
       action={canCreateProject ? (
        <Link to="/projects/new">
         <Button className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-full px-5 h-9 text-sm font-semibold shadow-none">צור פרויקט</Button>
