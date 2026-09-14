@@ -183,12 +183,16 @@ describe('workspace navigation survives partial exports', () => {
     }
   });
 
+  // Importing the module registry makes Vite transform every page in the app.
+  // On a loaded machine that alone outruns the suite default, and the failure
+  // that follows is a timeout on assertions which all pass — the kind of flake
+  // that teaches people to re-run instead of to read.
   it('every sidebar entry points at a path that exists in this bundle', async () => {
     const { NAV_ITEMS } = await import('./navItems');
     const { ALL_ROUTES } = await import('./moduleRegistry');
     const paths = new Set(ALL_ROUTES.map((r) => r.path));
     for (const item of NAV_ITEMS) expect(paths.has(item.path), `${item.label} → ${item.path}`).toBe(true);
-  });
+  }, 60_000);
 
   it('exporting a single workspace module still yields a buildable bundle', () => {
     const only = pick('leads')[0] || ACTIVE_MODULE_IDS[0];

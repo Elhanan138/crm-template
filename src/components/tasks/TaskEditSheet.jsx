@@ -10,6 +10,7 @@ import { Loader2, Check, MessageCircle, ChevronDown, ChevronUp } from 'lucide-re
 import { toast } from 'sonner';
 import TaskComments from '@/components/tasks/TaskComments';
 import { useProjectPeople } from '@/hooks/useProjectPeople';
+import { useRecordTrail, RecordTrailButtons, RecordTrailPanel } from '@/components/crm/RecordTrailStrip';
 
 export default function TaskEditSheet({ open, task, projectId, onClose }) {
  const queryClient = useQueryClient();
@@ -153,6 +154,8 @@ export default function TaskEditSheet({ open, task, projectId, onClose }) {
  };
 
 
+ // The task's history, activity and files — the same strip every other form has.
+ const trail = useRecordTrail();
  const customFields = useEntityCustomFields('Task');
  const layout = useFormLayout('Task', customFields);
 
@@ -164,11 +167,14 @@ export default function TaskEditSheet({ open, task, projectId, onClose }) {
      <SheetTitle className="text-base font-bold leading-tight">
       {isEditing ? 'עריכת משימה' : 'משימה חדשה'}
      </SheetTitle>
-     {saving && (
-      <span className="flex items-center gap-1.5 text-caption">
-       <Loader2 className="w-3.5 h-3.5 animate-spin"/> שומר…
-      </span>
-     )}
+     <div className="flex items-center gap-2">
+      {saving && (
+       <span className="flex items-center gap-1.5 text-caption">
+        <Loader2 className="w-3.5 h-3.5 animate-spin"/> שומר…
+       </span>
+      )}
+      <RecordTrailButtons trail={trail} recordId={taskId} />
+     </div>
     </SheetHeader>
 
     <div className="flex-1 overflow-y-auto px-5 py-4 space-y-4">
@@ -198,6 +204,8 @@ export default function TaskEditSheet({ open, task, projectId, onClose }) {
        צור משימה
       </Button>
      )}
+
+     <RecordTrailPanel trail={trail} entity="Task" record={task} />
 
      {/* Comments — collapsible */}
      {task && (

@@ -12,6 +12,7 @@ import { promoteTarget, ticketAgeDays, ageTone, ageLabel } from './supportGroups
 import { resolveSubmitterName } from '@/lib/userDisplay';
 import TicketConversation from '../TicketConversation';
 import { useAccessControl } from '@/hooks/useAccessControl';
+import { useRecordTrail, RecordTrailButtons, RecordTrailPanel } from '@/components/crm/RecordTrailStrip';
 
 // Full ticket detail — decision row, content, resolution note (user-facing), internal note.
 export default function TicketDetailPanel({ ticket, projects = [], teamMembers = [], onUpdate, onDelete }) {
@@ -22,6 +23,8 @@ export default function TicketDetailPanel({ ticket, projects = [], teamMembers =
   const [copied, setCopied] = useState(false);
   const noteRef = useRef(null);
   const { currentUser } = useAccessControl();
+  // The ticket's history, activity and files — the same strip every form has.
+  const trail = useRecordTrail();
 
   const handleCopy = () => {
     navigator.clipboard?.writeText(ticket.description || '');
@@ -60,6 +63,11 @@ export default function TicketDetailPanel({ ticket, projects = [], teamMembers =
 
   return (
     <div className="space-y-5">
+      <div className="flex items-center justify-end">
+        <RecordTrailButtons trail={trail} recordId={ticket.id} />
+      </div>
+      <RecordTrailPanel trail={trail} entity="SupportTicket" record={ticket} />
+
       {/* Decision row — the core flow */}
       <div className="grid grid-cols-3 gap-2">
         <Button

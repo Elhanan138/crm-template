@@ -27,6 +27,9 @@ import ErrorDisplay from '@/components/shared/ErrorDisplay';
 import { captureError } from '@/lib/errorCapture';
 import { getErrorInfo } from '@/lib/errors';
 import { entityLabel, fieldLabel, enumValueHe } from '@/lib/agentLabels';
+import { APP_IDENTITY } from '@/lib/appIdentity';
+
+const AGENT_LABEL = APP_IDENTITY.name ? `${APP_IDENTITY.name} Agent` : 'עוזר חכם';
 
 const ACTION_ICONS = {
   createTask: SquareCheckBig,

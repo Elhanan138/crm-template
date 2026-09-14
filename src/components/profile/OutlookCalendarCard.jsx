@@ -8,6 +8,9 @@ import { Calendar, Loader2, Mail, CheckCircle2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useOutlookCalendarConfig } from '@/hooks/useOutlookCalendar';
 import { OUTLOOK_CONNECTOR_ID } from '@/lib/outlookConnector';
+import { APP_IDENTITY } from '@/lib/appIdentity';
+
+const SYSTEM_LABEL = APP_IDENTITY.name || 'המערכת';
 
 export default function OutlookCalendarCard() {
  const queryClient = useQueryClient();

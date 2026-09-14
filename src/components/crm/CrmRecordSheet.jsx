@@ -8,7 +8,7 @@ import RelatedRecords from '@/components/crm/RelatedRecords';
 import { recordActionsFor } from '@/lib/crm/recordActions';
 import { isDerived } from '@/lib/crm/derived';
 import { useI18n } from '@/lib/i18n';
-import RecordTrail, { TRAIL_TABS } from '@/components/crm/RecordTrail';
+import { useRecordTrail, RecordTrailButtons, RecordTrailPanel } from '@/components/crm/RecordTrailStrip';
 import { validateCustomFields } from '@/lib/customFields';
 import CrmFormFields from '@/components/crm/CrmFormFields';
 import { useFormLayout } from '@/lib/useFormLayout';
@@ -83,11 +83,8 @@ export default function CrmRecordSheet({
   // the custom fields — which is what it has always been.
   const layout = useFormLayout(schema.entity, customFields);
 
-  // The record's history, activity and files. They belong to the record rather
-  // than to any field, so they sit in the header as icons instead of taking a
-  // labelled row each at the foot of a form people already scroll.
-  const [trailTab, setTrailTab] = useState(null);
-  const [trailCounts, setTrailCounts] = useState({});
+  // The record's history, activity and files, as icons in the header.
+  const trail = useRecordTrail();
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -103,37 +100,7 @@ export default function CrmRecordSheet({
               </SheetDescription>
             </div>
 
-            {/* Only a saved record has a story to show. */}
-            {record?.id && (
-              <div className="flex items-center gap-1 flex-shrink-0">
-                {TRAIL_TABS.map((item) => {
-                  const open = trailTab === item.id;
-                  const count = trailCounts[item.id] || 0;
-                  return (
-                    <button
-                      key={item.id}
-                      type="button"
-                      title={t(item.label)}
-                      aria-label={t(item.label)}
-                      aria-pressed={open}
-                      onClick={() => setTrailTab(open ? null : item.id)}
-                      className={`relative w-8 h-8 rounded-lg flex items-center justify-center border transition-colors ${
-                        open
-                          ? 'bg-accent text-accent-foreground border-primary/30'
-                          : 'bg-card border-border text-muted-foreground hover:text-foreground'
-                      }`}
-                    >
-                      <item.icon className="w-3.5 h-3.5 flex-shrink-0" />
-                      {count > 0 && (
-                        <span className="absolute -top-1 -end-1 min-w-[15px] h-[15px] px-1 rounded-full bg-primary text-primary-foreground text-[9px] font-bold flex items-center justify-center tabular-nums">
-                          {count}
-                        </span>
-                      )}
-                    </button>
-                  );
-                })}
-              </div>
-            )}
+            <RecordTrailButtons trail={trail} recordId={record?.id} />
           </div>
         </SheetHeader>
 
@@ -183,17 +150,7 @@ export default function CrmRecordSheet({
 
           {/* What changed, what people did, what is attached — opened from the
               header, so it costs nothing until it is asked for. */}
-          {record?.id && (
-            <div className={trailTab ? 'pt-3 mt-3 border-t border-border' : 'hidden'}>
-              <RecordTrail
-                schema={schema}
-                entity={schema.entity}
-                record={record}
-                activeTab={trailTab || 'history'}
-                onCounts={setTrailCounts}
-              />
-            </div>
-          )}
+          <RecordTrailPanel trail={trail} schema={schema} entity={schema.entity} record={record} />
 
         </div>
 

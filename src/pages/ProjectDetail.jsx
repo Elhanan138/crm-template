@@ -32,10 +32,13 @@ import BackButton from '@/components/shared/BackButton';
 import { PROJECT_TABS as TABS } from '@/components/project/projectTabs';
 import { classifyProjectError } from '@/lib/projectFetch';
 import { isObjectId, getProjectPath } from '@/lib/projectSlug';
+import { useRecordTrail, RecordTrailButtons, RecordTrailPanel } from '@/components/crm/RecordTrailStrip';
 
 export default function ProjectDetail() {
   const projectAgentEnabled = useSystemFeature('project_agent', 'agent');
  const { slug: slugOrId } = useParams();
+ // The project's history, activity and files.
+ const trail = useRecordTrail();
  const navigate = useNavigate();
  const queryClient = useQueryClient();
 
@@ -353,6 +356,9 @@ export default function ProjectDetail() {
     </div>
     {/* Action buttons — folder docs + 3-dot menu */}
     <div className="flex items-center gap-1.5 flex-shrink-0">
+     {/* The project's history, activity and files — the same strip every
+         record in the system has. */}
+     <RecordTrailButtons trail={trail} recordId={projectId} />
      <DocumentsButton project={project} />
      <ProjectActionsMenu
      projectId={projectId}
@@ -367,6 +373,8 @@ export default function ProjectDetail() {
     />
     </div>
    </div>
+
+   <RecordTrailPanel trail={trail} entity="Project" record={project} />
 
    {deleteError && (
     <div className="mb-6">

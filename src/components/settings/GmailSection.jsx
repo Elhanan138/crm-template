@@ -5,6 +5,9 @@ import { Button } from '@/components/ui/button';
 import { Mail, CheckCircle2, XCircle, Loader2, Send } from 'lucide-react';
 import { toast } from 'sonner';
 import { useI18n } from '@/lib/i18n';
+import { APP_IDENTITY } from '@/lib/appIdentity';
+
+const SYSTEM_LABEL = APP_IDENTITY.name || 'המערכת';
 
 export default function GmailSection({ status }) {
   const { t } = useI18n();

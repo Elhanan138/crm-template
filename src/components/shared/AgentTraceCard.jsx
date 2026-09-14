@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Bot } from 'lucide-react';
+import { APP_IDENTITY } from '@/lib/appIdentity';
+
+const AGENT_LABEL = APP_IDENTITY.name ? `${APP_IDENTITY.name} Agent` : 'עוזר חכם';
 
 const STEPS = ['מנתח את הבקשה', 'שולף נתונים', 'מנסח תשובה'];
 

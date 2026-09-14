@@ -271,3 +271,33 @@ describe('every form is drawn the same way', () => {
     }
   });
 });
+
+describe('every record has a trail, not only a CRM one', () => {
+  // The history, activity and files panel lived in the CRM sheet and nowhere
+  // else: a task, a ticket and a project had no readable history and no way to
+  // attach a file. All four now mount the one shared strip.
+  const read = (path) => readFileSync(path, 'utf8');
+
+  const FORMS = [
+    'src/components/crm/CrmRecordSheet.jsx',
+    'src/components/tasks/TaskEditSheet.jsx',
+    'src/components/support/workspace/TicketDetailPanel.jsx',
+    'src/pages/ProjectDetail.jsx',
+  ];
+
+  it('gives every record form the buttons and the panel', () => {
+    for (const form of FORMS) {
+      const src = read(form);
+      expect(src, `${form} should import the strip`).toContain('RecordTrailStrip');
+      expect(src, `${form} should show the buttons`).toContain('<RecordTrailButtons');
+      expect(src, `${form} should show the panel`).toContain('<RecordTrailPanel');
+    }
+  });
+
+  it('leaves no form wiring the trail by hand', () => {
+    // A second copy is how the four drifted apart in the first place.
+    for (const form of FORMS) {
+      expect(read(form), `${form} still builds its own tab strip`).not.toContain('TRAIL_TABS');
+    }
+  });
+});

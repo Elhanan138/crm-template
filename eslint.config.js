@@ -13,6 +13,8 @@ export default [
     languageOptions: {
       globals: {
         ...globals.node,
+        // Tests run in jsdom: they touch localStorage, Range, Element and the rest.
+        ...globals.browser,
         describe: "readonly",
         it: "readonly",
         test: "readonly",
@@ -33,6 +35,10 @@ export default [
       "no-unused-vars": "off",
       "react/react-in-jsx-scope": "off",
       "react/prop-types": "off",
+      // A missing import is a blank screen at runtime and nothing at all at
+      // build time — Vite happily bundles a name that is never defined. This is
+      // the only check that catches it before someone opens the page.
+      "no-undef": "error",
     },
   },
   {
@@ -85,6 +91,10 @@ export default [
         { ignore: ["cmdk-input-wrapper", "toast-close"] },
       ],
       "react-hooks/rules-of-hooks": "error",
+      // A missing import is a blank screen at runtime and nothing at build time —
+      // Vite bundles a name that is never defined without a word. This is the
+      // only check that catches it before someone opens the page.
+      "no-undef": "error",
       // Prevent re-introducing hardcoded Tailwind palette colors instead of semantic tokens.
       // Allowed: chart-* tokens and the semantic tokens (primary/success/warning/info/destructive/muted/accent).
       "no-restricted-syntax": [
