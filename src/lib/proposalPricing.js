@@ -91,3 +91,46 @@ export function generateProposalNumber(existingCount = 0) {
   const prefix = (APP_IDENTITY.name || 'Q').replace(/\s+/g, '').toUpperCase();
   return `${prefix}-${year}-${seq}`;
 }
+
+/**
+ * A new version of a quote — the next draft in a negotiation.
+ *
+ * A quote used to be edited in place, so the price the customer saw on
+ * Monday was overwritten by Wednesday's and nobody could say what changed.
+ * A version is a copy: same customer, same lines, the number suffixed, status
+ * back to draft, the signature cleared — and a link to the first version so
+ * the whole negotiation can be read in order.
+ */
+/** Today as a calendar day in local time — toISOString() is UTC, a day off after midnight. */
+export const localToday = () => {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+};
+
+export function nextVersion(proposal, siblings = []) {
+  const rootId = proposal.root_id || proposal.id;
+  const family = [proposal, ...siblings].filter((p) => (p.root_id || p.id) === rootId);
+  const version = Math.max(1, ...family.map((p) => Number(p.version) || 1)) + 1;
+  const base = String(proposal.proposal_number || '').replace(/-v\d+$/, '');
+  const { id: _id, created_date: _c, updated_date: _u, signed_by: _s, signed_date: _d, ...rest } = proposal;
+  return {
+    ...rest,
+    root_id: rootId,
+    version,
+    proposal_number: base ? `${base}-v${version}` : '',
+    status: 'draft',
+    issue_date: localToday(),
+  };
+}
+
+/**
+ * Why a quote cannot be marked approved as it stands, or null.
+ *
+ * "Approved" with nobody's name on it is a status, not an agreement. The
+ * customer-side signatory is what makes it one — and it is what the invoice
+ * hand-off rests on.
+ */
+export const approvalMissing = (proposal) =>
+  proposal?.status === 'approved' && !String(proposal.signed_by || '').trim()
+    ? 'הצעה מאושרת צריכה שם של מאשר מטעם הלקוח'
+    : null;

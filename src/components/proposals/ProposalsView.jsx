@@ -17,7 +17,7 @@ import CardSkeleton from '@/components/shared/CardSkeleton';
 import HebrewDateInput from '@/components/shared/HebrewDateInput';
 import {
   PROPOSAL_STATUSES, PROPOSAL_COMPLEXITIES, proposalStatusMeta, VAT_RATE,
-  computePricing, generateProposalNumber,
+  computePricing, generateProposalNumber, nextVersion, approvalMissing, localToday,
 } from '@/lib/proposalPricing';
 import StatusBadge from '@/components/shared/StatusBadge';
 import DocumentLetterhead, { DocumentFooter, DocumentSheet } from '@/components/shared/DocumentLetterhead';
@@ -36,7 +36,10 @@ function ProposalCard({ proposal, clientName, onEdit, onPrint, onPdf, pdfBusy })
     <div className="bg-card rounded-lg border border-border p-4 sm:p-5 hover:shadow-md hover:border-primary/30 transition-all cursor-pointer" onClick={() => onEdit(proposal)}>
       <div className="flex items-start justify-between gap-3 mb-3">
         <div className="min-w-0">
-          <h3 className="text-sm font-bold text-foreground truncate" dir="ltr">{proposal.proposal_number || t('ללא מספר')}</h3>
+          <h3 className="text-sm font-bold text-foreground truncate" dir="ltr">
+            {proposal.proposal_number || t('ללא מספר')}
+            {Number(proposal.version) > 1 && <span className="ms-1.5 text-[10px] font-semibold text-muted-foreground">v{proposal.version}</span>}
+          </h3>
           <p className="text-xs text-muted-foreground mt-0.5 truncate">{clientName || t('לקוח לא מוגדר')}</p>
         </div>
         <StatusBadge
@@ -84,7 +87,7 @@ const blankProposal = (existingCount, projectId) => ({
   client_name: '',
   project_id: projectId || '',
   status: 'draft',
-  issue_date: new Date().toISOString().slice(0, 10),
+  issue_date: localToday(),
   valid_until: '',
   base_hourly_rate: 350,
   complexity: 'basic',
@@ -94,7 +97,7 @@ const blankProposal = (existingCount, projectId) => ({
   notes: '',
 });
 
-function ProposalForm({ open, onOpenChange, proposal, clients, projects, existingCount, onSave, projectId }) {
+function ProposalForm({ open, onOpenChange, proposal, clients, projects, existingCount, onSave, onNewVersion, projectId }) {
   const { t, dir } = useI18n();
   // Merged rather than replaced: a quote seeded from a lead carries a customer
   // and nothing else, and it still needs a number, a VAT rate and a status.
@@ -136,6 +139,8 @@ function ProposalForm({ open, onOpenChange, proposal, clients, projects, existin
   }));
 
   const handleSave = () => {
+    const missing = approvalMissing(form);
+    if (missing) { toast.error(t(missing)); return; }
     const computed = computePricing(form);
     onSave({
       ...form,
@@ -321,6 +326,35 @@ function ProposalForm({ open, onOpenChange, proposal, clients, projects, existin
           <Textarea id="prop-notes" value={form.notes || ''} onChange={e => setField('notes', e.target.value)} rows={2} />
         </div>
 
+        {/* The customer's sign-off. Shown once the quote is approved, because
+            "approved" with nobody's name on it is a status, not an agreement —
+            and it is what the invoice hand-off rests on. */}
+        {form.status === 'approved' && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 rounded-lg border border-border p-3">
+            <div className="space-y-1.5">
+              <Label htmlFor="prop-signed-by">{t('אושר על ידי (מטעם הלקוח)')} <span className="text-destructive">*</span></Label>
+              <Input id="prop-signed-by" value={form.signed_by || ''} onChange={e => setField('signed_by', e.target.value)} />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="prop-signed-date">{t('תאריך אישור')}</Label>
+              <HebrewDateInput id="prop-signed-date" value={form.signed_date || ''} onChange={v => setField('signed_date', v)} />
+            </div>
+          </div>
+        )}
+
+        {/* A new version rather than an edit in place: Monday's price stays on
+            file when Wednesday's is sent. */}
+        {proposal?.id && onNewVersion && (
+          <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg bg-muted/40 px-3 py-2">
+            <p className="text-xs text-muted-foreground">
+              {t('גרסה')} <span dir="ltr">{proposal.version || 1}</span> · {t('שינוי במחיר? צור גרסה חדשה במקום לדרוס את הקיימת.')}
+            </p>
+            <Button variant="outline" size="sm" className="h-8 rounded-full text-xs" onClick={() => onNewVersion(proposal)}>
+              {t('גרסה חדשה')}
+            </Button>
+          </div>
+        )}
+
         {/* The next step in the journey, offered only once this quote is
             approved and only when the target module is in this build. Same
             declaration every other hand-off uses. */}
@@ -428,6 +462,22 @@ function ProposalDocument({ proposal, client, innerRef }) {
             <p className="text-sm text-doc-muted whitespace-pre-wrap">{proposal.notes}</p>
           </div>
         )}
+
+        {/* Where the customer signs. Filled in once it is approved; a blank
+            line on a draft, so the printed copy can be signed by hand. */}
+        <div className="grid grid-cols-2 gap-10 mt-14 text-sm">
+          <div>
+            <p className="font-semibold mb-1">אישור הלקוח</p>
+            <p className="text-doc-muted mb-8 min-h-[1.25rem]">{proposal.signed_by || ''}</p>
+            <div className="border-t border-doc-foreground pt-1 text-xs text-doc-muted">
+              חתימה{proposal.signed_date ? ` · ${proposal.signed_date}` : ' ותאריך'}
+            </div>
+          </div>
+          <div>
+            <p className="font-semibold mb-1">גרסה</p>
+            <p className="text-doc-muted" dir="ltr">{proposal.version || 1}</p>
+          </div>
+        </div>
 
         <DocumentFooter className="text-center" />
       </div>
@@ -691,6 +741,10 @@ export default function ProposalsView({ projectId }) {
           projects={projects}
           existingCount={projectProposals.length}
           onSave={handleSave}
+          onNewVersion={(source) => {
+            setFormOpen(false);
+            saveMutation.mutate(nextVersion(source, proposals));
+          }}
           projectId={projectId}
         />
       )}

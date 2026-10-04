@@ -789,6 +789,12 @@ export const EN = {
   'שמירת הצעת המחיר נכשלה': 'Saving the quote failed',
   'הצעת המחיר יוצאה ל-PDF': 'Quote exported to PDF',
   'יצירת ה-PDF נכשלה': 'Creating the PDF failed',
+  'אושר על ידי (מטעם הלקוח)': 'Approved by (customer side)',
+  'תאריך אישור': 'Approval date',
+  'גרסה': 'Version',
+  'גרסה חדשה': 'New version',
+  'שינוי במחיר? צור גרסה חדשה במקום לדרוס את הקיימת.': 'Changing the price? Create a new version rather than overwriting this one.',
+  'הצעה מאושרת צריכה שם של מאשר מטעם הלקוח': 'An approved quote needs the name of the customer-side signatory',
 
   // ── Settings screens ──────────────────────────────────────────────────────
   "3–32 תווים באנגלית, ספרות, נקודה, מקף או קו תחתון. אופציונלי.": "3–32 Latin characters, digits, dot, hyphen or underscore. Optional.",

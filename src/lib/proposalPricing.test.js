@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import {
   PROPOSAL_STATUSES, PROPOSAL_COMPLEXITIES, proposalStatusMeta, complexityMeta,
-  complexityLabel, getAdjustedRate, computePricing, VAT_RATE,
+  complexityLabel, getAdjustedRate, computePricing, VAT_RATE, nextVersion, approvalMissing,
 } from './proposalPricing';
 import { TONES, normalizeTone, surfaceFor } from './tones';
 import { EN } from './i18n/dictionary';
@@ -81,5 +81,44 @@ describe('what a proposal comes to', () => {
     const pricing = computePricing({});
     expect(pricing.subtotal).toBe(0);
     expect(pricing.finalTotal).toBe(0);
+  });
+});
+
+describe('a new version keeps the old price on file', () => {
+  const original = {
+    id: 'p1', proposal_number: 'Q-2026-001', status: 'approved', signed_by: 'דנה', signed_date: '2026-01-01',
+    client_name: 'אקמה', line_items: [{ name: 'א', hours: 3 }], created_date: 'x',
+  };
+
+  it('copies the quote as a draft, numbered as the next version, signature cleared', () => {
+    const v2 = nextVersion(original);
+    expect(v2.id).toBeUndefined();
+    expect(v2.created_date).toBeUndefined();
+    expect(v2.status).toBe('draft');
+    expect(v2.version).toBe(2);
+    expect(v2.proposal_number).toBe('Q-2026-001-v2');
+    expect(v2.signed_by).toBeUndefined();
+    expect(v2.root_id).toBe('p1');
+    expect(v2.line_items).toEqual(original.line_items);
+  });
+
+  it('numbers from the whole family, not from the version it was copied from', () => {
+    const v2 = { ...nextVersion(original), id: 'p2' };
+    const v3 = { ...nextVersion(v2, [original]), id: 'p3' };
+    // Branching off v2 again while v3 exists must give v4, not a second v3.
+    const again = nextVersion(v2, [original, v3]);
+    expect(v3.version).toBe(3);
+    expect(v3.proposal_number).toBe('Q-2026-001-v3');
+    expect(again.version).toBe(4);
+  });
+});
+
+describe('approved means somebody on the customer side signed off', () => {
+  it('refuses an approval with no signatory, and accepts one with', () => {
+    expect(approvalMissing({ status: 'approved' })).toBeTruthy();
+    expect(approvalMissing({ status: 'approved', signed_by: '  ' })).toBeTruthy();
+    expect(approvalMissing({ status: 'approved', signed_by: 'דנה' })).toBeNull();
+    expect(approvalMissing({ status: 'sent' })).toBeNull();
+    expect(EN[approvalMissing({ status: 'approved' })]).toBeTruthy();
   });
 });
