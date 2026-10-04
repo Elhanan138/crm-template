@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useLayoutEffect, useRef } from 'react';
+import React, { useEffect, useLayoutEffect, useRef } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
 import { MotionPage } from '@/components/shared/motion';
 import Sidebar from './Sidebar';
@@ -17,12 +17,16 @@ import { useAuth } from '@/lib/AuthContext';
 import { clearNavStack, handleRouteChange, consumePendingScroll } from '@/hooks/useSmartBack';
 import { api } from '@/api/client';
 import { WideLayoutProvider, useIsWide } from '@/lib/WideLayoutContext';
+import { useSidebarCollapsed } from '@/lib/sidebarPrefs';
 
 function AppLayoutInner() {
   const announcementsEnabled = useCapability('announcements');
   const agentEnabled = useCapability('blossom_agent', 'agent');
   const wide = useIsWide();
-  const [collapsed, setCollapsed] = useState(false);
+  // Starts as an icon rail and remembers what it was last set to. It used to
+  // start wide on every load, so collapsing it was a decision nobody could
+  // make stick.
+  const [collapsed, toggleCollapsed] = useSidebarCollapsed();
   const { isAllowed, isLoading, currentUser, effectiveUser, isRealAdmin } = useAccessControl();
   const { navigateToLogin } = useAuth();
 
@@ -105,9 +109,9 @@ function AppLayoutInner() {
 
   return (
     <div className="min-h-screen bg-background">
-      <Sidebar collapsed={collapsed} onToggle={() => setCollapsed(c => !c)} />
+      <Sidebar collapsed={collapsed} onToggle={toggleCollapsed} />
       <main className={`min-h-screen pt-16 md:pt-0 transition-all duration-300 ${collapsed ? 'md:ms-16' : 'md:ms-[174px]'}`}>
-        <TopBar collapsed={collapsed} onToggle={() => setCollapsed(c => !c)} />
+        <TopBar collapsed={collapsed} onToggle={toggleCollapsed} />
         <div className={`mx-auto py-6 md:py-8 ${wide ? 'max-w-none px-3 md:px-4' : 'max-w-[1600px] px-4 md:px-8'}`}>
           <MotionPage key={location.pathname}>
             <Outlet />

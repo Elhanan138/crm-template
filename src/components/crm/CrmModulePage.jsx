@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -14,7 +14,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import {
   Plus, Search, Pencil, Trash2, Lock, ShieldOff, ArrowUpDown, ArrowUp, ArrowDown,
-  Download, LayoutGrid, List, Layers, X, AlertTriangle, ChevronDown, UserCheck, CopyCheck,
+  Download, LayoutGrid, List, Layers, Rows3, X, AlertTriangle, ChevronDown, UserCheck, CopyCheck,
 } from 'lucide-react';
 import PageHeader from '@/components/shared/PageHeader';
 import EmptyState from '@/components/shared/EmptyState';
@@ -32,6 +32,7 @@ import { readField } from '@/lib/crm/derived';
 import { useI18n, translateSchema } from '@/lib/i18n';
 import { useTablePrefs, PAGE_SIZES } from '@/lib/crm/tablePrefs';
 import { findDuplicates } from '@/lib/crm/duplicates';
+import { inboundActionsFor } from '@/lib/crm/recordActions';
 import {
   statsFor, segmentsFor, groupOptionsFor, boardConfigFor, sortRecords,
   groupRecords, toCsv, isOverdue, statusFieldOf, moneyFieldOf,
@@ -47,6 +48,15 @@ export function StatusPill({ meta }) {
 }
 
 const NO_GROUP = '__none__';
+
+// The ways a module can be looked at. One list, so a view cannot exist in the
+// switch and not in the body. `needsBoard` marks the one that depends on the
+// schema declaring stages.
+const VIEWS = [
+  { id: 'table', label: 'תצוגת רשימה', icon: List },
+  { id: 'cards', label: 'תצוגת כרטיסים', icon: Rows3 },
+  { id: 'board', label: 'תצוגת לוח', icon: LayoutGrid, needsBoard: true },
+];
 
 /**
  * A new record pre-filled from the URL, for a hand-off out of another module.
@@ -112,7 +122,7 @@ export default function CrmModulePage({
   const [segmentId, setSegmentId] = useState('all');
   const [sort, setSort] = useState({ key: null, dir: 'asc' });
   const [groupKey, setGroupKey] = useState('');
-  const [view, setView] = useState('table');
+  // `view` is a kept preference, not page state — see useTablePrefs below.
   const [page, setPage] = useState(1);
   const [selected, setSelected] = useState(() => new Set());
   // An extra, ad-hoc slice set by whatever `renderAbove` renders — pressing an
@@ -131,13 +141,18 @@ export default function CrmModulePage({
   const [bulkDeleteOpen, setBulkDeleteOpen] = useState(false);
   const [duplicatesOpen, setDuplicatesOpen] = useState(false);
 
-  const { columns, pageSize, toggleColumn, resetColumns, setPageSize } = useTablePrefs(moduleId, schema);
+  const {
+    columns, pageSize, view, toggleColumn, resetColumns, setPageSize, setView,
+  } = useTablePrefs(moduleId, schema);
 
   const Icon = schema.icon;
   const statusField = statusFieldOf(schema);
   const moneyField = moneyFieldOf(schema);
   const board = boardConfigFor(schema);
   const groupOptions = groupOptionsFor(schema);
+  // Which other modules feed this one, for the empty state. Derived from the
+  // same hand-off declarations the record sheet offers in the other direction.
+  const inbound = useMemo(() => inboundActionsFor(moduleId), [moduleId]);
 
   const segments = useMemo(
     () => segmentsFor(schema, { myEmail, myName: viewer?.fullName || '' }),
@@ -188,6 +203,17 @@ export default function CrmModulePage({
     const lastPage = Math.max(1, Math.ceil(visible.length / pageSize));
     if (page > lastPage) setPage(lastPage);
   }, [visible.length, pageSize, page]);
+
+  // Everything that can be narrowing the list, cleared at once. Telling someone
+  // to "try changing the search or the filter" when the page can simply do it
+  // is advice standing in for a button.
+  const clearFilters = () => {
+    setSearch('');
+    setFilters({});
+    setSegmentId('all');
+    setFocus(null);
+    setGroupKey('');
+  };
 
   const openNew = () => { setSheetRecord(null); setSheetOpen(true); };
   const openRecord = (record) => {
@@ -370,6 +396,51 @@ export default function CrmModulePage({
     );
   });
 
+  // One card, rendered by the mobile layout and by the desktop card view
+  // alike. Written twice, the two drifted: the phone showed a status chip and
+  // an overdue marker that the wider screen never got.
+  const cardsOf = (items) => items.map((record) => {
+    const late = isOverdue(schema, record);
+    const statusColumns = columns.filter((f) => f.type === 'select' && f.options?.[0]?.tone !== undefined);
+    const detailColumns = columns.filter(
+      (f) => f.key !== schema.titleField && !statusColumns.includes(f),
+    );
+    return (
+      <div
+        key={record.id}
+        className={`flex items-start gap-2 border rounded-xl p-3.5 transition-colors ${
+          selected.has(record.id) ? 'border-primary/30 bg-accent' : 'border-border bg-card hover:border-primary/30'
+        }`}
+      >
+        <Checkbox
+          checked={selected.has(record.id)}
+          onCheckedChange={() => toggleRow(record.id)}
+          className="mt-0.5 flex-shrink-0"
+          aria-label={t('בחירת שורה')}
+        />
+        <button onClick={() => openRecord(record)} className="flex-1 min-w-0 text-start">
+          <div className="flex items-start justify-between gap-2 mb-1.5">
+            <p className="text-sm font-bold truncate min-w-0 inline-flex items-center gap-1.5">
+              {late && <AlertTriangle className="w-3.5 h-3.5 text-destructive flex-shrink-0" />}
+              {record[schema.titleField] || '—'}
+            </p>
+            {statusColumns.slice(0, 1).map((f) => (
+              <span key={f.key} className="flex-shrink-0">{cell(f, record)}</span>
+            ))}
+          </div>
+          <dl className="grid grid-cols-2 gap-x-3 gap-y-1">
+            {detailColumns.slice(0, 4).map((f) => (
+              <div key={f.key} className="min-w-0">
+                <dt className="text-[10px] text-muted-foreground truncate">{f.label}</dt>
+                <dd className="text-xs truncate">{cell(f, record)}</dd>
+              </div>
+            ))}
+          </dl>
+        </button>
+      </div>
+    );
+  });
+
   const table = (items) => (
     <table className="w-full text-sm" style={{ tableLayout: 'fixed' }}>
       <thead>
@@ -507,7 +578,7 @@ export default function CrmModulePage({
             </Select>
           ))}
 
-          {groupOptions.length > 0 && view === 'table' && (
+          {groupOptions.length > 0 && view !== 'board' && (
             <Select value={groupKey || NO_GROUP} onValueChange={(v) => setGroupKey(v === NO_GROUP ? '' : v)}>
               <SelectTrigger className="h-9 rounded-lg text-sm w-full sm:w-44 gap-1.5">
                 <Layers className="w-3.5 h-3.5 flex-shrink-0 opacity-70" />
@@ -520,24 +591,25 @@ export default function CrmModulePage({
             </Select>
           )}
 
-          {board && (
-            <div className="flex bg-muted/50 rounded-full p-0.5 flex-shrink-0 self-start">
+          {/* The view switch. Cards are offered to every module, not only to
+              the ones with a board: a list of twelve rows with four columns
+              reads better as cards, and a phone has always shown cards anyway —
+              this is the same component, at desktop width. */}
+          <div className="flex bg-muted/50 rounded-full p-0.5 flex-shrink-0 self-start">
+            {VIEWS.filter((v) => !v.needsBoard || board).map((v) => (
               <Button
+                key={v.id}
                 variant="ghost" size="icon"
-                className={`h-8 w-8 rounded-full ${view === 'table' ? 'bg-card shadow-sm' : ''}`}
-                onClick={() => setView('table')} aria-label={t('תצוגת רשימה')}
+                className={`h-8 w-8 rounded-full ${view === v.id ? 'bg-card shadow-sm' : ''}`}
+                onClick={() => setView(v.id)}
+                aria-label={t(v.label)}
+                aria-pressed={view === v.id}
+                title={t(v.label)}
               >
-                <List className="w-4 h-4" />
+                <v.icon className="w-4 h-4" />
               </Button>
-              <Button
-                variant="ghost" size="icon"
-                className={`h-8 w-8 rounded-full ${view === 'board' ? 'bg-card shadow-sm' : ''}`}
-                onClick={() => setView('board')} aria-label={t('תצוגת לוח')}
-              >
-                <LayoutGrid className="w-4 h-4" />
-              </Button>
-            </div>
-          )}
+            ))}
+          </div>
         </div>
 
         {/* Bulk bar — appears only with a selection, and says what it will act on */}
@@ -595,14 +667,49 @@ export default function CrmModulePage({
 
         {isLoading ? (
           <CardSkeleton count={4} />
-        ) : visible.length === 0 ? (
+        ) : visible.length === 0 && records.length === 0 ? (
+          /* Genuinely empty. The next step is usually in ANOTHER module — an
+             invoice normally comes from an approved quote, a quote from a lead
+             — and the hand-off graph already says which, so this points there
+             instead of repeating one generic line on all twenty-five pages. */
           <EmptyState
             icon={Icon}
-            title={records.length === 0 ? `${t('אין עדיין')} ${schema.title}` : t('לא נמצאו תוצאות')}
-            description={records.length === 0 ? t('צור רשומה ראשונה כדי להתחיל.') : t('נסה לשנות את החיפוש, את הסינון או את הפלח.')}
-            action={records.length === 0 ? (
-              <Button onClick={openNew} className="rounded-full gap-1.5"><Plus className="w-4 h-4" /> {schema.singular}</Button>
-            ) : null}
+            title={`${t('אין עדיין')} ${schema.title}`}
+            description={schema.subtitle}
+            action={
+              <div className="flex flex-col items-center gap-3">
+                <Button onClick={openNew} className="rounded-full gap-1.5">
+                  <Plus className="w-4 h-4 flex-shrink-0" /> {schema.singular}
+                </Button>
+                {inbound.length > 0 && (
+                  <p className="text-xs text-muted-foreground">
+                    {t('נוצר גם מתוך')}
+                    {' '}
+                    {inbound.map((source, i) => (
+                      <React.Fragment key={source.key}>
+                        {i > 0 && ' · '}
+                        <Link to={source.path} className="font-semibold text-primary hover:underline">
+                          {t(source.label)}
+                        </Link>
+                      </React.Fragment>
+                    ))}
+                  </p>
+                )}
+              </div>
+            }
+          />
+        ) : visible.length === 0 ? (
+          /* Filtered to nothing. The useful thing here is not advice — it is
+             the way back, which the page can do for you. */
+          <EmptyState
+            icon={Icon}
+            title={t('לא נמצאו תוצאות')}
+            description={`${records.length} ${t('רשומות קיימות, אך אף אחת לא עונה על הסינון הנוכחי.')}`}
+            action={
+              <Button variant="outline" onClick={clearFilters} className="rounded-full gap-1.5">
+                <X className="w-4 h-4 flex-shrink-0" /> {t('נקה סינון')}
+              </Button>
+            }
           />
         ) : view === 'board' && board ? (
           <BoardView
@@ -616,6 +723,48 @@ export default function CrmModulePage({
             amountOf={moneyField ? (r) => readField(moneyField, r) : undefined}
             formatValue={currency}
           />
+        ) : view === 'cards' ? (
+          <>
+            {/* Cards at every width. Grouped, the subtotal header stays — it is
+                the reason grouping is worth having. */}
+            {grouped ? (
+              <div className="space-y-4">
+                {grouped.map((group) => (
+                  <div key={group.label}>
+                    <div className="flex items-center justify-between gap-3 mb-2">
+                      <p className="text-xs font-semibold truncate">{group.label}</p>
+                      <p className="text-[11px] text-muted-foreground flex-shrink-0">
+                        {group.items.length}
+                        {groupTotal(group.items) > 0 && <> · <span dir="ltr">{currency(groupTotal(group.items))}</span></>}
+                      </p>
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-2">
+                      {cardsOf(group.items)}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-2">
+                {cardsOf(paged)}
+              </div>
+            )}
+
+            {!groupKey && (
+              <Pagination
+                total={visible.length}
+                page={page}
+                pageSize={pageSize}
+                onPageChange={setPage}
+                className="mt-4"
+              />
+            )}
+
+            <p className="text-[11px] text-muted-foreground mt-3">
+              {visible.length} / {records.length}
+              {hiddenCount > 0 && ` · ${hiddenCount} ${t('רשומות מוסתרות לפי הרשאות')}`}
+            </p>
+          </>
         ) : (
           <>
             {/* Desktop: table, optionally grouped with a subtotal per group */}
@@ -636,46 +785,8 @@ export default function CrmModulePage({
               )}
             </div>
 
-            {/* Mobile: cards */}
-            <div className="md:hidden space-y-2">
-              {(groupKey ? visible : paged).map((record) => {
-                const late = isOverdue(schema, record);
-                return (
-                  <div
-                    key={record.id}
-                    className={`flex items-start gap-2 border rounded-xl p-3.5 transition-colors ${
-                      selected.has(record.id) ? 'border-primary/30 bg-accent' : 'border-border bg-card'
-                    }`}
-                  >
-                    <Checkbox
-                      checked={selected.has(record.id)}
-                      onCheckedChange={() => toggleRow(record.id)}
-                      className="mt-0.5 flex-shrink-0"
-                      aria-label={t('בחירת שורה')}
-                    />
-                    <button onClick={() => openRecord(record)} className="flex-1 min-w-0 text-start">
-                      <div className="flex items-start justify-between gap-2 mb-1.5">
-                        <p className="text-sm font-bold truncate min-w-0 inline-flex items-center gap-1.5">
-                          {late && <AlertTriangle className="w-3.5 h-3.5 text-destructive flex-shrink-0" />}
-                          {record[schema.titleField] || '—'}
-                        </p>
-                        {columns.filter((f) => f.type === 'select' && f.options?.[0]?.tone !== undefined).slice(0, 1).map((f) => (
-                          <span key={f.key} className="flex-shrink-0">{cell(f, record)}</span>
-                        ))}
-                      </div>
-                      <dl className="grid grid-cols-2 gap-x-3 gap-y-1">
-                        {columns.filter((f) => f.key !== schema.titleField && !(f.type === 'select' && f.options?.[0]?.tone !== undefined)).slice(0, 4).map((f) => (
-                          <div key={f.key} className="min-w-0">
-                            <dt className="text-[10px] text-muted-foreground truncate">{f.label}</dt>
-                            <dd className="text-xs truncate">{cell(f, record)}</dd>
-                          </div>
-                        ))}
-                      </dl>
-                    </button>
-                  </div>
-                );
-              })}
-            </div>
+            {/* Mobile: the same cards the desktop card view renders */}
+            <div className="md:hidden space-y-2">{cardsOf(groupKey ? visible : paged)}</div>
 
             {!groupKey && (
               <Pagination

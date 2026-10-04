@@ -127,5 +127,27 @@ export const recordActionsFor = (moduleId, record) =>
       (!a.available || a.available(record))
   ).map((a) => ({ ...a, to: (r = record) => actionPath(a, r) }));
 
+/**
+ * The hand-offs that lead INTO a module — what an empty one is usually fed by.
+ *
+ * An empty module's real next step is often in another module: the first
+ * invoice normally comes from an approved quote, and the first quote from a
+ * lead. The graph already says so in the other direction, so an empty state
+ * can point at the right place instead of repeating "create your first
+ * record" on all twenty-five pages.
+ */
+export const inboundActionsFor = (moduleId) =>
+  ACTIONS.filter(
+    (a) =>
+      a.requires === moduleId &&
+      ACTIVE_MODULE_IDS.includes(a.from) &&
+      !!MODULES[a.from]?.navPath
+  ).map((a) => ({
+    key: a.key,
+    from: a.from,
+    path: MODULES[a.from].navPath,
+    label: MODULES[a.from].label,
+  }));
+
 /** Every hand-off declared, for tests and diagnostics. */
 export const allRecordActions = () => ACTIONS;

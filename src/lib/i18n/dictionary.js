@@ -50,6 +50,8 @@ export const EN = {
   'התראות': 'Notifications',
   'כווץ תפריט': 'Collapse menu',
   'הרחב תפריט': 'Expand menu',
+  'פתח תפריט': 'Open menu',
+  'סגירת תפריט': 'Close menu',
 
   // ── Module titles and subtitles ───────────────────────────────────────────
   'לידים וצנרת': 'Leads & pipeline',
@@ -380,6 +382,7 @@ export const EN = {
   'ללא קיבוץ': 'No grouping',
   'עמודות': 'Columns',
   'תצוגת רשימה': 'List view',
+  'תצוגת כרטיסים': 'Card view',
   'תצוגת לוח': 'Board view',
   'בחירת שורה': 'Select row',
   'בחירת הכל': 'Select all',
@@ -392,6 +395,9 @@ export const EN = {
   'אין הרשאת עריכה': 'No edit permission',
   'שייך אליי': 'Assign to me',
   'לא נמצאו תוצאות': 'No results',
+  'רשומות קיימות, אך אף אחת לא עונה על הסינון הנוכחי.': 'records exist, but none match the current filter.',
+  'נקה סינון': 'Clear the filter',
+  'נוצר גם מתוך': 'Also created from',
   'נסה לשנות את החיפוש, את הסינון או את הפלח.': 'Try a different search, filter or segment.',
   'העמוד סגור': 'This page is closed',
   'היכולת הזו נסגרה או הוגבלה למנהלי מערכת בהגדרות המערכת.':
