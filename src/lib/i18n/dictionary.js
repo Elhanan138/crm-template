@@ -593,6 +593,13 @@ export const EN = {
   'חובה בהזמנה של ₪5,000 ומעלה לפני שהיא מאושרת, מוזמנת או מתקבלת.': 'Required on an order of ₪5,000 or more before it is approved, ordered or received.',
   'נדרש אישור לפני ההזמנה — סכום מעל סף האישור': 'Sign-off required — the amount is over the approval threshold',
 
+  // ── Support SLA ───────────────────────────────────────────────────────────
+  'בזמן': 'On time',
+  'קרוב ליעד': 'Near the deadline',
+  'חריגה מ-SLA': 'SLA breached',
+  'לא עמד ביעד': 'Missed the SLA',
+  'מוקפא': 'On hold',
+
   // ── Notes ─────────────────────────────────────────────────────────────────
   'עמוד חדש מתבנית': 'New page from a template',
   'ייצוא ל-Markdown': 'Export to Markdown',
@@ -802,7 +809,6 @@ export const EN = {
   'יצירת ה-PDF נכשלה': 'Creating the PDF failed',
   'אושר על ידי (מטעם הלקוח)': 'Approved by (customer side)',
   'תאריך אישור': 'Approval date',
-  'גרסה': 'Version',
   'גרסה חדשה': 'New version',
   'שינוי במחיר? צור גרסה חדשה במקום לדרוס את הקיימת.': 'Changing the price? Create a new version rather than overwriting this one.',
   'הצעה מאושרת צריכה שם של מאשר מטעם הלקוח': 'An approved quote needs the name of the customer-side signatory',

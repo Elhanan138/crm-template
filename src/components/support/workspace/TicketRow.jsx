@@ -7,6 +7,8 @@ import StatusBadge from '@/components/shared/StatusBadge';
 import InlinePriorityCell from '@/components/tasks/InlinePriorityCell';
 import { ticketAgeDays, ageTone, ageLabel } from './supportGroups';
 import { resolveSubmitterName } from '@/lib/userDisplay';
+import { ticketSla, slaMeta } from '@/lib/supportSla';
+import { useI18n } from '@/lib/i18n';
 
 export default function TicketRow({ ticket, teamMembers = [], active, selected, onToggleSelect, onOpen, onUpdate }) {
   const tc = TYPE_CONFIG[ticket.type] || TYPE_CONFIG.other;
@@ -14,6 +16,11 @@ export default function TicketRow({ ticket, teamMembers = [], active, selected, 
   const days = ticketAgeDays(ticket);
   const imgCount = ticket.image_urls?.length || 0;
   const submitterName = resolveSubmitterName(ticket, teamMembers);
+  const { t } = useI18n();
+  // Age alone said nothing about whether the age was a problem. The SLA does:
+  // it is shown only when it has something to say.
+  const sla = slaMeta(ticketSla(ticket).state);
+  const showSla = ['at_risk', 'breached', 'missed'].includes(sla.value);
 
   return (
     <div className={cn(
@@ -35,6 +42,7 @@ export default function TicketRow({ ticket, teamMembers = [], active, selected, 
         <div className="flex items-center gap-1.5 mt-1.5 flex-wrap">
           <InlinePriorityCell value={ticket.priority} onChange={priority => onUpdate?.(ticket.id, { priority })} />
           <StatusBadge label={ageLabel(days)} tone={ageTone(days)} className="px-2 py-0.5 text-[10px]" />
+          {showSla && <StatusBadge label={t(sla.label)} tone={sla.tone} className="px-2 py-0.5 text-[10px]" />}
           {ticket.internal && <StatusBadge label="יזום" tone="accent" className="px-2 py-0.5 text-[10px]" />}
           {submitterName && !ticket.internal && (
             <span className="text-caption flex items-center gap-1 truncate">

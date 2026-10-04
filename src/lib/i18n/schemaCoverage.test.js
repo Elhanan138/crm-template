@@ -36,3 +36,18 @@ describe('every schema speaks English too', () => {
     expect(missing, `${moduleId}: no English for`).toEqual([]);
   });
 });
+
+// A key written twice is silently resolved by the second one. That is how
+// "Files" became "files" with nobody noticing: the later entry won.
+describe('the dictionary has one answer per word', () => {
+  it('declares no key twice', async () => {
+    const { readFileSync } = await import('node:fs');
+    const { resolve } = await import('node:path');
+    // Read from the project root: under Vite, import.meta.url is not a file URL.
+    const source = readFileSync(resolve(process.cwd(), 'src/lib/i18n/dictionary.js'), 'utf8');
+    const keys = [...source.matchAll(/^\s*(['"])((?:\\.|(?!\1)[^\\])*?)\1\s*:/gm)].map((m) => m[2]);
+    const seen = new Set();
+    const twice = keys.filter((k) => (seen.has(k) ? true : (seen.add(k), false)));
+    expect(twice).toEqual([]);
+  });
+});
