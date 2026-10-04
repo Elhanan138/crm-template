@@ -103,6 +103,9 @@ export const RELATIONS = [
   // ── Governance — a control and the risks around it share a category ──────
   { from: 'compliance', fromField: 'framework', to: 'risks', toField: 'category', label: 'סיכונים', match: 'exact' },
   { from: 'risks', fromField: 'category', to: 'compliance', toField: 'framework', label: 'בקרות', match: 'exact' },
+  // A risk to one delivery belongs on that delivery.
+  { from: 'risks', fromField: 'project_id', to: 'projects', toField: 'id', label: 'פרויקט', match: 'id' },
+  { from: 'projects', fromField: 'id', to: 'risks', toField: 'project_id', label: 'סיכונים', match: 'id' },
 ];
 
 /** The entity behind a module, whether or not it is schema-driven. */

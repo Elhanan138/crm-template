@@ -126,6 +126,27 @@ export const RISK_BANDS = [
 
 export const riskBand = (r) => RISK_BANDS.find((b) => riskScore(r) <= b.max)?.value ?? 'low';
 
+/** The band a bare score falls in — shared by the inherent and residual reading. */
+export const bandOfScore = (score) => RISK_BANDS.find((b) => score <= b.max) || RISK_BANDS[0];
+
+/**
+ * What is left once the treatment is in place.
+ *
+ * A register that only records the risk before anything was done about it
+ * cannot answer the one question an auditor asks: did the mitigation work?
+ * Null until both residual values are given — an unassessed residual is not
+ * a residual of zero.
+ */
+export const residualScore = (r) =>
+  num(r.residual_likelihood) && num(r.residual_impact)
+    ? num(r.residual_likelihood) * num(r.residual_impact)
+    : null;
+
+export const residualBand = (r) => {
+  const score = residualScore(r);
+  return score === null ? null : bandOfScore(score).value;
+};
+
 /** Hours booked against a work order, priced at a single blended rate. */
 export const workOrderCost = (rate) => (r) => Math.round(num(r.parts_cost) + num(r.labor_hours) * rate);
 

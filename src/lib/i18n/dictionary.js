@@ -590,6 +590,26 @@ export const EN = {
   'פותח מנוי חדש עם הלקוח והסכום מהחשבונית': 'Opens a new subscription with the customer and amount from the invoice',
   'מהליד': 'From the lead',
 
+  // ── Risk register ─────────────────────────────────────────────────────────
+  'הסתברות שיורית': 'Residual likelihood',
+  'השפעה שיורית': 'Residual impact',
+  'ציון שיורי': 'Residual score',
+  'רמה שיורית': 'Residual level',
+  'יעד לטיפול': 'Treatment due',
+  'לפני טיפול': 'Before treatment',
+  'אחרי טיפול': 'After treatment',
+  'מפת חום — הסתברות מול השפעה': 'Heat map — likelihood against impact',
+  'סיכונים פתוחים': 'open risks',
+  'עדיין לא הוערכו': 'not assessed yet',
+
+  // ── Scale labels ──────────────────────────────────────────────────────────
+  'נמוך מאוד': 'Very low',
+  'חלש': 'Weak',
+  'סביר': 'Fair',
+  'טוב': 'Good',
+  'טוב מאוד': 'Very good',
+  'מצוין': 'Excellent',
+
   // ── Debt aging ────────────────────────────────────────────────────────────
   'גיול': 'Aging',
   'יתרה פתוחה': 'Outstanding',

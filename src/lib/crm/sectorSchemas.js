@@ -4,7 +4,7 @@ import {
 } from 'lucide-react';
 import {
   monthlyRevenue, stockValue, stockState, STOCK_STATES, riskScore, riskBand,
-  RISK_BANDS, slaState, SLA_STATES, warrantyState, WARRANTY_STATES,
+  RISK_BANDS, residualScore, residualBand, slaState, SLA_STATES, warrantyState, WARRANTY_STATES,
   yearsSince, daysUntil, ageInStage,
 } from '@/lib/crm/derived';
 
@@ -407,6 +407,16 @@ export const SECTOR_SCHEMAS = {
       { key: 'risk_score', label: 'ציון סיכון', type: 'number', list: true, derive: riskScore },
       { key: 'risk_band', label: 'רמת סיכון', type: 'select', options: RISK_BANDS.map(({ value, label, tone }) => ({ value, label, tone })), list: true, derive: riskBand },
       { key: 'response', label: 'אסטרטגיה', type: 'select', options: RISK_RESPONSES, list: true },
+      // After the treatment. Without it a register shows how bad things were
+      // and never whether what was done about them worked.
+      { key: 'residual_likelihood', label: 'הסתברות שיורית', type: 'select', options: RISK_LEVELS, scale: 5, scaleLabels: ['נמוך מאוד', 'נמוך', 'בינוני', 'גבוה', 'קריטי'] },
+      { key: 'residual_impact', label: 'השפעה שיורית', type: 'select', options: RISK_LEVELS, scale: 5, scaleLabels: ['נמוך מאוד', 'נמוך', 'בינוני', 'גבוה', 'קריטי'] },
+      { key: 'residual_score', label: 'ציון שיורי', type: 'number', list: true, derive: residualScore },
+      { key: 'residual_band', label: 'רמה שיורית', type: 'select', options: RISK_BANDS.map(({ value, label, tone }) => ({ value, label, tone })), derive: residualBand },
+      { key: 'treatment_due', label: 'יעד לטיפול', type: 'date', list: true },
+      // A risk to one delivery, not to the company — so it follows that
+      // project, and shows up on it.
+      { key: 'project_id', label: 'פרויקט', type: 'relation', entity: 'Project', labelField: 'client_name' },
       { key: 'status', label: 'סטטוס', type: 'select', options: [
         { value: 'open', label: 'פתוח', tone: 'warning' },
         { value: 'monitoring', label: 'במעקב', tone: 'info' },
