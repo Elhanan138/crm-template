@@ -77,6 +77,27 @@ export function supabaseSchemaSql(prefix = '') {
       .map((f) => `  ${snake(f.key)} ${SQL_TYPES[f.type] || 'text'}${f.required ? ' not null' : ''}`)
       .join(',\n');
 
+    // The write policy is DERIVED from the columns the schema declares, not
+    // assumed. Every table used to get `using (owner_email = ...)`, including
+    // the two schemas that have no owner at all — `products` and `automations`.
+    // Postgres rejects a policy on a column that does not exist, so the script
+    // a user was told to paste into the SQL editor died partway through and
+    // left half a database behind.
+    //
+    // A catalogue and a rule engine are shared data, so there is nothing to
+    // own: they take an authenticated-write policy instead.
+    const owned = schema.fields.some((f) => f.key === 'owner_email');
+    const writePolicy = owned
+      ? [
+        `create policy "${table}_write" on ${table} for all to authenticated`,
+        `  using (owner_email = auth.jwt() ->> 'email')`,
+        `  with check (owner_email = auth.jwt() ->> 'email');`,
+      ]
+      : [
+        `-- Shared data: ${schema.entity} declares no owner.`,
+        `create policy "${table}_write" on ${table} for all to authenticated using (true) with check (true);`,
+      ];
+
     return [
       `create table if not exists ${table} (`,
       '  id uuid primary key default gen_random_uuid(),',
@@ -87,9 +108,7 @@ export function supabaseSchemaSql(prefix = '') {
       ');',
       `alter table ${table} enable row level security;`,
       `create policy "${table}_read" on ${table} for select to authenticated using (true);`,
-      `create policy "${table}_write" on ${table} for all to authenticated`,
-      `  using (owner_email = auth.jwt() ->> 'email')`,
-      `  with check (owner_email = auth.jwt() ->> 'email');`,
+      ...writePolicy,
     ].join('\n');
   });
 
@@ -112,6 +131,18 @@ export function supabaseSchemaSql(prefix = '') {
   return [
     '-- Generated from the module manifest. Re-generate after adding a module.',
     '-- Run in the Supabase SQL editor.',
+    '--',
+    '-- WHAT THIS COVERS: the schema-driven modules, plus the record trail and',
+    '-- the audit log. The delivery side — Project, Task, Proposal, Client and',
+    '-- the records hanging off a project — declares no schema, so there is',
+    '-- nothing here to generate a table from. Those entities still live in',
+    '-- local storage after you connect.',
+    '--',
+    '-- READ POLICY: every table is readable by any authenticated user. Row',
+    '-- visibility (`scope` in src/lib/crm/schemas.js) is applied in the app,',
+    '-- not here, so anyone holding the anon key and a login can read rows the',
+    '-- interface would not show them. Do not put data here that must be',
+    '-- withheld at the database.',
     '',
     ...blocks,
     '-- Cross-module tables: record trail and administration audit log.',

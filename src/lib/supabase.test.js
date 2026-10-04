@@ -77,4 +77,54 @@ describe('generated schema', () => {
   it('marks required fields as not null', () => {
     expect(sql).toMatch(/full_name text not null/);
   });
+
+  // Every table used to get `using (owner_email = ...)`, including the schemas
+  // that declare no owner. Postgres rejects a policy naming a column that does
+  // not exist, so the script died partway through and left half a database.
+  describe('the write policy only names columns the table has', () => {
+    const tableOf = (entity) => entity.replace(/([a-z0-9])([A-Z])/g, '$1_$2').toLowerCase();
+
+    it('never references owner_email on a table without it', () => {
+      for (const schema of Object.values(CRM_SCHEMAS)) {
+        if (schema.fields.some((f) => f.key === 'owner_email')) continue;
+        const table = tableOf(schema.entity);
+        const block = sql.split('\n\n').find((b) => b.includes(`create table if not exists ${table} (`));
+        expect(block, `no block for ${table}`).toBeTruthy();
+        expect(block, `${table} has no owner_email column`).not.toContain('owner_email');
+      }
+    });
+
+    it('still scopes writes by owner wherever an owner is declared', () => {
+      for (const schema of Object.values(CRM_SCHEMAS)) {
+        if (!schema.fields.some((f) => f.key === 'owner_email')) continue;
+        const table = tableOf(schema.entity);
+        expect(sql, table).toContain(`create policy "${table}_write" on ${table} for all to authenticated\n  using (owner_email = auth.jwt() ->> 'email')`);
+      }
+    });
+
+    it('gives every table exactly one write policy', () => {
+      for (const table of expectedTables()) {
+        const policies = sql.match(new RegExp(`create policy "${table}_(write|append)"`, 'g')) || [];
+        expect(policies, table).toHaveLength(1);
+      }
+    });
+  });
+
+  // The generated SQL is what a person pastes into a production database. It
+  // has to say what it does not do, or they will assume it does.
+  describe('the SQL states its own limits', () => {
+    it('names the entities it cannot generate a table for', () => {
+      for (const entity of ['Project', 'Task', 'Proposal', 'Client']) {
+        expect(sql, entity).toContain(entity);
+        expect(expectedTables()).not.toContain(tableNameOf(entity));
+      }
+    });
+
+    it('warns that row visibility is not enforced at the database', () => {
+      expect(sql).toContain('READ POLICY');
+      expect(sql).toMatch(/scope/);
+    });
+  });
 });
+
+const tableNameOf = (entity) => entity.replace(/([a-z0-9])([A-Z])/g, '$1_$2').toLowerCase();
