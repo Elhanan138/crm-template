@@ -18,8 +18,15 @@
 const STATE_COLLECTION = 'AutomationState';
 const DAY = 24 * 60 * 60 * 1000;
 
+// A date FIELD holds a calendar day, not an instant. `new Date('2026-03-01')`
+// reads it as UTC midnight — the previous evening east of Greenwich — so a
+// "due date passed" rule fired a day early and a reminder for "3 days before"
+// arrived on the 4th. A bare day is parsed as a local day, as everywhere else.
+const DATE_ONLY = /^(\d{4})-(\d{2})-(\d{2})$/;
 const asDate = (value) => {
   if (!value) return null;
+  const day = typeof value === 'string' && value.match(DATE_ONLY);
+  if (day) return new Date(Number(day[1]), Number(day[2]) - 1, Number(day[3]));
   const d = new Date(value);
   return Number.isNaN(d.getTime()) ? null : d;
 };
@@ -32,7 +39,10 @@ const text = (value) => String(value ?? '').trim().toLowerCase();
 export function conditionHolds(record, condition) {
   const actual = record?.[condition.field];
   const expected = condition.value;
-  switch (condition.operator) {
+  // The builder wrote `op` and this read `operator`, so every condition built
+  // in the interface evaluated to false and any rule with a condition never
+  // fired. Rules already saved with `op` are read as they are.
+  switch (condition.operator ?? condition.op) {
     case 'eq': return text(actual) === text(expected);
     case 'neq': return text(actual) !== text(expected);
     case 'gt': return Number(actual) > Number(expected);
@@ -107,6 +117,20 @@ export function matchingRecords(rule, records, now, since, fired) {
     if (!(rule.conditions || []).every((c) => conditionHolds(record, c))) return false;
     return !fired.has(fireKey(rule, record, now));
   });
+}
+
+/**
+ * Which records a rule WOULD act on right now — without acting.
+ *
+ * A dry run: it looks at every record (not only those that moved since the
+ * last pass) and ignores the fire log, because the question being asked is
+ * "is this rule written right", not "what is left to do". Nothing is written.
+ */
+export function previewRule(rule, records, now = new Date()) {
+  if (!rule?.subject) return [];
+  return (records || []).filter((record) =>
+    eventFires(record, rule, now, null) &&
+    (rule.conditions || []).every((c) => conditionHolds(record, c)));
 }
 
 /**
