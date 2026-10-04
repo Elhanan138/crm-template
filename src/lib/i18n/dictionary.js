@@ -593,6 +593,17 @@ export const EN = {
   'חובה בהזמנה של ₪5,000 ומעלה לפני שהיא מאושרת, מוזמנת או מתקבלת.': 'Required on an order of ₪5,000 or more before it is approved, ordered or received.',
   'נדרש אישור לפני ההזמנה — סכום מעל סף האישור': 'Sign-off required — the amount is over the approval threshold',
 
+  // ── Notes ─────────────────────────────────────────────────────────────────
+  'עמוד חדש מתבנית': 'New page from a template',
+  'ייצוא ל-Markdown': 'Export to Markdown',
+  'השחזור מהארכיון נכשל': 'Restoring from the archive failed',
+  'בחר עמוד מהרשימה, או התחל מתבנית': 'Pick a page from the list, or start from a template',
+  'התחל מתבנית': 'Start from a template',
+  'סיכום פגישה': 'Meeting summary',
+  'פגישת התנעה': 'Kick-off meeting',
+  'רטרוספקטיבה': 'Retrospective',
+  'שיחת לקוח': 'Customer call',
+
   // ── Messages and documents from a record ──────────────────────────────────
   'הזמנה לשיחת סינון': 'Invite to a screening call',
   'הזמנה לראיון': 'Invite to an interview',

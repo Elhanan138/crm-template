@@ -8,11 +8,16 @@ import { Input } from '@/components/ui/input';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import DeleteDialog from '@/components/shared/DeleteDialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
-import { Plus, Menu, Loader2, Check, AlertCircle, Archive } from 'lucide-react';
+import { Plus, Menu, Loader2, Check, AlertCircle, Archive, LayoutTemplate, FileDown } from 'lucide-react';
+import {
+ DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { useIsMobile } from '@/hooks/use-mobile';
 import CardSkeleton from '@/components/shared/CardSkeleton';
 import EmptyState from '@/components/shared/EmptyState';
-import { EMPTY_DOC } from '@/lib/notionDoc';
+import { EMPTY_DOC, docToMarkdown, docToPlainText } from '@/lib/notionDoc';
+import { NOTE_TEMPLATES } from '@/lib/noteTemplates';
+import { useI18n } from '@/lib/i18n';
 import { reorderPages } from '@/lib/pageTree';
 import PageList from './notion/PageList';
 
@@ -22,7 +27,34 @@ const EMOJIS = ['📄', '📝', '📋', '📌', '📎', '🔖', '💡', '🎯', 
 
 const SAVE_DEBOUNCE = 800;
 
+/** New page from a template, and the active page out as Markdown. */
+function NoteActions({ onTemplate, onExport }) {
+ const { t, dir } = useI18n();
+ return (
+  <div className="flex items-center gap-1 flex-shrink-0">
+   <DropdownMenu>
+    <DropdownMenuTrigger asChild>
+     <Button variant="ghost" size="icon" className="h-8 w-8" aria-label={t('עמוד חדש מתבנית')} title={t('עמוד חדש מתבנית')}>
+      <LayoutTemplate className="w-4 h-4" />
+     </Button>
+    </DropdownMenuTrigger>
+    <DropdownMenuContent align="end" dir={dir}>
+     {NOTE_TEMPLATES.map((tpl) => (
+      <DropdownMenuItem key={tpl.id} onClick={() => onTemplate(tpl)}>
+       <span className="me-2">{tpl.icon}</span>{t(tpl.label)}
+      </DropdownMenuItem>
+     ))}
+    </DropdownMenuContent>
+   </DropdownMenu>
+   <Button variant="ghost" size="icon" className="h-8 w-8" aria-label={t('ייצוא ל-Markdown')} title={t('ייצוא ל-Markdown')} onClick={onExport}>
+    <FileDown className="w-4 h-4" />
+   </Button>
+  </div>
+ );
+}
+
 export default function NotionTab({ projectId, project }) {
+ const { t } = useI18n();
  const queryClient = useQueryClient();
  const isMobile = useIsMobile();
  const [searchParams, setSearchParams] = useSearchParams();
@@ -91,13 +123,17 @@ export default function NotionTab({ projectId, project }) {
 
  const archiveMutation = useMutation({
   mutationFn: (id) => api.entities.ProjectPage.update(id, { is_archived: true }),
-  onSuccess: () => {
+  // The id is the mutation's own variable, so the undo can use it. The button
+  // used to say "undo" and do nothing at all.
+  onSuccess: (_r, id) => {
    queryClient.invalidateQueries({ queryKey: ['projectPages', projectId || 'global'] });
    toast.success('העמוד הועבר לארכיון', {
     action: {
      label: 'בטל',
      onClick: () => {
-      // Undo is handled by the caller since we don't have the id here
+      api.entities.ProjectPage.update(id, { is_archived: false })
+       .then(() => queryClient.invalidateQueries({ queryKey: ['projectPages', projectId || 'global'] }))
+       .catch(() => toast.error(t('השחזור מהארכיון נכשל')));
      },
     },
    });
@@ -157,6 +193,30 @@ export default function NotionTab({ projectId, project }) {
    parent_page_id: parentPageId,
    order: pages.length,
   });
+ };
+
+ // A page that starts from an agreed structure — the same headings, in the
+ // same order, every time — rather than from a blank sheet.
+ const handleNewFromTemplate = (template) => {
+  createMutation.mutate({
+   title: t(template.label),
+   icon: template.icon,
+   content_json: template.doc,
+   content_text: docToPlainText(template.doc),
+   parent_page_id: null,
+   order: pages.length,
+  });
+ };
+
+ // Out as Markdown — what every wiki, mail client and notes app accepts.
+ const handleExport = (page) => {
+  const markdown = docToMarkdown(page.content_json || EMPTY_DOC, page.title || '');
+  const url = URL.createObjectURL(new Blob([markdown], { type: 'text/markdown;charset=utf-8' }));
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = `${(page.title || 'note').replace(/[\\/:*?"<>|]+/g, '-').trim() || 'note'}.md`;
+  link.click();
+  URL.revokeObjectURL(url);
  };
 
  const handleNewSection = () => {
@@ -313,6 +373,7 @@ export default function NotionTab({ projectId, project }) {
        {saveState === 'saving' && <span className="text-xs text-muted-foreground hidden sm:inline">שומר...</span>}
        {saveState === 'saved' && <span className="text-xs text-muted-foreground hidden sm:inline">נשמר</span>}
        {saveState === 'error' && <span className="text-xs text-destructive hidden sm:inline">שגיאת שמירה</span>}
+       <NoteActions onTemplate={handleNewFromTemplate} onExport={() => handleExport(activePage)} />
       </div>
 
       {/* Editor */}
@@ -321,8 +382,15 @@ export default function NotionTab({ projectId, project }) {
       </React.Suspense>
      </>
     ) : (
-     <div className="flex-1 flex items-center justify-center">
-      <p className="text-sm text-muted-foreground">בחר עמוד מהרשימה</p>
+     <div className="flex-1 flex flex-col items-center justify-center gap-3 py-10">
+      <p className="text-sm text-muted-foreground">{pages.length ? t('בחר עמוד מהרשימה, או התחל מתבנית') : t('התחל מתבנית')}</p>
+      <div className="flex flex-wrap justify-center gap-2">
+       {NOTE_TEMPLATES.map((tpl) => (
+        <Button key={tpl.id} variant="outline" size="sm" className="rounded-full gap-1.5" onClick={() => handleNewFromTemplate(tpl)}>
+         <span>{tpl.icon}</span> {t(tpl.label)}
+        </Button>
+       ))}
+      </div>
      </div>
     )}
    </div>
