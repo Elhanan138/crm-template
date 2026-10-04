@@ -389,7 +389,7 @@ function MemberEditDrawer({ member, members = [], onClose, onDelete }) {
      <Label className="text-xs font-medium text-muted-foreground">{t("סוג הרשאה")}</Label>
      <div className="grid grid-cols-1 gap-2">
       <button type="button"onClick={handleSelectAdmin}
-       className={`flex items-center gap-2.5 px-3 py-3 rounded-lg border text-sm font-medium transition-all text-right ${isAdmin ? 'bg-accent text-accent-foreground' : 'bg-card border-border text-muted-foreground hover:border-primary/20'}`}>
+       className={`flex items-center gap-2.5 px-3 py-3 rounded-lg border text-sm font-medium transition-all text-right ${isAdmin ? 'bg-accent text-accent-foreground' : 'bg-card border-border text-muted-foreground hover:border-primary/30'}`}>
        <ShieldCheck className="w-4 h-4 flex-shrink-0"/>
        <div>
         <p className="font-semibold">{t("אדמין")}</p>
@@ -409,7 +409,7 @@ function MemberEditDrawer({ member, members = [], onClose, onDelete }) {
        </span>
       ) : (
        <button type="button"onClick={() => setIsAdmin(false)}
-        className={`flex items-center gap-2.5 px-3 py-3 rounded-lg border text-sm font-medium transition-all text-right ${!isAdmin ? 'bg-accent text-accent-foreground' : 'bg-card border-border text-muted-foreground hover:border-primary/20'}`}>
+        className={`flex items-center gap-2.5 px-3 py-3 rounded-lg border text-sm font-medium transition-all text-right ${!isAdmin ? 'bg-accent text-accent-foreground' : 'bg-card border-border text-muted-foreground hover:border-primary/30'}`}>
         <CubeIcon className="w-4 h-4 flex-shrink-0"/>
         <div>
          <p className="font-semibold">{t("הרשאות פר פרויקט")}</p>

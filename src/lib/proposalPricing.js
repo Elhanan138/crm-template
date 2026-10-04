@@ -2,32 +2,40 @@ import { APP_IDENTITY } from '@/lib/appIdentity';
 // Proposal pricing calculation engine.
 // Single source of truth for all proposal price calculations.
 
-export const COMPLEXITY_MULTIPLIERS = {
-  basic: 1.0,
-  medium: 1.25,
-  advanced: 1.5,
-  enterprise: 2.0,
-};
+// A status is a value, a Hebrew label and what it MEANS — the same three-part
+// shape every schema in src/lib/crm uses, so a proposal status renders through
+// the one StatusBadge and the one tone→classes map in src/lib/tones.js.
+//
+// It used to be two parallel objects, one of them holding raw palette classes
+// (`bg-blue-100`): a colour the design system bans, in the one file the lint
+// rule did not look at.
+export const PROPOSAL_STATUSES = [
+  { value: 'draft', label: 'טיוטה', tone: 'muted' },
+  { value: 'sent', label: 'נשלחה', tone: 'info' },
+  { value: 'approved', label: 'אושרה', tone: 'success' },
+  { value: 'rejected', label: 'נדחתה', tone: 'destructive' },
+];
 
-export const COMPLEXITY_LABELS = {
-  basic: 'בסיסי (x1.0)',
-  medium: 'בינוני (x1.25)',
-  advanced: 'מתקדם (x1.5)',
-  enterprise: 'ארגוני (x2.0)',
-};
+export const proposalStatusMeta = (value) =>
+  PROPOSAL_STATUSES.find((s) => s.value === value) || PROPOSAL_STATUSES[0];
 
-export const STATUS_LABELS = {
-  draft: 'טיוטה',
-  sent: 'נשלחה',
-  approved: 'אושרה',
-  rejected: 'נדחתה',
-};
+// Complexity was a label map and a multiplier map keyed by the same four ids —
+// two lists that could drift. The multiplier is the definition; the label is
+// derived from it, so a new tier cannot arrive priced but unnamed.
+export const PROPOSAL_COMPLEXITIES = [
+  { value: 'basic', label: 'בסיסי', multiplier: 1.0 },
+  { value: 'medium', label: 'בינוני', multiplier: 1.25 },
+  { value: 'advanced', label: 'מתקדם', multiplier: 1.5 },
+  { value: 'enterprise', label: 'ארגוני', multiplier: 2.0 },
+];
 
-export const STATUS_COLORS = {
-  draft: 'bg-muted text-muted-foreground',
-  sent: 'bg-blue-100 text-blue-700',
-  approved: 'bg-success-muted text-success',
-  rejected: 'bg-red-100 text-red-700',
+export const complexityMeta = (value) =>
+  PROPOSAL_COMPLEXITIES.find((c) => c.value === value) || PROPOSAL_COMPLEXITIES[0];
+
+/** The label a picker shows: the tier and what it does to the rate. */
+export const complexityLabel = (value) => {
+  const meta = complexityMeta(value);
+  return `${meta.label} (x${meta.multiplier})`;
 };
 
 export const VAT_RATE = 18;
@@ -36,8 +44,7 @@ export const VAT_RATE = 18;
  * Compute the adjusted hourly rate for a given complexity.
  */
 export function getAdjustedRate(baseHourlyRate, complexity) {
-  const multiplier = COMPLEXITY_MULTIPLIERS[complexity] || 1.0;
-  return Math.round((baseHourlyRate || 0) * multiplier);
+  return Math.round((baseHourlyRate || 0) * complexityMeta(complexity).multiplier);
 }
 
 /**

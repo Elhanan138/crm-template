@@ -264,7 +264,7 @@ export default function RecordTrail({ schema, entity, record, activeTab, onCount
 
       {tab === 'files' && (
         <div className="space-y-3">
-          <label className="inline-flex items-center gap-1.5 rounded-full border border-dashed border-border px-3 h-8 text-xs text-muted-foreground hover:text-foreground hover:border-primary/40 cursor-pointer transition-colors">
+          <label className="inline-flex items-center gap-1.5 rounded-full border border-dashed border-border px-3 h-8 text-xs text-muted-foreground hover:text-foreground hover:border-primary/30 cursor-pointer transition-colors">
             {uploading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Upload className="w-3.5 h-3.5" />}
             {t('צירוף קובץ')}
             <input type="file" className="hidden" onChange={onPickFile} disabled={uploading} />

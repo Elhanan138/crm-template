@@ -578,7 +578,7 @@ export default function CrmModulePage({
                   <div
                     key={record.id}
                     className={`flex items-start gap-2 border rounded-xl p-3.5 transition-colors ${
-                      selected.has(record.id) ? 'border-primary/40 bg-accent' : 'border-border bg-card'
+                      selected.has(record.id) ? 'border-primary/30 bg-accent' : 'border-border bg-card'
                     }`}
                   >
                     <Checkbox

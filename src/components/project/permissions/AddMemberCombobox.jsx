@@ -49,7 +49,7 @@ export default function AddMemberCombobox({ members, excludedEmails, onAdd, onAd
           type="button"
           role="combobox"
           aria-expanded={open}
-          className="w-full flex items-center gap-2 h-10 px-3 rounded-lg border border-input bg-card text-sm text-muted-foreground hover:border-primary/40 transition-colors text-start"
+          className="w-full flex items-center gap-2 h-10 px-3 rounded-lg border border-input bg-card text-sm text-muted-foreground hover:border-primary/30 transition-colors text-start"
         >
           <UserPlus className="w-4 h-4 text-primary flex-shrink-0" />
           <span className="flex-1 truncate">הוסף חבר צוות...</span>

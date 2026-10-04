@@ -48,7 +48,7 @@ export default function TaskKanban({ tasks, projectMap, onStatusChange, onEdit, 
                {...prov.draggableProps}
                {...prov.dragHandleProps}
                onClick={() => onEdit(task)}
-               className={`bg-card rounded-lg border p-3 cursor-pointer transition-all duration-200 ${(task.status || 'in_progress') === 'done' ? 'opacity-60' : ''} ${snapshot.isDragging ? 'shadow-lg border-primary/40 rotate-2' : 'border-border hover:border-primary/30 hover:shadow-sm'}`}
+               className={`bg-card rounded-lg border p-3 cursor-pointer transition-all duration-200 ${(task.status || 'in_progress') === 'done' ? 'opacity-60' : ''} ${snapshot.isDragging ? 'shadow-lg border-primary/30 rotate-2' : 'border-border hover:border-primary/30 hover:shadow-sm'}`}
               >
                <div className="flex items-start gap-2">
                 <div className="mt-0.5">

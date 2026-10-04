@@ -28,8 +28,8 @@ export default function InlineEditTrigger({
       onClick={(event) => { event.stopPropagation(); onEdit(); }}
       className={`inline-flex items-center gap-1.5 max-w-full text-start align-middle transition-all duration-150
         ${round ? 'rounded-full' : 'rounded-md px-1 -mx-1'}
-        hover:ring-2 hover:ring-offset-1 hover:ring-primary/20 hover:bg-muted/50
-        focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40
+        hover:ring-2 hover:ring-offset-1 hover:ring-primary/30 hover:bg-muted/50
+        focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30
         active:scale-95 ${className}`}
     >
       {children}

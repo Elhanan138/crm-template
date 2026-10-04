@@ -99,7 +99,7 @@ export default function UserReports() {
   <div className="space-y-5">
    <button
     onClick={() => navigate('/reports')}
-    className="w-full flex items-center justify-between gap-3 bg-gradient-to-l from-primary/10 to-success/5 border border-primary/20 rounded-lg p-4 hover:from-primary/15 hover:to-success/10 transition-colors group"
+    className="w-full flex items-center justify-between gap-3 bg-accent border border-primary/30 rounded-lg p-4 hover:bg-muted transition-colors group"
    >
     <div className="flex items-center gap-3">
      <div className="w-10 h-10 rounded-lg bg-accent flex items-center justify-center flex-shrink-0">

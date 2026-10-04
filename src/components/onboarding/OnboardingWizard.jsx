@@ -163,7 +163,7 @@ export default function OnboardingWizard({ onDone }) {
                 key={s.id}
                 aria-current={i === step ? 'step' : undefined}
                 className={`h-1.5 rounded-full transition-all ${
-                  i === step ? 'w-8 bg-primary' : i < step ? 'w-4 bg-primary/40' : 'w-4 bg-muted'
+                  i === step ? 'w-8 bg-primary' : i < step ? 'w-4 bg-primary' : 'w-4 bg-muted'
                 }`}
               />
             ))}
@@ -202,7 +202,7 @@ export default function OnboardingWizard({ onDone }) {
                       {isCustom && logoUrl && (
                         <img src={logoUrl} alt="" className="w-10 h-10 rounded-lg object-contain border border-border" />
                       )}
-                      <label className="inline-flex items-center gap-1.5 rounded-full border border-dashed border-border px-3 h-9 text-sm text-muted-foreground hover:text-foreground hover:border-primary/40 cursor-pointer transition-colors">
+                      <label className="inline-flex items-center gap-1.5 rounded-full border border-dashed border-border px-3 h-9 text-sm text-muted-foreground hover:text-foreground hover:border-primary/30 cursor-pointer transition-colors">
                         {uploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
                         {t('העלאת לוגו')}
                         <input type="file" accept="image/*" className="hidden" onChange={uploadLogo} disabled={uploading} />
@@ -217,7 +217,7 @@ export default function OnboardingWizard({ onDone }) {
                           type="button"
                           onClick={() => setPreset(p)}
                           className={`flex items-center gap-2 rounded-lg border px-2.5 py-2 text-xs transition-colors ${
-                            preset?.id === p.id ? 'border-primary/40 bg-accent font-semibold' : 'border-border hover:border-primary/30'
+                            preset?.id === p.id ? 'border-primary/30 bg-accent font-semibold' : 'border-border hover:border-primary/30'
                           }`}
                         >
                           <span className="w-4 h-4 rounded-full flex-shrink-0" style={{ background: p.primary }} />
@@ -240,7 +240,7 @@ export default function OnboardingWizard({ onDone }) {
                         type="button"
                         onClick={() => setPackageId(p.id)}
                         className={`w-full text-start rounded-lg border px-3.5 py-3 transition-colors ${
-                          active ? 'border-primary/40 bg-accent' : 'border-border hover:border-primary/30'
+                          active ? 'border-primary/30 bg-accent' : 'border-border hover:border-primary/30'
                         }`}
                       >
                         <div className="flex items-center justify-between gap-2">
@@ -286,7 +286,7 @@ export default function OnboardingWizard({ onDone }) {
                         type="button"
                         onClick={() => setWantDemo(value)}
                         className={`rounded-lg border px-3 py-3 text-sm transition-colors ${
-                          wantDemo === value ? 'border-primary/40 bg-accent font-semibold' : 'border-border hover:border-primary/30'
+                          wantDemo === value ? 'border-primary/30 bg-accent font-semibold' : 'border-border hover:border-primary/30'
                         }`}
                       >
                         {value ? t('כן, עם דוגמה') : t('לא, מערכת ריקה')}

@@ -15,9 +15,10 @@ import EmptyState from '@/components/shared/EmptyState';
 import CardSkeleton from '@/components/shared/CardSkeleton';
 import HebrewDateInput from '@/components/shared/HebrewDateInput';
 import {
-  COMPLEXITY_LABELS, STATUS_LABELS, STATUS_COLORS, VAT_RATE,
+  PROPOSAL_STATUSES, PROPOSAL_COMPLEXITIES, proposalStatusMeta, complexityLabel, VAT_RATE,
   computePricing, generateProposalNumber,
 } from '@/lib/proposalPricing';
+import StatusBadge from '@/components/shared/StatusBadge';
 import DocumentLetterhead, { DocumentFooter, DocumentSheet } from '@/components/shared/DocumentLetterhead';
 
 function ProposalCard({ proposal, clientName, onEdit, onPrint, onPdf, pdfBusy }) {
@@ -28,9 +29,11 @@ function ProposalCard({ proposal, clientName, onEdit, onPrint, onPdf, pdfBusy })
           <h3 className="text-sm font-bold text-foreground truncate">{proposal.proposal_number || 'ללא מספר'}</h3>
           <p className="text-xs text-muted-foreground mt-0.5 truncate">{clientName || 'לקוח לא מוגדר'}</p>
         </div>
-        <span className={`text-[10px] font-semibold px-2 py-1 rounded-full ${STATUS_COLORS[proposal.status] || STATUS_COLORS.draft}`}>
-          {STATUS_LABELS[proposal.status] || proposal.status}
-        </span>
+        <StatusBadge
+          label={proposalStatusMeta(proposal.status).label}
+          tone={proposalStatusMeta(proposal.status).tone}
+          className="flex-shrink-0 text-[10px] px-2 py-0.5"
+        />
       </div>
       <div className="flex items-center justify-between">
         <div className="text-right">
@@ -131,8 +134,8 @@ function ProposalForm({ open, onOpenChange, proposal, clients, projects, existin
             <Select value={form.status} onValueChange={v => setField('status', v)}>
               <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>
-                {Object.entries(STATUS_LABELS).map(([k, v]) => (
-                  <SelectItem key={k} value={k}>{v}</SelectItem>
+                {PROPOSAL_STATUSES.map((s) => (
+                  <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -176,8 +179,8 @@ function ProposalForm({ open, onOpenChange, proposal, clients, projects, existin
             <Select value={form.complexity} onValueChange={v => setField('complexity', v)}>
               <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>
-                {Object.entries(COMPLEXITY_LABELS).map(([k, v]) => (
-                  <SelectItem key={k} value={k}>{v}</SelectItem>
+                {PROPOSAL_COMPLEXITIES.map((c) => (
+                  <SelectItem key={c.value} value={c.value}>{complexityLabel(c.value)}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -241,13 +244,13 @@ function ProposalForm({ open, onOpenChange, proposal, clients, projects, existin
             />
           </div>
           {pricing.discountAmount > 0 && (
-            <div className="flex justify-between text-red-600">
+            <div className="flex justify-between text-destructive">
               <span>הנחה</span>
               <span dir="ltr">-₪{pricing.discountAmount.toLocaleString()}</span>
             </div>
           )}
           <div className="flex justify-between">
-            <span className="text-muted-foreground">מע"ד ({form.vat_percent || VAT_RATE}%)</span>
+            <span className="text-muted-foreground">מע"מ ({form.vat_percent || VAT_RATE}%)</span>
             <span dir="ltr">₪{pricing.vatAmount.toLocaleString()}</span>
           </div>
           <div className="flex justify-between text-base font-bold pt-1.5 border-t border-border">
@@ -334,7 +337,7 @@ function ProposalDocument({ proposal, client, innerRef }) {
           {pricing.discountAmount > 0 && (
             <div className="flex justify-between text-doc-negative"><span>הנחה ({proposal.discount_percent}%)</span><span dir="ltr">-₪{pricing.discountAmount.toLocaleString()}</span></div>
           )}
-          <div className="flex justify-between"><span className="text-doc-muted">מע"ד ({proposal.vat_percent || VAT_RATE}%)</span><span dir="ltr">₪{pricing.vatAmount.toLocaleString()}</span></div>
+          <div className="flex justify-between"><span className="text-doc-muted">מע"מ ({proposal.vat_percent || VAT_RATE}%)</span><span dir="ltr">₪{pricing.vatAmount.toLocaleString()}</span></div>
           <div className="flex justify-between text-lg font-bold pt-2 border-t-2 border-doc-accent"><span>סה"כ לתשלום</span><span className="text-doc-accent" dir="ltr">₪{pricing.finalTotal.toLocaleString()}</span></div>
         </div>
 
@@ -513,8 +516,8 @@ export default function ProposalsView({ projectId }) {
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">כל הסטטוסים</SelectItem>
-            {Object.entries(STATUS_LABELS).map(([k, v]) => (
-              <SelectItem key={k} value={k}>{v}</SelectItem>
+            {PROPOSAL_STATUSES.map((s) => (
+              <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>
             ))}
           </SelectContent>
         </Select>

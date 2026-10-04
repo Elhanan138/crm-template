@@ -379,7 +379,7 @@ export default function GlobalSearch() {
         key={`${type}-${record.id}${isLeading ? '-leading' : ''}`}
         value={`${type}-${record.id}${isLeading ? '-leading' : ''}`}
         onSelect={() => handleSelect(type, record)}
-        className={`min-h-[44px] cursor-pointer gap-3 transition-colors ${isLeading ? 'bg-accent ring-1 ring-primary/20 rounded-lg' : ''}`}
+        className={`min-h-[44px] cursor-pointer gap-3 transition-colors ${isLeading ? 'bg-accent ring-1 ring-primary/30 rounded-lg' : ''}`}
       >
         <div className="w-8 h-8 rounded-lg bg-muted/60 flex items-center justify-center flex-shrink-0">
           <Icon className={`w-4 h-4 ${meta.color}`} />

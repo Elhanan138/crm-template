@@ -36,7 +36,7 @@ export default function TicketKanban({ tickets, teamMembers = [], onOpen, onUpda
                 {...provided.droppableProps}
                 className={cn(
                   'w-64 sm:w-72 flex-shrink-0 rounded-xl border p-2.5 transition-colors',
-                  snapshot.isDraggingOver ? 'border-brand/40 bg-accent/30' : 'border-border bg-muted/30'
+                  snapshot.isDraggingOver ? 'border-primary/30 bg-accent/30' : 'border-border bg-muted/30'
                 )}
               >
                 <div className="flex items-center gap-2 px-1 pb-2">

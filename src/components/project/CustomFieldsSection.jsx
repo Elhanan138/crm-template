@@ -130,7 +130,7 @@ function CustomFieldForm({ field, projectId, onClose }) {
         key={k}
         type="button"
         onClick={() => update('field_type', k)}
-        className={`flex items-center gap-2 px-3 py-2.5 rounded-lg border text-sm font-medium transition-all ${active ? 'bg-accent border-primary/40 text-primary' : 'bg-card border-border text-muted-foreground hover:border-primary/20'}`}
+        className={`flex items-center gap-2 px-3 py-2.5 rounded-lg border text-sm font-medium transition-all ${active ? 'bg-accent border-primary/30 text-primary' : 'bg-card border-border text-muted-foreground hover:border-primary/30'}`}
        >
         <Icon className="w-4 h-4 flex-shrink-0"/>
         {cfg.label}
@@ -339,7 +339,7 @@ export default function CustomFieldsSection({ projectId, canEdit = true, embedde
       );
      })}
      {canEdit && (
-      <button type="button"onClick={() => setDialog({ open: true, field: null })} className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full border border-dashed border-border text-muted-foreground hover:border-primary/40 hover:text-primary text-xs font-medium transition-colors">
+      <button type="button"onClick={() => setDialog({ open: true, field: null })} className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full border border-dashed border-border text-muted-foreground hover:border-primary/30 hover:text-primary text-xs font-medium transition-colors">
        <Plus className="w-3 h-3"/> הוסף שדה
       </button>
      )}

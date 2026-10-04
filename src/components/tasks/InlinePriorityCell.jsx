@@ -20,7 +20,7 @@ export default function InlinePriorityCell({ value, onChange }) {
             <button
               key={p}
               onClick={e => { e.stopPropagation(); onChange(p); setOpen(false); }}
-              className={`rounded-full transition-all ${(value || 'medium') === p ? 'ring-2 ring-primary/30' : 'hover:ring-2 hover:ring-primary/10'}`}
+              className={`rounded-full transition-all ${(value || 'medium') === p ? 'ring-2 ring-primary/30' : 'hover:ring-2 hover:ring-primary/30'}`}
             >
               <StatusBadge status={p} />
             </button>

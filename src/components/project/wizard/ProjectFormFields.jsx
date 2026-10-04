@@ -39,7 +39,7 @@ export default function ProjectFormFields({
               </button>
             </div>
           ) : (
-            <label className="w-10 h-10 rounded-lg border-2 border-dashed border-border flex items-center justify-center cursor-pointer hover:border-primary/40 hover:bg-muted/30 transition-colors flex-shrink-0">
+            <label className="w-10 h-10 rounded-lg border-2 border-dashed border-border flex items-center justify-center cursor-pointer hover:border-primary/30 hover:bg-muted/30 transition-colors flex-shrink-0">
               {uploadingImage
                 ? <Loader2 className="w-3.5 h-3.5 text-muted-foreground animate-spin" />
                 : <ImagePlus className="w-3.5 h-3.5 text-muted-foreground" />}

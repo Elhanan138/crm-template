@@ -121,7 +121,7 @@ export default function DashboardCustomizer({ open, onClose, widgets, order, hid
                     const active = (opt.limit || w.defaultLimit || 5) === n;
                     return (
                      <button key={n} onClick={() => setOption(w.id, 'limit', n)}
-                      className={`flex-1 py-1.5 rounded-lg text-xs font-semibold border transition-all ${active ? 'bg-primary text-primary-foreground border-primary' : 'bg-card text-muted-foreground border-border hover:border-primary/40'}`}>
+                      className={`flex-1 py-1.5 rounded-lg text-xs font-semibold border transition-all ${active ? 'bg-primary text-primary-foreground border-primary' : 'bg-card text-muted-foreground border-border hover:border-primary/30'}`}>
                       {n}
                      </button>
                     );

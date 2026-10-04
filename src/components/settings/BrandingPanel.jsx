@@ -236,7 +236,7 @@ export default function BrandingPanel() {
             onDrop={(e) => { e.preventDefault(); setDragging(false); ingestFile(e.dataTransfer.files?.[0]); }}
             onClick={() => fileRef.current?.click()}
             className={`w-20 h-20 flex-shrink-0 rounded-xl border-2 border-dashed flex items-center justify-center overflow-hidden cursor-pointer transition-colors ${
-              dragging ? 'border-primary bg-accent' : 'border-border bg-muted/30 hover:border-primary/40'
+              dragging ? 'border-primary bg-accent' : 'border-border bg-muted/30 hover:border-primary/30'
             }`}
           >
             {uploading
@@ -349,7 +349,7 @@ export default function BrandingPanel() {
                   aria-pressed={active}
                   onClick={() => { setPalette(preset.palette); setBrandColor(preset.primary); toast.success(`ערכת "${preset.label}" הוחלה`); }}
                   className={`flex items-center gap-2 px-2.5 py-1.5 rounded-lg border transition-colors ${
-                    active ? 'border-primary bg-accent' : 'border-border hover:border-primary/40'
+                    active ? 'border-primary bg-accent' : 'border-border hover:border-primary/30'
                   }`}
                 >
                   <span className="flex -space-x-1">

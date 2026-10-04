@@ -99,7 +99,7 @@ export default function SectionStepperNav({
         <button
          onClick={() => onSelect(section.key)}
          title={section.hint ? t(section.hint) : undefined}
-         className={`relative w-full flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 ${
+         className={`relative w-full flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 ${
           isActive
            ? 'bg-accent text-accent-foreground font-semibold'
            : 'text-muted-foreground hover:bg-muted/60 hover:text-foreground'
@@ -126,7 +126,7 @@ export default function SectionStepperNav({
              key={child.key}
              onClick={() => goToChild(section.key, child.key)}
              title={child.hint ? t(child.hint) : undefined}
-             className={`relative w-full flex items-center gap-2 rounded-lg px-3 py-1.5 text-[13px] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 ${
+             className={`relative w-full flex items-center gap-2 rounded-lg px-3 py-1.5 text-[13px] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 ${
               childActive
                ? 'bg-accent text-accent-foreground font-semibold'
                : 'text-muted-foreground hover:bg-muted/60 hover:text-foreground'

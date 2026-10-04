@@ -63,7 +63,7 @@ function MemberAccessRow({ member, projectId, hasAccess }) {
      className={`flex items-center gap-1 text-[11px] font-semibold px-2.5 py-1 rounded-full border transition-all flex-shrink-0 disabled:opacity-50 ${
       hasAccess
        ? 'bg-primary text-primary-foreground border-primary'
-       : 'bg-card text-muted-foreground border-border hover:border-primary/40'
+       : 'bg-card text-muted-foreground border-border hover:border-primary/30'
      }`}
     >
      <ShieldCheck className="w-3 h-3"/>
