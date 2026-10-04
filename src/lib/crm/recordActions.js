@@ -1,4 +1,5 @@
-import { ArrowLeftRight, FileSignature, Receipt, Repeat } from 'lucide-react';
+import { ArrowLeftRight, FileSignature, Receipt, Repeat, Mail, ClipboardSignature } from 'lucide-react';
+import { RECRUITING_TEMPLATES, mailtoFor } from '@/lib/crm/messageTemplates';
 import { ACTIVE_MODULE_IDS } from '@/lib/moduleRegistry';
 import { MODULES } from '@/lib/modules';
 
@@ -86,6 +87,34 @@ const ACTIONS = [
     available: (record) => !!record?.id && !!String(record.client_name || '').trim(),
     seed: (record) => ({ customer: record.client_name, amount: record.amount }),
   },
+  // A printable hand-over form for a piece of equipment: who received it,
+  // what it is, its serial number, and two signature lines. A VIEW of the
+  // record rather than a form in another module, so it carries a link and no
+  // seed.
+  {
+    from: 'assets',
+    requires: 'assets',
+    key: 'asset-handover',
+    label: 'טופס מסירת ציוד',
+    icon: ClipboardSignature,
+    hint: 'מסמך להדפסה או ל-PDF עם פרטי הנכס, המקבל ושורות חתימה',
+    available: (record) => !!record?.id,
+    link: (record) => `${MODULES.assets.navPath}?handover=${encodeURIComponent(record.id)}`,
+  },
+  // One action per stage that has a message. It opens the user's own mail
+  // client with the candidate addressed and the text filled in, so it needs
+  // no server — and offers nothing for a candidate with no email to send to.
+  ...RECRUITING_TEMPLATES.map((tpl) => ({
+    from: 'recruiting',
+    requires: 'recruiting',
+    key: `message-${tpl.key}`,
+    label: tpl.label,
+    icon: Mail,
+    hint: 'נפתח בתוכנת המייל שלך, ממוען וממולא',
+    external: true,
+    available: (record) => !!record?.id && record.stage === tpl.stage && !!String(record.email || '').trim(),
+    link: (record) => mailtoFor(tpl, record),
+  })),
 ];
 
 const isPresent = (value) => value !== undefined && value !== null && String(value) !== '';
@@ -125,7 +154,7 @@ export const recordActionsFor = (moduleId, record) =>
       ACTIVE_MODULE_IDS.includes(a.requires) &&
       !!MODULES[a.requires]?.navPath &&
       (!a.available || a.available(record))
-  ).map((a) => ({ ...a, to: (r = record) => actionPath(a, r) }));
+  ).map((a) => ({ ...a, to: (r = record) => (a.link ? a.link(r) : actionPath(a, r)) }));
 
 /**
  * The hand-offs that lead INTO a module — what an empty one is usually fed by.
@@ -140,6 +169,10 @@ export const inboundActionsFor = (moduleId) =>
   ACTIONS.filter(
     (a) =>
       a.requires === moduleId &&
+      // Only hand-offs that CREATE a record here. A view (a hand-over form)
+      // or a mail link creates nothing, and a module does not feed itself.
+      a.from !== moduleId &&
+      !a.link &&
       ACTIVE_MODULE_IDS.includes(a.from) &&
       !!MODULES[a.from]?.navPath
   ).map((a) => ({

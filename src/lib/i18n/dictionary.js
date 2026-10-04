@@ -593,6 +593,16 @@ export const EN = {
   'חובה בהזמנה של ₪5,000 ומעלה לפני שהיא מאושרת, מוזמנת או מתקבלת.': 'Required on an order of ₪5,000 or more before it is approved, ordered or received.',
   'נדרש אישור לפני ההזמנה — סכום מעל סף האישור': 'Sign-off required — the amount is over the approval threshold',
 
+  // ── Messages and documents from a record ──────────────────────────────────
+  'הזמנה לשיחת סינון': 'Invite to a screening call',
+  'הזמנה לראיון': 'Invite to an interview',
+  'הצעת עבודה': 'Job offer',
+  'עדכון על החלטה': 'Decision update',
+  'נפתח בתוכנת המייל שלך, ממוען וממולא': 'Opens in your mail client, addressed and filled in',
+  'טופס מסירת ציוד': 'Equipment hand-over form',
+  'מסמך להדפסה או ל-PDF עם פרטי הנכס, המקבל ושורות חתימה': 'A printable or PDF document with the asset, the recipient and signature lines',
+  'הטופס יוצא ל-PDF': 'Form exported to PDF',
+
   // ── Contact cadence ───────────────────────────────────────────────────────
   'קשר אחרון': 'Last contact',
   'ימים מאז קשר': 'Days since contact',

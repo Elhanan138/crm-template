@@ -141,10 +141,19 @@ export default function CrmRecordSheet({
               {handOffs.map((action) => (
                 <div key={action.key} className="space-y-1">
                   <Button asChild variant="outline" size="sm" className="rounded-full h-8 px-3.5 text-xs gap-1.5">
-                    <Link to={action.to(record)}>
-                      <action.icon className="w-3.5 h-3.5 flex-shrink-0" />
-                      {t(action.label)}
-                    </Link>
+                    {/* A mail link leaves the app; a router Link would try to
+                        route to it. */}
+                    {action.external ? (
+                      <a href={action.to(record)}>
+                        <action.icon className="w-3.5 h-3.5 flex-shrink-0" />
+                        {t(action.label)}
+                      </a>
+                    ) : (
+                      <Link to={action.to(record)}>
+                        <action.icon className="w-3.5 h-3.5 flex-shrink-0" />
+                        {t(action.label)}
+                      </Link>
+                    )}
                   </Button>
                   {action.hint && <p className="text-[10px] text-muted-foreground">{t(action.hint)}</p>}
                 </div>
