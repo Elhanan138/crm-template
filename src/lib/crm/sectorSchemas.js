@@ -4,8 +4,8 @@ import {
 } from 'lucide-react';
 import {
   monthlyRevenue, stockValue, stockState, STOCK_STATES, riskScore, riskBand,
-  RISK_BANDS, slaState, SLA_STATES, warrantyState, WARRANTY_STATES,
-  yearsSince, daysUntil, ageInStage,
+  RISK_BANDS, residualScore, residualBand, slaState, SLA_STATES, warrantyState, WARRANTY_STATES,
+  yearsSince, daysUntil, ageInStage, availability, AVAILABILITY,
 } from '@/lib/crm/derived';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -131,6 +131,11 @@ export const SECTOR_SCHEMAS = {
       { key: 'tenure_years', label: 'ותק (שנים)', type: 'number', list: true, derive: (r) => yearsSince(r.start_date) },
       { key: 'end_date', label: 'תאריך סיום', type: 'date' },
       { key: 'work_percent', label: 'היקף משרה %', type: 'percent' },
+      // Leave, as dates. The status field said "on leave" only if somebody
+      // remembered to set it and remembered to set it back.
+      { key: 'leave_from', label: 'חופשה מ-', type: 'date' },
+      { key: 'leave_until', label: 'חופשה עד', type: 'date' },
+      { key: 'availability', label: 'זמינות', type: 'select', options: AVAILABILITY, list: true, derive: availability },
       { key: 'email', label: 'אימייל', type: 'email' },
       { key: 'phone', label: 'טלפון', type: 'phone' },
       { key: 'location', label: 'מיקום', type: 'text' },
@@ -252,6 +257,15 @@ export const SECTOR_SCHEMAS = {
     titleField: 'number',
     defaultSort: '-order_date',
     searchFields: ['number', 'supplier', 'description'],
+    // At or above the threshold, an order cannot be ordered or received until
+    // somebody has signed it off. Enforced in the save every write passes
+    // through — see src/lib/crm/approvals.js.
+    approval: {
+      amountField: 'amount',
+      approverField: 'approved_by',
+      threshold: 5000,
+      statuses: ['approved', 'ordered', 'received'],
+    },
     fields: [
       { key: 'number', label: 'מספר הזמנה', type: 'text', required: true, list: true },
       { key: 'supplier', label: 'ספק', type: 'text', required: true, list: true },
@@ -266,7 +280,7 @@ export const SECTOR_SCHEMAS = {
       { key: 'expected_date', label: 'אספקה צפויה', type: 'date', list: true },
       { key: 'delivery_days_left', label: 'ימים לאספקה', type: 'number', list: true, derive: (r) => (r.received_date || ['received', 'cancelled'].includes(r.status) ? null : daysUntil(r.expected_date)) },
       { key: 'received_date', label: 'תאריך קבלה', type: 'date' },
-      { key: 'approved_by', label: 'אושר על ידי', type: 'person', by: 'name' },
+      { key: 'approved_by', label: 'אושר על ידי', type: 'person', by: 'name', help: 'חובה בהזמנה של ₪5,000 ומעלה לפני שהיא מאושרת, מוזמנת או מתקבלת.' },
       { key: 'cost_center', label: 'מרכז עלות', type: 'text' },
       OWNER,
       { key: 'description', label: 'פירוט', type: 'textarea' },
@@ -407,6 +421,16 @@ export const SECTOR_SCHEMAS = {
       { key: 'risk_score', label: 'ציון סיכון', type: 'number', list: true, derive: riskScore },
       { key: 'risk_band', label: 'רמת סיכון', type: 'select', options: RISK_BANDS.map(({ value, label, tone }) => ({ value, label, tone })), list: true, derive: riskBand },
       { key: 'response', label: 'אסטרטגיה', type: 'select', options: RISK_RESPONSES, list: true },
+      // After the treatment. Without it a register shows how bad things were
+      // and never whether what was done about them worked.
+      { key: 'residual_likelihood', label: 'הסתברות שיורית', type: 'select', options: RISK_LEVELS, scale: 5, scaleLabels: ['נמוך מאוד', 'נמוך', 'בינוני', 'גבוה', 'קריטי'] },
+      { key: 'residual_impact', label: 'השפעה שיורית', type: 'select', options: RISK_LEVELS, scale: 5, scaleLabels: ['נמוך מאוד', 'נמוך', 'בינוני', 'גבוה', 'קריטי'] },
+      { key: 'residual_score', label: 'ציון שיורי', type: 'number', list: true, derive: residualScore },
+      { key: 'residual_band', label: 'רמה שיורית', type: 'select', options: RISK_BANDS.map(({ value, label, tone }) => ({ value, label, tone })), derive: residualBand },
+      { key: 'treatment_due', label: 'יעד לטיפול', type: 'date', list: true },
+      // A risk to one delivery, not to the company — so it follows that
+      // project, and shows up on it.
+      { key: 'project_id', label: 'פרויקט', type: 'relation', entity: 'Project', labelField: 'client_name' },
       { key: 'status', label: 'סטטוס', type: 'select', options: [
         { value: 'open', label: 'פתוח', tone: 'warning' },
         { value: 'monitoring', label: 'במעקב', tone: 'info' },

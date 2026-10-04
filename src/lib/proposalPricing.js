@@ -2,32 +2,40 @@ import { APP_IDENTITY } from '@/lib/appIdentity';
 // Proposal pricing calculation engine.
 // Single source of truth for all proposal price calculations.
 
-export const COMPLEXITY_MULTIPLIERS = {
-  basic: 1.0,
-  medium: 1.25,
-  advanced: 1.5,
-  enterprise: 2.0,
-};
+// A status is a value, a Hebrew label and what it MEANS — the same three-part
+// shape every schema in src/lib/crm uses, so a proposal status renders through
+// the one StatusBadge and the one tone→classes map in src/lib/tones.js.
+//
+// It used to be two parallel objects, one of them holding raw palette classes
+// (`bg-blue-100`): a colour the design system bans, in the one file the lint
+// rule did not look at.
+export const PROPOSAL_STATUSES = [
+  { value: 'draft', label: 'טיוטה', tone: 'muted' },
+  { value: 'sent', label: 'נשלחה', tone: 'info' },
+  { value: 'approved', label: 'אושרה', tone: 'success' },
+  { value: 'rejected', label: 'נדחתה', tone: 'destructive' },
+];
 
-export const COMPLEXITY_LABELS = {
-  basic: 'בסיסי (x1.0)',
-  medium: 'בינוני (x1.25)',
-  advanced: 'מתקדם (x1.5)',
-  enterprise: 'ארגוני (x2.0)',
-};
+export const proposalStatusMeta = (value) =>
+  PROPOSAL_STATUSES.find((s) => s.value === value) || PROPOSAL_STATUSES[0];
 
-export const STATUS_LABELS = {
-  draft: 'טיוטה',
-  sent: 'נשלחה',
-  approved: 'אושרה',
-  rejected: 'נדחתה',
-};
+// Complexity was a label map and a multiplier map keyed by the same four ids —
+// two lists that could drift. The multiplier is the definition; the label is
+// derived from it, so a new tier cannot arrive priced but unnamed.
+export const PROPOSAL_COMPLEXITIES = [
+  { value: 'basic', label: 'בסיסי', multiplier: 1.0 },
+  { value: 'medium', label: 'בינוני', multiplier: 1.25 },
+  { value: 'advanced', label: 'מתקדם', multiplier: 1.5 },
+  { value: 'enterprise', label: 'ארגוני', multiplier: 2.0 },
+];
 
-export const STATUS_COLORS = {
-  draft: 'bg-muted text-muted-foreground',
-  sent: 'bg-blue-100 text-blue-700',
-  approved: 'bg-success-muted text-success',
-  rejected: 'bg-red-100 text-red-700',
+export const complexityMeta = (value) =>
+  PROPOSAL_COMPLEXITIES.find((c) => c.value === value) || PROPOSAL_COMPLEXITIES[0];
+
+/** The label a picker shows: the tier and what it does to the rate. */
+export const complexityLabel = (value) => {
+  const meta = complexityMeta(value);
+  return `${meta.label} (x${meta.multiplier})`;
 };
 
 export const VAT_RATE = 18;
@@ -36,8 +44,7 @@ export const VAT_RATE = 18;
  * Compute the adjusted hourly rate for a given complexity.
  */
 export function getAdjustedRate(baseHourlyRate, complexity) {
-  const multiplier = COMPLEXITY_MULTIPLIERS[complexity] || 1.0;
-  return Math.round((baseHourlyRate || 0) * multiplier);
+  return Math.round((baseHourlyRate || 0) * complexityMeta(complexity).multiplier);
 }
 
 /**
@@ -84,3 +91,46 @@ export function generateProposalNumber(existingCount = 0) {
   const prefix = (APP_IDENTITY.name || 'Q').replace(/\s+/g, '').toUpperCase();
   return `${prefix}-${year}-${seq}`;
 }
+
+/**
+ * A new version of a quote — the next draft in a negotiation.
+ *
+ * A quote used to be edited in place, so the price the customer saw on
+ * Monday was overwritten by Wednesday's and nobody could say what changed.
+ * A version is a copy: same customer, same lines, the number suffixed, status
+ * back to draft, the signature cleared — and a link to the first version so
+ * the whole negotiation can be read in order.
+ */
+/** Today as a calendar day in local time — toISOString() is UTC, a day off after midnight. */
+export const localToday = () => {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+};
+
+export function nextVersion(proposal, siblings = []) {
+  const rootId = proposal.root_id || proposal.id;
+  const family = [proposal, ...siblings].filter((p) => (p.root_id || p.id) === rootId);
+  const version = Math.max(1, ...family.map((p) => Number(p.version) || 1)) + 1;
+  const base = String(proposal.proposal_number || '').replace(/-v\d+$/, '');
+  const { id: _id, created_date: _c, updated_date: _u, signed_by: _s, signed_date: _d, ...rest } = proposal;
+  return {
+    ...rest,
+    root_id: rootId,
+    version,
+    proposal_number: base ? `${base}-v${version}` : '',
+    status: 'draft',
+    issue_date: localToday(),
+  };
+}
+
+/**
+ * Why a quote cannot be marked approved as it stands, or null.
+ *
+ * "Approved" with nobody's name on it is a status, not an agreement. The
+ * customer-side signatory is what makes it one — and it is what the invoice
+ * hand-off rests on.
+ */
+export const approvalMissing = (proposal) =>
+  proposal?.status === 'approved' && !String(proposal.signed_by || '').trim()
+    ? 'הצעה מאושרת צריכה שם של מאשר מטעם הלקוח'
+    : null;

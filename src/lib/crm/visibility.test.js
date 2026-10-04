@@ -66,4 +66,37 @@ describe('record visibility', () => {
     expect(visibleModuleRecords('tasks', tasks, viewer, schemas)).toHaveLength(2);
     expect(visibleModuleRecords('projects', projects, admin, schemas)).toHaveLength(2);
   });
+
+  // A proposal carries a price, a discount and a margin. It was listed to
+  // everyone who could log in on its own page, and dropped from global search
+  // whenever it had no project — the same record leaking and lost at once.
+  describe('a proposal — project when it has one, owner when it does not', () => {
+    const see = (record, who = viewer) =>
+      visibleModuleRecords('proposals', [record], who, schemas).length === 1;
+
+    it('follows the project it belongs to', () => {
+      expect(see({ project_id: 'p1', owner_email: 'other@example.com' })).toBe(true);
+      expect(see({ project_id: 'p9', owner_email: 'me@example.com' })).toBe(false);
+    });
+
+    it('follows its owner when it belongs to no project', () => {
+      expect(see({ owner_email: 'ME@Example.com ' })).toBe(true);
+      expect(see({ created_by: 'me@example.com' })).toBe(true);
+      expect(see({ owner_email: 'other@example.com' })).toBe(false);
+      // Not owned, not in a project, and not admin: nothing to go on.
+      expect(see({})).toBe(false);
+    });
+
+    it('is never hidden from an admin', () => {
+      expect(see({ project_id: 'p9', owner_email: 'other@example.com' }, admin)).toBe(true);
+      expect(see({}, admin)).toBe(true);
+    });
+
+    it('does not fall back to the catch-all "visible to everyone" rule', () => {
+      // The bug this guards: without a rule of its own, a module with no schema
+      // reaches visibleRecords(records, undefined, viewer), whose scope defaults
+      // to 'all' — so every row is returned to everyone.
+      expect(see({ owner_email: 'other@example.com', project_id: 'p9' })).toBe(false);
+    });
+  });
 });

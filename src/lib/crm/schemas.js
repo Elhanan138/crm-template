@@ -2,8 +2,17 @@ import {
   Filter, Contact, Receipt, Package, Route, TrendingUp,
 } from 'lucide-react';
 import {
-  weightedValue, invoiceBalance, invoiceOverdueDays, marginPercent,
+  weightedValue, invoiceBalance, invoiceOverdueDays, marginPercent, daysSince,
 } from '@/lib/crm/derived';
+
+// When we last spoke to them, and when we said we would again. Stamped by any
+// call, meeting or email logged on the record (src/lib/crm/recordTrail.js), so
+// it is never left for somebody to remember to type.
+const CONTACT_CADENCE = [
+  { key: 'last_contact_date', label: 'קשר אחרון', type: 'date', list: true },
+  { key: 'days_since_contact', label: 'ימים מאז קשר', type: 'number', list: true, derive: (r) => daysSince(r.last_contact_date) },
+  { key: 'next_followup', label: 'מעקב הבא', type: 'date', list: true },
+];
 
 // ─────────────────────────────────────────────────────────────────────────────
 // CRM SCHEMAS
@@ -121,11 +130,96 @@ export const AUTOMATION_ACTIONS = [
   { value: 'set_field', label: 'עדכן שדה', needsField: true, valueLabel: 'ערך חדש' },
   { value: 'assign_owner', label: 'הקצה לבעלים', valueLabel: 'אימייל' },
   { value: 'notify', label: 'שלח התראה', valueLabel: 'נמענים (מופרד בפסיק)' },
-  { value: 'send_email', label: 'שלח מייל מתבנית', valueLabel: 'שם התבנית' },
+  // Without a server this is written to the email log and goes nowhere — the
+  // builder says so next to the action rather than after the fact.
+  { value: 'send_email', label: 'שלח מייל מתבנית', valueLabel: 'שם התבנית', requiresServer: true },
   { value: 'add_tag', label: 'הוסף תגית', valueLabel: 'תגית' },
 ];
 
 export const subjectMeta = (value) => AUTOMATION_SUBJECTS.find((s) => s.value === value);
+
+// ─── Rule library ───────────────────────────────────────────────────────────
+// The rules almost every business ends up writing, written once, correctly.
+// An empty rule builder is a blank page most people never fill in; these are
+// the starting points. Each names the module it serves, so a bundle without
+// invoices is not offered a collection reminder.
+//
+// They are added SWITCHED OFF. A rule that creates tasks should be checked
+// with the dry run against real data before it is let loose on it.
+export const AUTOMATION_TEMPLATES = [
+  {
+    id: 'collect-overdue',
+    module: 'invoices',
+    name: 'תזכורת גבייה — חשבונית שבוע באיחור',
+    description: 'משימת גבייה לאחראי על כל חשבונית שעברה שבוע ממועד התשלום ולא שולמה.',
+    subject: 'Invoice', event: 'date_passed', field: 'due_date', days: 7,
+    conditions: [
+      { field: 'status', operator: 'neq', value: 'paid' },
+      { field: 'status', operator: 'neq', value: 'void' },
+    ],
+    actions: [{ type: 'create_task', value: 'גבייה: חשבונית {{number}} — {{client_name}}' }],
+  },
+  {
+    id: 'invoice-due-soon',
+    module: 'invoices',
+    name: 'חשבונית שלושה ימים לפני מועד התשלום',
+    description: 'התראה לאחראי לפני שחשבונית שנשלחה מגיעה למועד התשלום.',
+    subject: 'Invoice', event: 'date_approaching', field: 'due_date', days: 3,
+    conditions: [{ field: 'status', operator: 'eq', value: 'sent' }],
+    actions: [{ type: 'notify', value: '{{owner_email}}' }],
+  },
+  {
+    id: 'stale-lead',
+    module: 'leads',
+    name: 'ליד פתוח שלא נגעו בו שבועיים',
+    description: 'משימת מעקב על כל ליד פתוח שלא עודכן 14 יום.',
+    subject: 'Lead', event: 'idle', days: 14,
+    conditions: [
+      { field: 'stage', operator: 'neq', value: 'won' },
+      { field: 'stage', operator: 'neq', value: 'lost' },
+    ],
+    actions: [{ type: 'create_task', value: 'מעקב: {{name}} ({{company}})' }],
+  },
+  {
+    id: 'close-date-passed',
+    module: 'leads',
+    name: 'מועד הסגירה הצפוי חלף',
+    description: 'ליד פתוח שמועד הסגירה שלו עבר — התחזית נשענת עליו ומשקרת.',
+    subject: 'Lead', event: 'date_passed', field: 'expected_close', days: 0,
+    conditions: [
+      { field: 'stage', operator: 'neq', value: 'won' },
+      { field: 'stage', operator: 'neq', value: 'lost' },
+    ],
+    actions: [{ type: 'create_task', value: 'עדכן מועד סגירה: {{name}}' }],
+  },
+  {
+    id: 'task-overdue',
+    module: 'tasks',
+    name: 'משימה באיחור עולה לדחופה',
+    description: 'משימה שעבר יום ממועד היעד שלה ולא הושלמה מסומנת כדחופה.',
+    subject: 'Task', event: 'date_passed', field: 'due_date', days: 1,
+    conditions: [{ field: 'status', operator: 'neq', value: 'done' }],
+    actions: [{ type: 'set_field', field: 'priority', value: 'urgent' }],
+  },
+  {
+    id: 'licensing-renewal',
+    module: 'projects',
+    name: 'חידוש רישוי בעוד חודש',
+    description: 'משימה 30 יום לפני תאריך תזכורת הרישוי של פרויקט.',
+    subject: 'Project', event: 'date_approaching', field: 'licensing_reminder_date', days: 30,
+    conditions: [],
+    actions: [{ type: 'create_task', value: 'חידוש רישוי: {{client_name}}' }],
+  },
+  {
+    id: 'ticket-waiting',
+    module: 'support',
+    name: 'פנייה ממתינה שלושה ימים',
+    description: 'משימה על פניית תמיכה פתוחה שלא עודכנה שלושה ימים.',
+    subject: 'SupportTicket', event: 'idle', days: 3,
+    conditions: [{ field: 'status', operator: 'neq', value: 'resolved' }],
+    actions: [{ type: 'create_task', value: 'פנייה ממתינה: {{title}}' }],
+  },
+];
 export const RUN_MODES = [
   { value: 'auto', label: 'אוטומטי' },
   { value: 'manual', label: 'ידני בלבד' },
@@ -162,6 +256,10 @@ const CORE_SCHEMAS = {
       // probability its own stage already declares.
       { key: 'weighted_value', label: 'שווי משוקלל', type: 'currency', list: true, derive: weightedValue(LEAD_STAGES) },
       { key: 'expected_close', label: 'סגירה צפויה', type: 'date', list: true },
+      // After the close date on purpose: the first date field that reads like
+      // a deadline is the one "overdue" is judged by, and for a lead that is
+      // still the close date.
+      ...CONTACT_CADENCE,
       { key: 'source', label: 'מקור', type: 'select', options: [
         { value: 'inbound', label: 'פנייה נכנסת' },
         { value: 'referral', label: 'המלצה' },
@@ -194,6 +292,7 @@ const CORE_SCHEMAS = {
       { key: 'email', label: 'אימייל', type: 'email', list: true },
       { key: 'phone', label: 'טלפון', type: 'phone', list: true },
       { key: 'is_primary', label: 'איש קשר ראשי', type: 'checkbox' },
+      ...CONTACT_CADENCE,
       OWNER_FIELD,
       { key: 'notes', label: 'הערות', type: 'textarea' },
     ],

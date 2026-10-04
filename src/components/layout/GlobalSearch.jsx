@@ -233,8 +233,14 @@ export default function GlobalSearch() {
 
     const projectIds = new Set(projects.filter(p => canViewProject(p.id)).map(p => p.id));
 
-    // Enrich proposals with client_name for search scoring
-    const enrichedQuotes = (quotes || []).map(q => ({ ...q, client_name: clientMap[q.client_id] || '' }));
+    // Proposals now STORE client_name; the lookup stays as a fallback so a
+    // record saved before that still scores on its customer.
+    const enrichedQuotes = visibleModuleRecords(
+      'proposals',
+      (quotes || []).map(q => ({ ...q, client_name: q.client_name || clientMap[q.client_id] || '' })),
+      viewer,
+      CRM_SCHEMAS,
+    );
 
     const buildGroup = (records, type, filterFn) =>
       (records || [])
@@ -247,7 +253,11 @@ export default function GlobalSearch() {
     const groups = {
       project: buildGroup(projects, 'project', p => canViewProject(p.id)),
       task: buildGroup(tasks, 'task', t => projectIds.has(t.project_id) && canAccess(t)),
-      quote: buildGroup(enrichedQuotes, 'quote', qt => projectIds.has(qt.project_id) && canAccess(qt)),
+      // Visibility was already applied above, by the one rule in
+      // src/lib/crm/visibility.js. It used to be `projectIds.has(project_id)`
+      // here, which meant a proposal belonging to no project could not be found
+      // from the search box by anyone, its own author included.
+      quote: buildGroup(enrichedQuotes, 'quote'),
       note: (notePages || [])
         .filter((p) => !p.is_archived)
         .map((record) => ({
@@ -379,7 +389,7 @@ export default function GlobalSearch() {
         key={`${type}-${record.id}${isLeading ? '-leading' : ''}`}
         value={`${type}-${record.id}${isLeading ? '-leading' : ''}`}
         onSelect={() => handleSelect(type, record)}
-        className={`min-h-[44px] cursor-pointer gap-3 transition-colors ${isLeading ? 'bg-accent ring-1 ring-primary/20 rounded-lg' : ''}`}
+        className={`min-h-[44px] cursor-pointer gap-3 transition-colors ${isLeading ? 'bg-accent ring-1 ring-primary/30 rounded-lg' : ''}`}
       >
         <div className="w-8 h-8 rounded-lg bg-muted/60 flex items-center justify-center flex-shrink-0">
           <Icon className={`w-4 h-4 ${meta.color}`} />

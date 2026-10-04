@@ -16,7 +16,7 @@ export default function ProjectAlertRow({ alert, recipientLabel, onEdit, onDelet
       tabIndex={0}
       onClick={() => onEdit(alert)}
       onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onEdit(alert); } }}
-      className="rounded-lg border border-border bg-muted/20 p-3 space-y-2.5 cursor-pointer hover:border-primary/40 hover:bg-muted/40 transition-colors"
+      className="rounded-lg border border-border bg-muted/20 p-3 space-y-2.5 cursor-pointer hover:border-primary/30 hover:bg-muted/40 transition-colors"
     >
       <div className="flex items-start justify-between gap-2">
         <div className="flex-1 min-w-0">

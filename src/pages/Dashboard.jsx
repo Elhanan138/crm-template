@@ -20,6 +20,7 @@ import QuickAccessConfig from '@/components/dashboard/widgetConfigs/QuickAccessC
 import { SupportPriority } from '@/components/dashboard/AdminWidgets';
 import QuickAccessWidget from '@/components/dashboard/QuickAccessWidget';
 import RequiresAttention from '@/components/dashboard/RequiresAttention';
+import GettingStarted from '@/components/onboarding/GettingStarted';
 import DashboardCustomizer from '@/components/dashboard/DashboardCustomizer';
 import CardSkeleton from '@/components/shared/CardSkeleton';
 import { selectMyTasks } from '@/lib/dashboardTasks';
@@ -283,6 +284,8 @@ export default function Dashboard() {
      <SettingsIcon className="w-[18px] h-[18px]"/>
     </Button>
    </div>
+
+   <GettingStarted isAdmin={isRealAdmin} />
 
    <div className="space-y-6">
     {rows.length === 0 ? (

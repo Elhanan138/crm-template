@@ -26,7 +26,10 @@ export default function Sidebar({ collapsed, onToggle }) {
  const [mobileOpen, setMobileOpen] = useState(false);
  const { systemName, systemSubtitle } = useLogo();
  const isMobile = useIsMobile();
- const { t } = useI18n();
+ const { t, isRtl } = useI18n();
+ // Where the closed drawer sits: off the inline-start edge, whichever side
+ // that is in this language.
+ const offscreenX = isRtl ? '100%' : '-100%';
  const blossomAgentEnabled = useCapability('blossom_agent', 'agent');
 
  const { data: user } = useQuery({
@@ -132,7 +135,7 @@ export default function Sidebar({ collapsed, onToggle }) {
      {!isCollapsed && (
       <button
        onClick={closeMobile}
-       aria-label="סגירת תפריט"
+       aria-label={t('סגירת תפריט')}
        className="md:hidden w-8 h-8 rounded-full flex items-center justify-center hover:bg-muted transition-colors flex-shrink-0"
       >
        <Cross2Icon className="w-4 h-4 text-muted-foreground"/>
@@ -143,10 +146,10 @@ export default function Sidebar({ collapsed, onToggle }) {
      {isCollapsed ? (
       <button
        onClick={onToggle}
-       title="הרחב תפריט"
+       title={t('הרחב תפריט')}
        className="w-8 h-8 rounded-lg overflow-hidden flex items-center justify-center hover:ring-2 hover:ring-primary/30 transition-all"
       >
-       <BrandMark alt="הרחב תפריט" className="w-full h-full rounded-lg"/>
+       <BrandMark alt={t('הרחב תפריט')} className="w-full h-full rounded-lg"/>
       </button>
      ) : (
       <div className="flex items-center gap-2.5 flex-1 min-w-0">
@@ -166,8 +169,8 @@ export default function Sidebar({ collapsed, onToggle }) {
      {!isCollapsed && (
       <button
        onClick={onToggle}
-       title="כווץ תפריט"
-       aria-label="כווץ תפריט"
+       title={t('כווץ תפריט')}
+       aria-label={t('כווץ תפריט')}
        className="hidden md:flex w-8 h-8 rounded-lg items-center justify-center text-muted-foreground hover:bg-muted hover:text-foreground transition-colors flex-shrink-0"
       >
        <ChevronRightIcon className="w-4 h-4"/>
@@ -220,7 +223,7 @@ export default function Sidebar({ collapsed, onToggle }) {
    <div className="fixed top-0 right-0 left-0 z-40 bg-card border-b border-sidebar-border px-3 py-2.5 flex items-center justify-between shadow-sm">
     <button
      onClick={() => setMobileOpen(true)}
-     aria-label="פתח תפריט"
+     aria-label={t('פתח תפריט')}
      className="w-9 h-9 rounded-full flex items-center justify-center hover:bg-muted transition-colors"
     >
      <HamburgerMenuIcon className="w-5 h-5 text-foreground"/>
@@ -228,11 +231,11 @@ export default function Sidebar({ collapsed, onToggle }) {
     
     <button
      onClick={() => window.dispatchEvent(new CustomEvent('global-search-open'))}
-     aria-label="חיפוש"
+     aria-label={t('חיפוש')}
      className="flex-1 max-w-[200px] flex items-center h-9 px-3 rounded-full border border-input bg-muted/30 hover:bg-muted/50 hover:border-primary/30 transition-colors text-muted-foreground gap-2"
     >
      <MagnifyingGlassIcon className="w-4 h-4 flex-shrink-0"/>
-     <span className="text-xs truncate">חיפוש...</span>
+     <span className="text-xs truncate">{t('חיפוש...')}</span>
     </button>
     
     <div className="flex items-center gap-1">
@@ -279,9 +282,13 @@ export default function Sidebar({ collapsed, onToggle }) {
 
    {/* Mobile drawer — only rendered on mobile */}
    {isMobile && (
+   /* The drawer is pinned to the inline START, so "away" is +100% in RTL and
+      −100% in LTR. Hard-coded to +100%, a closed drawer in English slid to the
+      RIGHT of its own position — i.e. into the middle of the screen, visible
+      and covering the page. */
    <motion.aside
-    initial={{ x: '100%' }}
-    animate={{ x: mobileOpen ? 0 : '100%' }}
+    initial={{ x: offscreenX }}
+    animate={{ x: mobileOpen ? 0 : offscreenX }}
     transition={{ type: 'spring', damping: 30, stiffness: 300 }}
     className={`fixed top-0 start-0 bottom-0 w-[187px] bg-card z-50 shadow-2xl ${
      mobileOpen ? '' : 'pointer-events-none'

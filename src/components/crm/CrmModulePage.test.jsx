@@ -3,7 +3,7 @@ import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { screen, cleanup, within, waitFor, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { renderWithProviders } from '@/test/utils';
-import CrmModulePage from './CrmModulePage';
+import CrmModulePage, { seedFromParams } from './CrmModulePage';
 import { CRM_SCHEMAS } from '@/lib/crm/schemas';
 
 // The local data client is backed by localStorage, which jsdom provides — so
@@ -327,3 +327,208 @@ describe('permissions', () => {
     });
   });
 });
+
+// A module can put its own numbers above the list (an aging strip, an MRR
+// band). Those numbers are only trustworthy if pressing one shows the rows it
+// was counted from — and if there is a way back out of the slice.
+describe('a module\'s own slice above the list', () => {
+  const renderWithStrip = () =>
+    renderWithProviders(
+      <CrmModulePage
+        schema={CRM_SCHEMAS.leads}
+        moduleId="leads"
+        renderAbove={({ setFocus }) => (
+          <button onClick={() => setFocus({
+            id: 'big',
+            label: 'עסקאות גדולות',
+            test: (r) => Number(r.value) >= 2000,
+          })}>
+            עסקאות גדולות
+          </button>
+        )}
+      />
+    );
+
+  it('narrows the list to the rows the tile counted', async () => {
+    const user = userEvent.setup();
+    seedLeads(3); // values 1000, 2000, 3000
+    renderWithStrip();
+    await findInTable('Deal 1');
+
+    await user.click(screen.getByRole('button', { name: 'עסקאות גדולות' }));
+
+    await waitFor(() => expect(within(table()).queryByText('Deal 1')).toBeNull());
+    expect(inTable('Deal 2')).toBeTruthy();
+    expect(inTable('Deal 3')).toBeTruthy();
+  });
+
+  it('shows the slice as a chip that clears it again', async () => {
+    const user = userEvent.setup();
+    seedLeads(3);
+    renderWithStrip();
+    await findInTable('Deal 1');
+
+    await user.click(screen.getByRole('button', { name: 'עסקאות גדולות' }));
+    // The chip carries the label and how many rows are behind it.
+    const chip = await screen.findByRole('button', { name: /עסקאות גדולות\s*2/ });
+
+    await user.click(chip);
+    expect(await findInTable('Deal 1')).toBeTruthy();
+  });
+
+  it('renders no chip at all until a tile is pressed', async () => {
+    seedLeads(3);
+    renderWithStrip();
+    await findInTable('Deal 1');
+    // Only the tile itself — no chip, because nothing is focused yet.
+    expect(screen.getAllByRole('button', { name: /עסקאות גדולות/ })).toHaveLength(1);
+  });
+});
+
+// A hand-off from another module arrives as `?new=1` plus the values it is
+// carrying. The target form must accept the fields its schema declares and
+// nothing else, or a link becomes a way to plant arbitrary keys on a record.
+describe('a new record seeded from the URL', () => {
+  const seed = (query) => seedFromParams(new URLSearchParams(query), CRM_SCHEMAS.invoices);
+
+  it('carries over the fields the schema declares', () => {
+    expect(seed('client_name=אקמה&amount=13500&vat_percent=18')).toEqual({
+      client_name: 'אקמה', amount: 13500, vat_percent: 18,
+    });
+  });
+
+  it('types numbers as numbers, not as the strings a URL carries', () => {
+    const result = seed('amount=13500');
+    expect(result.amount).toBe(13500);
+    expect(typeof result.amount).toBe('number');
+  });
+
+  it('ignores a key the schema does not declare', () => {
+    expect(seed('client_name=אקמה&role=admin&id=i9&__proto__=x')).toEqual({ client_name: 'אקמה' });
+  });
+
+  it('refuses a derived field — it would freeze a number that must keep tracking', () => {
+    // `balance` and `overdue_days` are computed from amount, VAT and the dates.
+    expect(seed('balance=1&overdue_days=99')).toBeNull();
+  });
+
+  it('ignores a number that is not one', () => {
+    expect(seed('amount=not-a-number')).toBeNull();
+    expect(seed('amount=not-a-number&client_name=אקמה')).toEqual({ client_name: 'אקמה' });
+  });
+
+  it('returns null for a plain ?new=1, so the form stays blank', () => {
+    expect(seed('')).toBeNull();
+    expect(seed('new=1')).toBeNull();
+  });
+
+  it('opens the create form pre-filled when the page loads with the parameters', async () => {
+    seedLeads(1);
+    renderWithProviders(
+      <CrmModulePage schema={CRM_SCHEMAS.invoices} moduleId="invoices" />,
+      { route: '/invoices?new=1&client_name=Acme+Ltd&amount=13500' },
+    );
+    const sheet = await screen.findByRole('dialog');
+    expect(within(sheet).getByDisplayValue('Acme Ltd')).toBeTruthy();
+    expect(within(sheet).getByDisplayValue('13500')).toBeTruthy();
+  });
+});
+
+// A phone has always shown cards; a wide screen could only show a table, and a
+// board only where the schema declares stages. The card markup existed twice —
+// which is how the phone ended up with a status chip the wide screen never got.
+describe('the view switch', () => {
+  it('offers cards to a module with no board at all', async () => {
+    seedLeads(2);
+    renderWithProviders(<CrmModulePage schema={CRM_SCHEMAS.products} moduleId="products" />);
+    expect(await screen.findByRole('button', { name: 'תצוגת כרטיסים' })).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'תצוגת רשימה' })).toBeTruthy();
+    expect(screen.queryByRole('button', { name: 'תצוגת לוח' })).toBeNull();
+  });
+
+  it('offers the board as well where the schema declares stages', async () => {
+    seedLeads(2);
+    renderLeads();
+    await findInTable('Deal 1');
+    expect(screen.getByRole('button', { name: 'תצוגת לוח' })).toBeTruthy();
+  });
+
+  it('renders cards instead of the table, with the same records', async () => {
+    const user = userEvent.setup();
+    seedLeads(2);
+    renderLeads();
+    await findInTable('Deal 1');
+
+    await user.click(screen.getByRole('button', { name: 'תצוגת כרטיסים' }));
+
+    await waitFor(() => expect(screen.queryByRole('table')).toBeNull());
+    expect(screen.getByText('Deal 1')).toBeTruthy();
+    expect(screen.getByText('Deal 2')).toBeTruthy();
+  });
+
+  it('keeps the chosen view across a remount — it used to reset every time', async () => {
+    const user = userEvent.setup();
+    seedLeads(2);
+    renderLeads();
+    await findInTable('Deal 1');
+    await user.click(screen.getByRole('button', { name: 'תצוגת כרטיסים' }));
+    await waitFor(() => expect(screen.queryByRole('table')).toBeNull());
+
+    cleanup();
+    renderLeads();
+
+    await waitFor(() => expect(screen.getByRole('button', { name: 'תצוגת כרטיסים' })).toHaveAttribute('aria-pressed', 'true'));
+    expect(screen.queryByRole('table')).toBeNull();
+  });
+
+  it('falls back to the table for a stored view that is not a view', async () => {
+    localStorage.setItem('crm_table_prefs_leads', JSON.stringify({ view: 'carousel' }));
+    seedLeads(2);
+    renderLeads();
+    expect(await findInTable('Deal 1')).toBeTruthy();
+  });
+});
+
+// An empty module used to say "create your first record" on all twenty-five
+// pages. What is actually useful is where the first one normally comes from,
+// which the hand-off graph already knows.
+describe('empty states that offer the next step', () => {
+  it('points at the module that feeds this one', async () => {
+    localStorage.setItem(PREFIX + 'Invoice', JSON.stringify([]));
+    renderWithProviders(<CrmModulePage schema={CRM_SCHEMAS.invoices} moduleId="invoices" />);
+    // An invoice is fed by an approved quote, so the empty invoice list links
+    // to quotes rather than only offering a blank form.
+    expect(await screen.findByText('נוצר גם מתוך')).toBeTruthy();
+    const link = screen.getByRole('link', { name: 'הצעות מחיר' });
+    expect(link.getAttribute('href')).toBe('/proposals');
+  });
+
+  it('still offers the blank form', async () => {
+    localStorage.setItem(PREFIX + 'Invoice', JSON.stringify([]));
+    renderWithProviders(<CrmModulePage schema={CRM_SCHEMAS.invoices} moduleId="invoices" />);
+    expect(await screen.findByRole('button', { name: /חשבונית/ })).toBeTruthy();
+  });
+
+  it('says nothing about other modules where nothing feeds this one', async () => {
+    localStorage.setItem(PREFIX + 'Product', JSON.stringify([]));
+    renderWithProviders(<CrmModulePage schema={CRM_SCHEMAS.products} moduleId="products" />);
+    await screen.findByText(/אין עדיין/);
+    expect(screen.queryByText('נוצר גם מתוך')).toBeNull();
+  });
+
+  // "Try changing the search" is advice standing in for a button the page can
+  // press itself.
+  it('clears the filter for you when a search matched nothing', async () => {
+    const user = userEvent.setup();
+    seedLeads(3);
+    renderLeads();
+    await findInTable('Deal 1');
+
+    await user.type(screen.getByPlaceholderText(/חיפוש/), 'zzzzzz');
+    const clear = await screen.findByRole('button', { name: /נקה סינון/ });
+
+    await user.click(clear);
+    expect(await findInTable('Deal 1')).toBeTruthy();
+  });
+});
+

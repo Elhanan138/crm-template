@@ -85,7 +85,7 @@ export default function TaskChecklist({ items = [], onChange }) {
       <div key={item.id} className="flex items-center gap-2.5 px-4 py-2 group hover:bg-muted/30 transition-colors animate-slide-in">
        <button
         onClick={() => toggle(item.id)}
-        className={`w-4 h-4 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all ${item.done ? 'bg-primary border-primary scale-110' : 'border-muted-foreground/30 hover:border-primary/50 hover:scale-110'}`}
+        className={`w-4 h-4 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all ${item.done ? 'bg-primary border-primary scale-110' : 'border-muted-foreground/30 hover:border-primary/30 hover:scale-110'}`}
        >
         {item.done && <Check className="w-2.5 h-2.5 text-primary-foreground"/>}
        </button>

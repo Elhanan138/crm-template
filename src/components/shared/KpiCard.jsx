@@ -45,7 +45,7 @@ export default function KpiCard({
  const containerClass = cn(
   'relative block h-full w-full bg-card border border-border shadow-sm rounded-lg text-start overflow-hidden',
   isCompact ? 'p-3.5' : 'p-5',
-  isClickable && 'hover:border-primary/40 active:scale-[0.98] transition-all cursor-pointer',
+  isClickable && 'hover:border-primary/30 active:scale-[0.98] transition-all cursor-pointer',
  );
 
  const iconBoxClass = cn(

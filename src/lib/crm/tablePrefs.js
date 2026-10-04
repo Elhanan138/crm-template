@@ -19,6 +19,12 @@ const KEY = (moduleId) => `crm_table_prefs_${moduleId || 'unknown'}`;
 export const PAGE_SIZES = [25, 50, 100, 250];
 export const DEFAULT_PAGE_SIZE = 50;
 
+// Which layout a module is read in is the same kind of preference as which
+// columns: per person, per module, and kept. It used to reset to the table on
+// every navigation, so choosing the board was a choice you made once a minute.
+export const VIEW_IDS = ['table', 'cards', 'board'];
+export const DEFAULT_VIEW = 'table';
+
 const read = (moduleId) => {
   try {
     return JSON.parse(localStorage.getItem(KEY(moduleId))) || {};
@@ -61,6 +67,9 @@ export function useTablePrefs(moduleId, schema) {
 
   const columns = resolveColumns(schema, prefs.columns);
   const pageSize = PAGE_SIZES.includes(prefs.pageSize) ? prefs.pageSize : DEFAULT_PAGE_SIZE;
+  // A stored view the build no longer offers — a board on a module whose
+  // stages were removed — falls back rather than rendering nothing.
+  const view = VIEW_IDS.includes(prefs.view) ? prefs.view : DEFAULT_VIEW;
 
   const toggleColumn = useCallback(
     (key) => {
@@ -76,5 +85,13 @@ export function useTablePrefs(moduleId, schema) {
 
   const resetColumns = useCallback(() => save({ columns: null }), [save]);
 
-  return { columns, pageSize, toggleColumn, resetColumns, setPageSize: (n) => save({ pageSize: n }) };
+  return {
+    columns,
+    pageSize,
+    view,
+    toggleColumn,
+    resetColumns,
+    setPageSize: (n) => save({ pageSize: n }),
+    setView: (id) => save({ view: VIEW_IDS.includes(id) ? id : DEFAULT_VIEW }),
+  };
 }

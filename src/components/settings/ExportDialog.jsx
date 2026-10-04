@@ -234,7 +234,7 @@ export default function ExportDialog({ open, onOpenChange }) {
                 <button
                   type="button"
                   onClick={() => logoInputRef.current?.click()}
-                  className="w-12 h-12 flex-shrink-0 rounded-lg border-2 border-dashed border-border flex items-center justify-center overflow-hidden hover:border-primary/40 transition-colors"
+                  className="w-12 h-12 flex-shrink-0 rounded-lg border-2 border-dashed border-border flex items-center justify-center overflow-hidden hover:border-primary/30 transition-colors"
                   aria-label={t("בחר לוגו")}
                 >
                   {brand.logo

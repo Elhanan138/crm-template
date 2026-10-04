@@ -1,9 +1,13 @@
 import React from 'react';
 import { differenceInCalendarDays, isSameMonth } from 'date-fns';
 import { cn } from '@/lib/utils';
+import { breachedCount } from '@/lib/supportSla';
+import { useI18n } from '@/lib/i18n';
 
 // Thin metrics strip above the list — pending decisions, over-a-week, resolved this month.
 export default function WorkspaceMetrics({ tickets }) {
+  const { t } = useI18n();
+  const breached = breachedCount(tickets);
   const pending = tickets.filter(t => t.status === 'open').length;
   const overWeek = tickets.filter(t =>
     t.status !== 'resolved' &&
@@ -19,6 +23,8 @@ export default function WorkspaceMetrics({ tickets }) {
   const items = [
     { label: 'ממתינות להחלטה', value: pending },
     { label: 'מעל שבוע', value: overWeek, destructive: overWeek > 0 },
+    // Over a week is age; this is the promise, set per priority.
+    { label: t('חריגה מ-SLA'), value: breached, destructive: breached > 0 },
     { label: 'בוצעו החודש', value: resolvedThisMonth },
   ];
 

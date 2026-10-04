@@ -12,7 +12,7 @@ function ProjectChip({ p }) {
  return (
   <Link
    to={getProjectPath(p)}
-   className="group/chip flex items-center gap-3 rounded-lg border border-border/70 px-3 py-3 hover:border-primary/40 hover:bg-accent/40 hover:shadow-md transition-all"
+   className="group/chip flex items-center gap-3 rounded-lg border border-border/70 px-3 py-3 hover:border-primary/30 hover:bg-accent/40 hover:shadow-md transition-all"
   >
    <div className="w-11 h-11 rounded-lg overflow-hidden bg-accent flex items-center justify-center flex-shrink-0 shadow-sm">
     {p.image_url ? (

@@ -47,7 +47,7 @@ function TaskCard({ task, onEdit, onDelete, onToggle, onReminder, onCycleStatus,
    <div className="flex-1 min-w-0 cursor-pointer"onClick={() => onEdit(task)}>
     <p className={`text-sm font-medium ${isDone ? 'line-through text-muted-foreground' : 'text-foreground'}`}>{task.title}</p>
     <div className="flex items-center flex-wrap gap-1.5 mt-1">
-     <button onClick={() => onCycleStatus(task)} className="rounded-full transition-all hover:ring-2 hover:ring-offset-1 hover:ring-primary/20"title="לחץ לשינוי סטטוס">
+     <button onClick={() => onCycleStatus(task)} className="rounded-full transition-all hover:ring-2 hover:ring-offset-1 hover:ring-primary/30"title="לחץ לשינוי סטטוס">
       <StatusBadge status={task.status || 'in_progress'} />
      </button>
      <StatusBadge status={task.priority || 'medium'} />

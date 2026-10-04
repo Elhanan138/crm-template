@@ -71,7 +71,7 @@ export default function QuickTaskForm({ projects, defaultProjectId, onOpenFullFo
             onFocus={() => setFocused(true)}
             onBlur={() => setFocused(false)}
             placeholder="הוסף משימה מהירה…"
-            className="h-10 rounded-xl text-right border-input bg-card focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/20"
+            className="h-10 rounded-xl text-start border-input bg-card focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-ring"
           />
           {focused && (
             <p className="absolute -bottom-4 right-1 text-[10px] text-muted-foreground">Enter ליצירה מהירה</p>

@@ -134,7 +134,7 @@ export default function TaskFormFields({
      type="button"
      onClick={() => set('show_in_gantt', !form.show_in_gantt)}
      aria-pressed={!!form.show_in_gantt}
-     className={`flex items-center gap-2 rounded-lg border px-3 h-10 w-full text-sm transition-colors ${form.show_in_gantt ? 'border-primary/40 bg-accent text-primary' : 'border-border bg-background text-muted-foreground hover:text-foreground'}`}
+     className={`flex items-center gap-2 rounded-lg border px-3 h-10 w-full text-sm transition-colors ${form.show_in_gantt ? 'border-primary/30 bg-accent text-primary' : 'border-border bg-background text-muted-foreground hover:text-foreground'}`}
     >
      <GanttChart className="w-3.5 h-3.5 flex-shrink-0"/>
      {form.show_in_gantt ? 'מוצגת בגאנט' : 'לא מוצגת בגאנט'}

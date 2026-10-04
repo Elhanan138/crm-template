@@ -100,7 +100,7 @@ export default function TicketListPane({ tickets, teamMembers = [], activeId, on
 
       {/* Batch actions */}
       {selectedIds.length > 0 && (
-        <div className="flex items-center gap-2 flex-wrap px-3 py-2 bg-accent/50 rounded-lg border border-brand/20">
+        <div className="flex items-center gap-2 flex-wrap px-3 py-2 bg-accent/50 rounded-lg border border-primary/30">
           <span className="text-xs font-semibold text-foreground">{selectedIds.length} נבחרו</span>
           <Select onValueChange={(v) => applyBatch({ status: v })} disabled={batchPending}>
             <SelectTrigger className="h-7 text-xs w-auto gap-1"><SelectValue placeholder="שנה סטטוס" /></SelectTrigger>

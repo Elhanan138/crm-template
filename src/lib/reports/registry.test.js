@@ -114,6 +114,7 @@ describe('module relations', () => {
   const NON_SCHEMA_FIELDS = {
     projects: ['id', 'client_name', 'project_manager', 'current_liaison'],
     tasks: ['id', 'project_id', 'assigned_to'],
+    proposals: ['id', 'project_id', 'client_id', 'client_name'],
   };
 
   const fieldsOf = (moduleId) =>
@@ -132,6 +133,17 @@ describe('module relations', () => {
       expect(['account', 'exact', 'id'], `${rel.from}→${rel.to} match mode`).toContain(rel.match);
       expect(fieldsOf(rel.from), `${rel.from}.${rel.fromField}`).toContain(rel.fromField);
       expect(fieldsOf(rel.to), `${rel.to}.${rel.toField}`).toContain(rel.toField);
+    }
+  });
+
+  // A relation's label reaches t() through rel.label, so the missing-string
+  // scan cannot see it. All ten of them were untranslated, and the whole
+  // related-records strip stayed Hebrew in English.
+  it('every relation label is translatable', async () => {
+    const { RELATIONS } = await import('@/lib/crm/relations');
+    const { EN } = await import('@/lib/i18n/dictionary');
+    for (const rel of RELATIONS) {
+      expect(EN[rel.label], `${rel.from}→${rel.to}: "${rel.label}" has no English`).toBeTruthy();
     }
   });
 

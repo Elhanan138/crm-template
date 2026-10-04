@@ -7,6 +7,7 @@ import { toast } from 'sonner';
 import { sortFields } from '@/lib/customFields';
 import { useRecordViewer, visibleRecords, scopeOf } from '@/lib/crm/visibility';
 import { HISTORY_ENTITY, historyEntryFor } from '@/lib/crm/recordTrail';
+import { approvalProblem, ApprovalRequiredError } from '@/lib/crm/approvals';
 
 export const currency = (v) =>
   v === null || v === undefined || v === '' ? '—' : `₪${Number(v).toLocaleString()}`;
@@ -105,6 +106,10 @@ export function useCrmRecords(schema) {
   const save = useMutation({
     mutationFn: async ({ id, ...data }) => {
       const before = id ? allRecords.find((r) => r.id === id) : null;
+      // Judged on the record as it WILL be — a status change alone is checked
+      // against the amount already on file.
+      const problem = approvalProblem(schema, { ...(before || {}), ...data });
+      if (problem) throw new ApprovalRequiredError(problem);
       const saved = id
         ? await api.entities[entity].update(id, data)
         : await api.entities[entity].create({ ...data, owner_email: data.owner_email || myEmail });
@@ -144,13 +149,24 @@ export function useCrmRecords(schema) {
   // the difference between "done" and "done to some of them".
   const bulkSave = useMutation({
     mutationFn: async ({ ids, patch }) => {
-      const editable = records.filter((r) => ids.includes(r.id) && canEdit(r));
+      const permitted = records.filter((r) => ids.includes(r.id) && canEdit(r));
+      // The approval rule applies here too. Without it, selecting ten orders
+      // and setting them all to "ordered" walked straight past the signature.
+      const editable = permitted.filter((r) => !approvalProblem(schema, { ...r, ...patch }));
       await api.entities[entity].bulkUpdate(editable.map((r) => ({ id: r.id, ...patch })));
-      return { changed: editable.length, skipped: ids.length - editable.length };
+      return {
+        changed: editable.length,
+        skipped: ids.length - permitted.length,
+        unapproved: permitted.length - editable.length,
+      };
     },
-    onSuccess: ({ changed, skipped }) => {
+    onSuccess: ({ changed, skipped, unapproved }) => {
       invalidate();
-      toast.success(skipped ? `${changed} רשומות עודכנו · ${skipped} דולגו (אין הרשאה)` : `${changed} רשומות עודכנו`);
+      const notes = [
+        skipped ? `${skipped} דולגו (אין הרשאה)` : '',
+        unapproved ? `${unapproved} דולגו (נדרש אישור)` : '',
+      ].filter(Boolean);
+      toast.success([`${changed} רשומות עודכנו`, ...notes].join(' · '));
     },
     onError: (e) => toast.error(e?.message || 'העדכון נכשל'),
   });

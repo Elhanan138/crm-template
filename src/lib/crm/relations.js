@@ -30,22 +30,40 @@ import { accountKey } from '@/lib/crm/accountKey';
 const NON_SCHEMA_ENTITIES = {
   projects: 'Project',
   tasks: 'Task',
+  // A proposal has a pricing engine and a printed document of its own, which is
+  // why it is not schema-driven. That is no reason for it to sit outside the
+  // graph: it is the step between a lead and an invoice, and without it the
+  // revenue journey has a hole in the middle.
+  proposals: 'Proposal',
 };
 
 export const RELATIONS = [
   // ── Revenue journey — lead → proposal → invoice → subscription ────────────
+  // The proposal used to be missing from this line. It is the one record that
+  // says what was offered and at what price, so a lead with no proposal and an
+  // invoice with no proposal were two numbers with nothing between them.
+  { from: 'leads', fromField: 'company', to: 'proposals', toField: 'client_name', label: 'הצעות מחיר', match: 'account' },
   { from: 'leads', fromField: 'company', to: 'contacts', toField: 'company', label: 'אנשי קשר', match: 'account' },
   { from: 'leads', fromField: 'company', to: 'invoices', toField: 'client_name', label: 'חשבוניות', match: 'account' },
   { from: 'leads', fromField: 'company', to: 'subscriptions', toField: 'customer', label: 'מנויים', match: 'account' },
 
+  { from: 'proposals', fromField: 'client_name', to: 'leads', toField: 'company', label: 'הזדמנויות', match: 'account' },
+  { from: 'proposals', fromField: 'client_name', to: 'invoices', toField: 'client_name', label: 'חשבוניות', match: 'account' },
+  { from: 'proposals', fromField: 'client_name', to: 'contacts', toField: 'company', label: 'אנשי קשר', match: 'account' },
+  { from: 'proposals', fromField: 'client_name', to: 'subscriptions', toField: 'customer', label: 'מנויים', match: 'account' },
+  { from: 'proposals', fromField: 'project_id', to: 'projects', toField: 'id', label: 'פרויקט', match: 'id' },
+
   { from: 'contacts', fromField: 'company', to: 'leads', toField: 'company', label: 'הזדמנויות', match: 'account' },
+  { from: 'contacts', fromField: 'company', to: 'proposals', toField: 'client_name', label: 'הצעות מחיר', match: 'account' },
   { from: 'contacts', fromField: 'company', to: 'invoices', toField: 'client_name', label: 'חשבוניות', match: 'account' },
 
   { from: 'invoices', fromField: 'client_name', to: 'leads', toField: 'company', label: 'הזדמנויות', match: 'account' },
+  { from: 'invoices', fromField: 'client_name', to: 'proposals', toField: 'client_name', label: 'הצעות מחיר', match: 'account' },
   { from: 'invoices', fromField: 'client_name', to: 'subscriptions', toField: 'customer', label: 'מנויים', match: 'account' },
   { from: 'invoices', fromField: 'client_name', to: 'contacts', toField: 'company', label: 'אנשי קשר', match: 'account' },
 
   { from: 'subscriptions', fromField: 'customer', to: 'invoices', toField: 'client_name', label: 'חשבוניות', match: 'account' },
+  { from: 'subscriptions', fromField: 'customer', to: 'proposals', toField: 'client_name', label: 'הצעות מחיר', match: 'account' },
   { from: 'subscriptions', fromField: 'customer', to: 'leads', toField: 'company', label: 'הזדמנויות', match: 'account' },
 
   // ── Sell → deliver — the half of the graph that used to be missing ────────
@@ -61,6 +79,7 @@ export const RELATIONS = [
   { from: 'projects', fromField: 'client_name', to: 'contacts', toField: 'company', label: 'אנשי קשר', match: 'account' },
   { from: 'projects', fromField: 'client_name', to: 'invoices', toField: 'client_name', label: 'חשבוניות', match: 'account' },
   { from: 'projects', fromField: 'client_name', to: 'subscriptions', toField: 'customer', label: 'מנויים', match: 'account' },
+  { from: 'projects', fromField: 'id', to: 'proposals', toField: 'project_id', label: 'הצעות מחיר', match: 'id' },
   { from: 'projects', fromField: 'id', to: 'tasks', toField: 'project_id', label: 'משימות', match: 'id' },
   { from: 'tasks', fromField: 'project_id', to: 'projects', toField: 'id', label: 'פרויקט', match: 'id' },
 
@@ -84,6 +103,9 @@ export const RELATIONS = [
   // ── Governance — a control and the risks around it share a category ──────
   { from: 'compliance', fromField: 'framework', to: 'risks', toField: 'category', label: 'סיכונים', match: 'exact' },
   { from: 'risks', fromField: 'category', to: 'compliance', toField: 'framework', label: 'בקרות', match: 'exact' },
+  // A risk to one delivery belongs on that delivery.
+  { from: 'risks', fromField: 'project_id', to: 'projects', toField: 'id', label: 'פרויקט', match: 'id' },
+  { from: 'projects', fromField: 'id', to: 'risks', toField: 'project_id', label: 'סיכונים', match: 'id' },
 ];
 
 /** The entity behind a module, whether or not it is schema-driven. */

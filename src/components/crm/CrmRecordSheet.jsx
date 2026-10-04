@@ -10,6 +10,7 @@ import { isDerived } from '@/lib/crm/derived';
 import { useI18n } from '@/lib/i18n';
 import { useRecordTrail, RecordTrailButtons, RecordTrailPanel } from '@/components/crm/RecordTrailStrip';
 import { validateCustomFields } from '@/lib/customFields';
+import { approvalProblem } from '@/lib/crm/approvals';
 import CrmFormFields from '@/components/crm/CrmFormFields';
 import { useFormLayout } from '@/lib/useFormLayout';
 import LineItemsEditor from '@/components/crm/LineItemsEditor';
@@ -60,13 +61,19 @@ export default function CrmRecordSheet({
         next[field.key] = 'שדה חובה';
       }
     }
+    // The approval rule, said in the form before the save refuses it: the
+    // field that is missing is the one that lights up.
+    const approval = approvalProblem(schema, form);
+    if (approval) next[approval.field] = approval.message;
     const missingCustom = validateCustomFields(customFields, form.custom_fields || {});
     if (Object.keys(next).length || missingCustom.length) {
       setErrors(next);
       toast.error(
         missingCustom.length
           ? `שדות חובה חסרים: ${missingCustom.join(', ')}`
-          : 'יש למלא את שדות החובה'
+          : approval && Object.keys(next).length === 1
+            ? t(approval.message)
+            : 'יש למלא את שדות החובה'
       );
       return;
     }
@@ -134,10 +141,19 @@ export default function CrmRecordSheet({
               {handOffs.map((action) => (
                 <div key={action.key} className="space-y-1">
                   <Button asChild variant="outline" size="sm" className="rounded-full h-8 px-3.5 text-xs gap-1.5">
-                    <Link to={action.to(record)}>
-                      <action.icon className="w-3.5 h-3.5 flex-shrink-0" />
-                      {t(action.label)}
-                    </Link>
+                    {/* A mail link leaves the app; a router Link would try to
+                        route to it. */}
+                    {action.external ? (
+                      <a href={action.to(record)}>
+                        <action.icon className="w-3.5 h-3.5 flex-shrink-0" />
+                        {t(action.label)}
+                      </a>
+                    ) : (
+                      <Link to={action.to(record)}>
+                        <action.icon className="w-3.5 h-3.5 flex-shrink-0" />
+                        {t(action.label)}
+                      </Link>
+                    )}
                   </Button>
                   {action.hint && <p className="text-[10px] text-muted-foreground">{t(action.hint)}</p>}
                 </div>

@@ -59,6 +59,27 @@ const SUPPORT_TABLES = [
     columns: ['entity text not null', `field_order jsonb default '[]'::jsonb`],
   },
   {
+    // Every entity that declares no schema — Project, Task, Proposal, Client
+    // and the twenty-odd records that hang off a project — in ONE table, one
+    // row per record, the record itself as a document.
+    //
+    // The alternative was a hand-written column list per entity: twenty lists
+    // that nothing derives and that would drift from the code the day after
+    // they were written. These records are read and written whole by the data
+    // layer anyway, so a document column loses nothing it was using. The
+    // three columns beside it are the ones a policy or an index needs.
+    entity: 'AppRecord',
+    columns: [
+      'entity text not null',
+      'record_id text not null',
+      `data jsonb not null default '{}'::jsonb`,
+      'owner_email text',
+      'project_id text',
+      'updated_date timestamptz not null default now()',
+      'unique (entity, record_id)',
+    ],
+  },
+  {
     entity: 'AuditLog',
     // Append-only on purpose: a log anyone can edit answers no question.
     appendOnly: true,
@@ -77,6 +98,27 @@ export function supabaseSchemaSql(prefix = '') {
       .map((f) => `  ${snake(f.key)} ${SQL_TYPES[f.type] || 'text'}${f.required ? ' not null' : ''}`)
       .join(',\n');
 
+    // The write policy is DERIVED from the columns the schema declares, not
+    // assumed. Every table used to get `using (owner_email = ...)`, including
+    // the two schemas that have no owner at all — `products` and `automations`.
+    // Postgres rejects a policy on a column that does not exist, so the script
+    // a user was told to paste into the SQL editor died partway through and
+    // left half a database behind.
+    //
+    // A catalogue and a rule engine are shared data, so there is nothing to
+    // own: they take an authenticated-write policy instead.
+    const owned = schema.fields.some((f) => f.key === 'owner_email');
+    const writePolicy = owned
+      ? [
+        `create policy "${table}_write" on ${table} for all to authenticated`,
+        `  using (owner_email = auth.jwt() ->> 'email')`,
+        `  with check (owner_email = auth.jwt() ->> 'email');`,
+      ]
+      : [
+        `-- Shared data: ${schema.entity} declares no owner.`,
+        `create policy "${table}_write" on ${table} for all to authenticated using (true) with check (true);`,
+      ];
+
     return [
       `create table if not exists ${table} (`,
       '  id uuid primary key default gen_random_uuid(),',
@@ -87,9 +129,7 @@ export function supabaseSchemaSql(prefix = '') {
       ');',
       `alter table ${table} enable row level security;`,
       `create policy "${table}_read" on ${table} for select to authenticated using (true);`,
-      `create policy "${table}_write" on ${table} for all to authenticated`,
-      `  using (owner_email = auth.jwt() ->> 'email')`,
-      `  with check (owner_email = auth.jwt() ->> 'email');`,
+      ...writePolicy,
     ].join('\n');
   });
 
@@ -112,6 +152,17 @@ export function supabaseSchemaSql(prefix = '') {
   return [
     '-- Generated from the module manifest. Re-generate after adding a module.',
     '-- Run in the Supabase SQL editor.',
+    '--',
+    '-- WHAT THIS COVERS: a typed table per schema-driven module, the record',
+    '-- trail, the audit log, and app_record — one document table for every',
+    '-- entity that declares no schema (Project, Task, Proposal, Client and the',
+    '-- records hanging off a project), keyed by (entity, record_id).',
+    '--',
+    '-- READ POLICY: every table is readable by any authenticated user. Row',
+    '-- visibility (`scope` in src/lib/crm/schemas.js) is applied in the app,',
+    '-- not here, so anyone holding the anon key and a login can read rows the',
+    '-- interface would not show them. Do not put data here that must be',
+    '-- withheld at the database.',
     '',
     ...blocks,
     '-- Cross-module tables: record trail and administration audit log.',

@@ -79,12 +79,28 @@ export const visibleRecords = (records, schema, viewer) =>
     ? records || []
     : (records || []).filter((r) => canSeeRecord(r, schema, viewer));
 
+/** Owned by the viewer, by either of the two fields every record carries. */
+const isMine = (record, viewer) => {
+  const email = viewer?.email || '';
+  if (!email) return false;
+  return cleanEmail(record?.owner_email) === email || cleanEmail(record?.created_by) === email;
+};
+
 // Modules that hold records without a schema. Their visibility is the project
 // permission model itself, so the related-records strip and search obey exactly
 // the same rule the project pages do.
 const NON_SCHEMA_RULES = {
   projects: (record, viewer) => !!viewer?.projectIds?.has(record?.id),
   tasks: (record, viewer) => !record?.project_id || !!viewer?.projectIds?.has(record.project_id),
+  // A proposal is commercial data: a price, a discount, a margin. It was
+  // visible to everyone who could log in on its own page, and invisible in
+  // global search unless it happened to belong to a project — the same record
+  // leaking in one place and lost in the other.
+  //
+  // Tied to a project, it follows that project. Standalone, it follows its
+  // owner, which is the same rule leads and invoices declare in their schemas.
+  proposals: (record, viewer) =>
+    record?.project_id ? !!viewer?.projectIds?.has(record.project_id) : isMine(record, viewer),
 };
 
 /**

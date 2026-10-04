@@ -220,7 +220,7 @@ export default function FormFillSheet({ open, onOpenChange, form, existingSubmis
 
    {/* Header */}
    <div className="bg-card rounded-xl border border-border shadow-sm overflow-hidden flex-shrink-0">
-    <div className="h-1 bg-gradient-to-l from-primary/60 to-primary/20"/>
+    <div className="h-1 bg-primary"/>
     <div className="p-4 sm:p-5">
      <div className="flex items-center gap-3 min-w-0">
       <div className="flex items-center gap-2.5 min-w-0 flex-1">

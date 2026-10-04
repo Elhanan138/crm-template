@@ -262,7 +262,7 @@ export default function EditProject() {
            </button>
           </div>
          ) : (
-          <label className="w-16 h-16 rounded-xl border-2 border-dashed border-border flex items-center justify-center cursor-pointer hover:border-primary/40 hover:bg-muted/30 transition-colors flex-shrink-0">
+          <label className="w-16 h-16 rounded-xl border-2 border-dashed border-border flex items-center justify-center cursor-pointer hover:border-primary/30 hover:bg-muted/30 transition-colors flex-shrink-0">
            {uploading ? <Loader2 className="w-5 h-5 text-muted-foreground animate-spin"/> : <ImagePlus className="w-5 h-5 text-muted-foreground"/>}
            <input type="file"accept="image/*"onChange={handleImageUpload} className="hidden"disabled={uploading} />
           </label>

@@ -21,7 +21,7 @@ export default function WidgetShell({
  className = '',
 }) {
  const ACCENTS = {
-  primary: { chip: 'bg-accent text-accent-foreground', glow: 'from-primary/5' },
+  primary: { chip: 'bg-accent text-accent-foreground', glow: 'from-accent' },
   amber: { chip: 'bg-warning-muted text-warning', glow: 'from-warning' },
   rose: { chip: 'bg-destructive/10 text-destructive', glow: 'from-destructive' },
   sky: { chip: 'bg-info-muted text-info', glow: 'from-info' },

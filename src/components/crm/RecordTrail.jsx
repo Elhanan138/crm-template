@@ -12,7 +12,7 @@ import { formatDate } from '@/lib/formatDate';
 import { useI18n } from '@/lib/i18n';
 import {
   HISTORY_ENTITY, ACTIVITY_ENTITY, FILE_ENTITY,
-  ACTIVITY_TYPES, activityMeta, describeValue,
+  ACTIVITY_TYPES, activityMeta, describeValue, contactStampFor,
 } from '@/lib/crm/recordTrail';
 import { TONE_CLASS } from '@/lib/crm/schemas';
 
@@ -73,8 +73,22 @@ export default function RecordTrail({ schema, entity, record, activeTab, onCount
     queryClient.invalidateQueries({ queryKey: ['record-trail', collection, entity, recordId] });
 
   const addActivity = useMutation({
-    mutationFn: (payload) => api.entities[ACTIVITY_ENTITY].create(payload),
-    onSuccess: () => { refresh(ACTIVITY_ENTITY); setNote(''); toast.success(t('הפעילות נרשמה')); },
+    mutationFn: async (payload) => {
+      const created = await api.entities[ACTIVITY_ENTITY].create(payload);
+      // A call, a meeting or an email is contact: the record's own "last
+      // contact" moves with it, so the field people sort by is never stale.
+      const stamp = contactStampFor(schema, payload.type);
+      if (stamp && entity && recordId) {
+        try { await api.entities[entity].update(recordId, stamp); } catch { /* the activity is logged; the stamp is not worth an error */ }
+      }
+      return created;
+    },
+    onSuccess: () => {
+      refresh(ACTIVITY_ENTITY);
+      queryClient.invalidateQueries({ queryKey: ['crm', entity] });
+      setNote('');
+      toast.success(t('הפעילות נרשמה'));
+    },
     onError: (e) => toast.error(e?.message || t('רישום הפעילות נכשל')),
   });
 
@@ -264,7 +278,7 @@ export default function RecordTrail({ schema, entity, record, activeTab, onCount
 
       {tab === 'files' && (
         <div className="space-y-3">
-          <label className="inline-flex items-center gap-1.5 rounded-full border border-dashed border-border px-3 h-8 text-xs text-muted-foreground hover:text-foreground hover:border-primary/40 cursor-pointer transition-colors">
+          <label className="inline-flex items-center gap-1.5 rounded-full border border-dashed border-border px-3 h-8 text-xs text-muted-foreground hover:text-foreground hover:border-primary/30 cursor-pointer transition-colors">
             {uploading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Upload className="w-3.5 h-3.5" />}
             {t('צירוף קובץ')}
             <input type="file" className="hidden" onChange={onPickFile} disabled={uploading} />

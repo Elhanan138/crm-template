@@ -184,3 +184,52 @@ describe('the schemas actually wire them up', () => {
     }
   });
 });
+
+// A register that records only the risk before treatment cannot answer
+// whether the treatment worked.
+describe('residual risk', () => {
+  it('scores what is left after treatment', async () => {
+    const { residualScore, residualBand } = await import('./derived');
+    expect(residualScore({ residual_likelihood: 2, residual_impact: 3 })).toBe(6);
+    expect(residualBand({ residual_likelihood: 2, residual_impact: 3 })).toBe('medium');
+    expect(residualBand({ residual_likelihood: 1, residual_impact: 2 })).toBe('low');
+  });
+
+  it('says nothing until both residual values are given — unassessed is not zero', async () => {
+    const { residualScore, residualBand } = await import('./derived');
+    expect(residualScore({})).toBeNull();
+    expect(residualScore({ residual_likelihood: 4 })).toBeNull();
+    expect(residualBand({ residual_impact: 4 })).toBeNull();
+  });
+
+  it('reads the same bands as the inherent score', async () => {
+    const { bandOfScore, riskBand } = await import('./derived');
+    for (const [l, i] of [[1, 1], [3, 3], [3, 4], [5, 5]]) {
+      expect(bandOfScore(l * i).value).toBe(riskBand({ likelihood: l, impact: i }));
+    }
+  });
+});
+
+describe('contact cadence', () => {
+  it('stamps the last-contact date on a call, a meeting or an email — not on a note', async () => {
+    const { contactStampFor } = await import('./recordTrail');
+    const { CRM_SCHEMAS } = await import('./schemas');
+    const today = new Date(2026, 2, 5);
+    expect(contactStampFor(CRM_SCHEMAS.contacts, 'call', today)).toEqual({ last_contact_date: '2026-03-05' });
+    expect(contactStampFor(CRM_SCHEMAS.leads, 'meeting', today)).toEqual({ last_contact_date: '2026-03-05' });
+    expect(contactStampFor(CRM_SCHEMAS.contacts, 'note', today)).toBeNull();
+  });
+
+  it('leaves a schema that does not declare the field alone', async () => {
+    const { contactStampFor } = await import('./recordTrail');
+    const { CRM_SCHEMAS } = await import('./schemas');
+    expect(contactStampFor(CRM_SCHEMAS.products, 'call')).toBeNull();
+  });
+
+  it('still judges a lead late by its close date, not by its follow-up', async () => {
+    const { deadlineFieldOf } = await import('./insights');
+    const { CRM_SCHEMAS } = await import('./schemas');
+    expect(deadlineFieldOf(CRM_SCHEMAS.leads).key).toBe('expected_close');
+    expect(deadlineFieldOf(CRM_SCHEMAS.contacts).key).toBe('next_followup');
+  });
+});
