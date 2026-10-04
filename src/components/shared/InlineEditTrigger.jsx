@@ -16,16 +16,23 @@ import React from 'react';
 // the whole reason the target has visible bounds.
 // ─────────────────────────────────────────────────────────────────────────────
 
-export default function InlineEditTrigger({
-  onEdit, title, disabled, round, className = '', children,
-}) {
+// forwardRef, and the rest of the props passed through, because this is used
+// as a Radix `asChild` trigger (the priority, status and project cells). Radix
+// hands its trigger a ref to anchor the popover to, plus aria and data
+// attributes; a plain function component dropped all of them — React warned on
+// every task row, and the popover had no element to position itself against.
+const InlineEditTrigger = React.forwardRef(function InlineEditTrigger({
+  onEdit, title, disabled, round, className = '', children, onClick, ...rest
+}, ref) {
   if (disabled) return children;
 
   return (
     <button
+      ref={ref}
       type="button"
       title={title}
-      onClick={(event) => { event.stopPropagation(); onEdit(); }}
+      {...rest}
+      onClick={(event) => { event.stopPropagation(); onClick?.(event); onEdit?.(); }}
       className={`inline-flex items-center gap-1.5 max-w-full text-start align-middle transition-all duration-150
         ${round ? 'rounded-full' : 'rounded-md px-1 -mx-1'}
         hover:ring-2 hover:ring-offset-1 hover:ring-primary/30 hover:bg-muted/50
@@ -35,4 +42,6 @@ export default function InlineEditTrigger({
       {children}
     </button>
   );
-}
+});
+
+export default InlineEditTrigger;

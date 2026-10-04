@@ -639,6 +639,7 @@ export const EN = {
   'השחזור מהארכיון נכשל': 'Restoring from the archive failed',
   'בחר עמוד מהרשימה, או התחל מתבנית': 'Pick a page from the list, or start from a template',
   'התחל מתבנית': 'Start from a template',
+  'או התחל מתבנית': 'or start from a template',
   'סיכום פגישה': 'Meeting summary',
   'פגישת התנעה': 'Kick-off meeting',
   'רטרוספקטיבה': 'Retrospective',

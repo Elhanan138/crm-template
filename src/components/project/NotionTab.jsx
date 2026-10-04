@@ -294,9 +294,21 @@ export default function NotionTab({ projectId, project }) {
      title={projectId ? "אין פתקים בפרויקט" : "אין פתקים עדיין"}
      description="צור נושאים כמו הדרכות, תהליכים או פגישות, וארגן את הפתקים בצורה נוחה — בדיוק כמו מחברת OneNote."
      action={
-      <Button onClick={() => handleNewSection()} className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-full gap-2">
-       <Plus className="w-4 h-4"/> צור נושא ראשון
-      </Button>
+      <div className="flex flex-col items-center gap-3">
+       <Button onClick={() => handleNewSection()} className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-full gap-2">
+        <Plus className="w-4 h-4"/> צור נושא ראשון
+       </Button>
+       {/* The first note is exactly when a structure is worth most — an empty
+           notebook is where inconsistent meeting notes begin. */}
+       <p className="text-xs text-muted-foreground">{t('או התחל מתבנית')}</p>
+       <div className="flex flex-wrap justify-center gap-2">
+        {NOTE_TEMPLATES.map((tpl) => (
+         <Button key={tpl.id} variant="outline" size="sm" className="rounded-full gap-1.5" onClick={() => handleNewFromTemplate(tpl)}>
+          <span>{tpl.icon}</span> {t(tpl.label)}
+         </Button>
+        ))}
+       </div>
+      </div>
      }
     />
    </div>
