@@ -2,8 +2,17 @@ import {
   Filter, Contact, Receipt, Package, Route, TrendingUp,
 } from 'lucide-react';
 import {
-  weightedValue, invoiceBalance, invoiceOverdueDays, marginPercent,
+  weightedValue, invoiceBalance, invoiceOverdueDays, marginPercent, daysSince,
 } from '@/lib/crm/derived';
+
+// When we last spoke to them, and when we said we would again. Stamped by any
+// call, meeting or email logged on the record (src/lib/crm/recordTrail.js), so
+// it is never left for somebody to remember to type.
+const CONTACT_CADENCE = [
+  { key: 'last_contact_date', label: 'קשר אחרון', type: 'date', list: true },
+  { key: 'days_since_contact', label: 'ימים מאז קשר', type: 'number', list: true, derive: (r) => daysSince(r.last_contact_date) },
+  { key: 'next_followup', label: 'מעקב הבא', type: 'date', list: true },
+];
 
 // ─────────────────────────────────────────────────────────────────────────────
 // CRM SCHEMAS
@@ -247,6 +256,10 @@ const CORE_SCHEMAS = {
       // probability its own stage already declares.
       { key: 'weighted_value', label: 'שווי משוקלל', type: 'currency', list: true, derive: weightedValue(LEAD_STAGES) },
       { key: 'expected_close', label: 'סגירה צפויה', type: 'date', list: true },
+      // After the close date on purpose: the first date field that reads like
+      // a deadline is the one "overdue" is judged by, and for a lead that is
+      // still the close date.
+      ...CONTACT_CADENCE,
       { key: 'source', label: 'מקור', type: 'select', options: [
         { value: 'inbound', label: 'פנייה נכנסת' },
         { value: 'referral', label: 'המלצה' },
@@ -279,6 +292,7 @@ const CORE_SCHEMAS = {
       { key: 'email', label: 'אימייל', type: 'email', list: true },
       { key: 'phone', label: 'טלפון', type: 'phone', list: true },
       { key: 'is_primary', label: 'איש קשר ראשי', type: 'checkbox' },
+      ...CONTACT_CADENCE,
       OWNER_FIELD,
       { key: 'notes', label: 'הערות', type: 'textarea' },
     ],

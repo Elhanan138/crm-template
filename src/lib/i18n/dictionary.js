@@ -593,6 +593,11 @@ export const EN = {
   'חובה בהזמנה של ₪5,000 ומעלה לפני שהיא מאושרת, מוזמנת או מתקבלת.': 'Required on an order of ₪5,000 or more before it is approved, ordered or received.',
   'נדרש אישור לפני ההזמנה — סכום מעל סף האישור': 'Sign-off required — the amount is over the approval threshold',
 
+  // ── Contact cadence ───────────────────────────────────────────────────────
+  'קשר אחרון': 'Last contact',
+  'ימים מאז קשר': 'Days since contact',
+  'מעקב הבא': 'Next follow-up',
+
   // ── Saved reports ─────────────────────────────────────────────────────────
   'דוחות שמורים': 'Saved reports',
   'הדוח נמחק': 'Report deleted',

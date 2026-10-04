@@ -12,7 +12,7 @@ import { formatDate } from '@/lib/formatDate';
 import { useI18n } from '@/lib/i18n';
 import {
   HISTORY_ENTITY, ACTIVITY_ENTITY, FILE_ENTITY,
-  ACTIVITY_TYPES, activityMeta, describeValue,
+  ACTIVITY_TYPES, activityMeta, describeValue, contactStampFor,
 } from '@/lib/crm/recordTrail';
 import { TONE_CLASS } from '@/lib/crm/schemas';
 
@@ -73,8 +73,22 @@ export default function RecordTrail({ schema, entity, record, activeTab, onCount
     queryClient.invalidateQueries({ queryKey: ['record-trail', collection, entity, recordId] });
 
   const addActivity = useMutation({
-    mutationFn: (payload) => api.entities[ACTIVITY_ENTITY].create(payload),
-    onSuccess: () => { refresh(ACTIVITY_ENTITY); setNote(''); toast.success(t('הפעילות נרשמה')); },
+    mutationFn: async (payload) => {
+      const created = await api.entities[ACTIVITY_ENTITY].create(payload);
+      // A call, a meeting or an email is contact: the record's own "last
+      // contact" moves with it, so the field people sort by is never stale.
+      const stamp = contactStampFor(schema, payload.type);
+      if (stamp && entity && recordId) {
+        try { await api.entities[entity].update(recordId, stamp); } catch { /* the activity is logged; the stamp is not worth an error */ }
+      }
+      return created;
+    },
+    onSuccess: () => {
+      refresh(ACTIVITY_ENTITY);
+      queryClient.invalidateQueries({ queryKey: ['crm', entity] });
+      setNote('');
+      toast.success(t('הפעילות נרשמה'));
+    },
     onError: (e) => toast.error(e?.message || t('רישום הפעילות נכשל')),
   });
 

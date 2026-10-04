@@ -29,6 +29,26 @@ export const ACTIVITY_TYPES = [
   { value: 'task', label: 'משימה', tone: 'warning' },
 ];
 
+/** Activity that is actual contact with the person — a note is not. */
+export const CONTACT_ACTIVITY = new Set(['call', 'meeting', 'email']);
+
+/** The field a schema declares for "when did we last speak to them", if any. */
+export const LAST_CONTACT_FIELD = 'last_contact_date';
+
+/**
+ * The patch a logged activity makes to its record, or null.
+ *
+ * Logging a call used to leave the contact's own "last contact" untouched, so
+ * the one field a salesperson sorts by was always stale. A schema opts in
+ * simply by declaring `last_contact_date`; nothing else needs to know.
+ */
+export function contactStampFor(schema, activityType, today = new Date()) {
+  if (!CONTACT_ACTIVITY.has(activityType)) return null;
+  if (!(schema?.fields || []).some((f) => f.key === LAST_CONTACT_FIELD)) return null;
+  const day = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+  return { [LAST_CONTACT_FIELD]: day };
+}
+
 export const activityMeta = (value) =>
   ACTIVITY_TYPES.find((t) => t.value === value) || ACTIVITY_TYPES[0];
 

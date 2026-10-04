@@ -209,3 +209,27 @@ describe('residual risk', () => {
     }
   });
 });
+
+describe('contact cadence', () => {
+  it('stamps the last-contact date on a call, a meeting or an email — not on a note', async () => {
+    const { contactStampFor } = await import('./recordTrail');
+    const { CRM_SCHEMAS } = await import('./schemas');
+    const today = new Date(2026, 2, 5);
+    expect(contactStampFor(CRM_SCHEMAS.contacts, 'call', today)).toEqual({ last_contact_date: '2026-03-05' });
+    expect(contactStampFor(CRM_SCHEMAS.leads, 'meeting', today)).toEqual({ last_contact_date: '2026-03-05' });
+    expect(contactStampFor(CRM_SCHEMAS.contacts, 'note', today)).toBeNull();
+  });
+
+  it('leaves a schema that does not declare the field alone', async () => {
+    const { contactStampFor } = await import('./recordTrail');
+    const { CRM_SCHEMAS } = await import('./schemas');
+    expect(contactStampFor(CRM_SCHEMAS.products, 'call')).toBeNull();
+  });
+
+  it('still judges a lead late by its close date, not by its follow-up', async () => {
+    const { deadlineFieldOf } = await import('./insights');
+    const { CRM_SCHEMAS } = await import('./schemas');
+    expect(deadlineFieldOf(CRM_SCHEMAS.leads).key).toBe('expected_close');
+    expect(deadlineFieldOf(CRM_SCHEMAS.contacts).key).toBe('next_followup');
+  });
+});
