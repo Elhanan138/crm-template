@@ -87,6 +87,15 @@ export default function CrmModulePage({
   const [view, setView] = useState('table');
   const [page, setPage] = useState(1);
   const [selected, setSelected] = useState(() => new Set());
+  // An extra, ad-hoc slice set by whatever `renderAbove` renders — pressing an
+  // aging bucket, an MRR band, a stat tile. It is deliberately NOT a segment:
+  // segments are derived from the schema and are the same for every module,
+  // while this is one module's own view of its own numbers.
+  //
+  // It carries the predicate it was counted with, so a tile saying "₪40,000 in
+  // 31–60 days" shows exactly the rows behind that figure. A number you cannot
+  // press to see what it is made of is a number nobody trusts.
+  const [focus, setFocus] = useState(null); // { id, label, test }
   const [editing, setEditing] = useState(null); // { id, key }
   const [sheetRecord, setSheetRecord] = useState(null);
   const [sheetOpen, setSheetOpen] = useState(false);
@@ -114,8 +123,16 @@ export default function CrmModulePage({
   );
 
   const visible = useMemo(
-    () => sortRecords(filterRecords(records.filter(segment.test), schema, { search, filters }), sort, schema),
-    [records, segment, schema, search, filters, sort]
+    () => sortRecords(
+      filterRecords(
+        records.filter(segment.test).filter(focus ? focus.test : () => true),
+        schema,
+        { search, filters },
+      ),
+      sort,
+      schema,
+    ),
+    [records, segment, focus, schema, search, filters, sort]
   );
 
   const duplicateCount = useMemo(
@@ -138,7 +155,7 @@ export default function CrmModulePage({
 
   // A selection or a page number that survives a filter change would act on, or
   // point at, rows you can no longer see.
-  useEffect(() => { setSelected(new Set()); setPage(1); }, [segmentId, search, filters, groupKey, pageSize]);
+  useEffect(() => { setSelected(new Set()); setPage(1); }, [segmentId, search, filters, groupKey, pageSize, focus]);
   useEffect(() => {
     const lastPage = Math.max(1, Math.ceil(visible.length / pageSize));
     if (page > lastPage) setPage(lastPage);
@@ -389,7 +406,21 @@ export default function CrmModulePage({
       {!restricted && (<>
         {headline.length > 0 && <StatStrip stats={headline} />}
 
-        {renderAbove?.({ records, lookups, openRecord })}
+        {renderAbove?.({ records, lookups, openRecord, focus, setFocus })}
+
+        {/* The slice a tile asked for, and the way back out of it. Without a
+            visible chip, a list filtered by a press you have forgotten making
+            looks like a list that lost rows. */}
+        {focus && (
+          <button
+            onClick={() => setFocus(null)}
+            className="inline-flex items-center gap-1.5 mb-3 rounded-full border border-primary/30 bg-accent px-3 h-8 text-xs font-semibold text-accent-foreground hover:bg-muted transition-colors"
+          >
+            {t(focus.label)}
+            <span className="text-[10px] tabular-nums opacity-70">{visible.length}</span>
+            <X className="w-3 h-3 flex-shrink-0 opacity-70" />
+          </button>
+        )}
 
         {/* Segments — open on the slice you work in, not on every row ever created */}
         {segments.length > 1 && records.length > 0 && (

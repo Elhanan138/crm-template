@@ -557,6 +557,14 @@ export const EN = {
   "מחיר": "Price",
   "סכום ביניים": "Subtotal",
 
+  // ── Debt aging ────────────────────────────────────────────────────────────
+  'גיול': 'Aging',
+  'יתרה פתוחה': 'Outstanding',
+  '1–30 יום': '1–30 days',
+  '31–60 יום': '31–60 days',
+  '61–90 יום': '61–90 days',
+  '90+ יום': '90+ days',
+
   // ── Relation labels ───────────────────────────────────────────────────────
   // What the related-records strip calls each link. These reach t() through
   // rel.label, so the scan cannot see them and all ten stayed Hebrew in

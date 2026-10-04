@@ -327,3 +327,60 @@ describe('permissions', () => {
     });
   });
 });
+
+// A module can put its own numbers above the list (an aging strip, an MRR
+// band). Those numbers are only trustworthy if pressing one shows the rows it
+// was counted from — and if there is a way back out of the slice.
+describe('a module\'s own slice above the list', () => {
+  const renderWithStrip = () =>
+    renderWithProviders(
+      <CrmModulePage
+        schema={CRM_SCHEMAS.leads}
+        moduleId="leads"
+        renderAbove={({ setFocus }) => (
+          <button onClick={() => setFocus({
+            id: 'big',
+            label: 'עסקאות גדולות',
+            test: (r) => Number(r.value) >= 2000,
+          })}>
+            עסקאות גדולות
+          </button>
+        )}
+      />
+    );
+
+  it('narrows the list to the rows the tile counted', async () => {
+    const user = userEvent.setup();
+    seedLeads(3); // values 1000, 2000, 3000
+    renderWithStrip();
+    await findInTable('Deal 1');
+
+    await user.click(screen.getByRole('button', { name: 'עסקאות גדולות' }));
+
+    await waitFor(() => expect(within(table()).queryByText('Deal 1')).toBeNull());
+    expect(inTable('Deal 2')).toBeTruthy();
+    expect(inTable('Deal 3')).toBeTruthy();
+  });
+
+  it('shows the slice as a chip that clears it again', async () => {
+    const user = userEvent.setup();
+    seedLeads(3);
+    renderWithStrip();
+    await findInTable('Deal 1');
+
+    await user.click(screen.getByRole('button', { name: 'עסקאות גדולות' }));
+    // The chip carries the label and how many rows are behind it.
+    const chip = await screen.findByRole('button', { name: /עסקאות גדולות\s*2/ });
+
+    await user.click(chip);
+    expect(await findInTable('Deal 1')).toBeTruthy();
+  });
+
+  it('renders no chip at all until a tile is pressed', async () => {
+    seedLeads(3);
+    renderWithStrip();
+    await findInTable('Deal 1');
+    // Only the tile itself — no chip, because nothing is focused yet.
+    expect(screen.getAllByRole('button', { name: /עסקאות גדולות/ })).toHaveLength(1);
+  });
+});
