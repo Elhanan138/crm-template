@@ -252,6 +252,15 @@ export const SECTOR_SCHEMAS = {
     titleField: 'number',
     defaultSort: '-order_date',
     searchFields: ['number', 'supplier', 'description'],
+    // At or above the threshold, an order cannot be ordered or received until
+    // somebody has signed it off. Enforced in the save every write passes
+    // through — see src/lib/crm/approvals.js.
+    approval: {
+      amountField: 'amount',
+      approverField: 'approved_by',
+      threshold: 5000,
+      statuses: ['approved', 'ordered', 'received'],
+    },
     fields: [
       { key: 'number', label: 'מספר הזמנה', type: 'text', required: true, list: true },
       { key: 'supplier', label: 'ספק', type: 'text', required: true, list: true },
@@ -266,7 +275,7 @@ export const SECTOR_SCHEMAS = {
       { key: 'expected_date', label: 'אספקה צפויה', type: 'date', list: true },
       { key: 'delivery_days_left', label: 'ימים לאספקה', type: 'number', list: true, derive: (r) => (r.received_date || ['received', 'cancelled'].includes(r.status) ? null : daysUntil(r.expected_date)) },
       { key: 'received_date', label: 'תאריך קבלה', type: 'date' },
-      { key: 'approved_by', label: 'אושר על ידי', type: 'person', by: 'name' },
+      { key: 'approved_by', label: 'אושר על ידי', type: 'person', by: 'name', help: 'חובה בהזמנה של ₪5,000 ומעלה לפני שהיא מאושרת, מוזמנת או מתקבלת.' },
       { key: 'cost_center', label: 'מרכז עלות', type: 'text' },
       OWNER,
       { key: 'description', label: 'פירוט', type: 'textarea' },

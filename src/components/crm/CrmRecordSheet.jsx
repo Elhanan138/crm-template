@@ -10,6 +10,7 @@ import { isDerived } from '@/lib/crm/derived';
 import { useI18n } from '@/lib/i18n';
 import { useRecordTrail, RecordTrailButtons, RecordTrailPanel } from '@/components/crm/RecordTrailStrip';
 import { validateCustomFields } from '@/lib/customFields';
+import { approvalProblem } from '@/lib/crm/approvals';
 import CrmFormFields from '@/components/crm/CrmFormFields';
 import { useFormLayout } from '@/lib/useFormLayout';
 import LineItemsEditor from '@/components/crm/LineItemsEditor';
@@ -60,13 +61,19 @@ export default function CrmRecordSheet({
         next[field.key] = 'שדה חובה';
       }
     }
+    // The approval rule, said in the form before the save refuses it: the
+    // field that is missing is the one that lights up.
+    const approval = approvalProblem(schema, form);
+    if (approval) next[approval.field] = approval.message;
     const missingCustom = validateCustomFields(customFields, form.custom_fields || {});
     if (Object.keys(next).length || missingCustom.length) {
       setErrors(next);
       toast.error(
         missingCustom.length
           ? `שדות חובה חסרים: ${missingCustom.join(', ')}`
-          : 'יש למלא את שדות החובה'
+          : approval && Object.keys(next).length === 1
+            ? t(approval.message)
+            : 'יש למלא את שדות החובה'
       );
       return;
     }

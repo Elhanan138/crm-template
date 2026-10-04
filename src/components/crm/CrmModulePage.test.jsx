@@ -531,3 +531,4 @@ describe('empty states that offer the next step', () => {
     expect(await findInTable('Deal 1')).toBeTruthy();
   });
 });
+
