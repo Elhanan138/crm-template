@@ -92,11 +92,20 @@ export function DocumentFooter({ children, className = '' }) {
   );
 }
 
-/** The white sheet a document is rendered onto, ready for html2canvas. */
+/**
+ * The white sheet a document is rendered onto, ready for html2canvas.
+ *
+ * Direction is pinned, for the same reason the `--doc-*` tokens are never
+ * redefined per theme: a quote sent to a client is a Hebrew commercial
+ * document, and it cannot come out mirrored because the sender happened to
+ * have the interface in English. Its own `text-right` / `text-left` columns
+ * are therefore correct rather than accidental.
+ */
 export function DocumentSheet({ innerRef, className = '', children }) {
   return (
     <div
       ref={innerRef}
+      dir="rtl"
       className={`bg-doc text-doc-foreground w-[800px] max-w-full mx-auto px-8 py-10 ${className}`}
     >
       {children}

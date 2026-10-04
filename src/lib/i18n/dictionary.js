@@ -557,6 +557,72 @@ export const EN = {
   "מחיר": "Price",
   "סכום ביניים": "Subtotal",
 
+  // ── Relation labels ───────────────────────────────────────────────────────
+  // What the related-records strip calls each link. These reach t() through
+  // rel.label, so the scan cannot see them and all ten stayed Hebrew in
+  // English. src/lib/reports/registry.test.js now fails if a relation is
+  // declared without one.
+  'הזדמנויות': 'Opportunities',
+  'פרויקטים בניהולו': 'Projects they manage',
+  'קריאות שירות': 'Service calls',
+  'קריאות': 'Calls',
+  'נכסים': 'Assets',
+  'ציוד': 'Equipment',
+  'הזמנות רכש': 'Purchase orders',
+  'פריטי מלאי': 'Stock items',
+  'תיק עובד': 'Employee file',
+  'בקרות': 'Controls',
+
+  // ── Quotes ────────────────────────────────────────────────────────────────
+  // The module had no entries at all: every string in it was hardcoded Hebrew
+  // and stayed Hebrew in English.
+  //
+  // The status and complexity labels reach t() through a variable, so the
+  // missing-translation scan cannot see them — they are listed here first,
+  // beside the values they come from in src/lib/proposalPricing.js.
+  'אושרה': 'Approved',
+  'נדחתה': 'Rejected',
+  'בסיסי': 'Basic',
+  'מתקדם': 'Advanced',
+  'ארגוני': 'Enterprise',
+  'הצעות': 'quotes',
+  'הצעת מחיר חדשה': 'New quote',
+  'עריכת הצעת מחיר': 'Edit quote',
+  'עריכת פרטי הצעת המחיר': 'Edit the quote details',
+  'צור הצעה': 'Create a quote',
+  'אין הצעות מחיר עדיין': 'No quotes yet',
+  'צור את ההצעה הראשונה כדי להתחיל.': 'Create the first quote to get started.',
+  'נסה לשנות את החיפוש או את הסינון.': 'Try changing the search or the filter.',
+  'חיפוש הצעות מחיר': 'Search quotes',
+  'חיפוש לפי מספר, לקוח או הערות...': 'Search by number, customer or notes…',
+  'כל הסטטוסים': 'All statuses',
+  'מספר הצעה': 'Quote number',
+  'ללא מספר': 'No number',
+  'לקוח לא מוגדר': 'No customer set',
+  'בחר לקוח': 'Pick a customer',
+  'בחר פרויקט': 'Pick a project',
+  'פרויקט (אופציונלי)': 'Project (optional)',
+  'בתוקף עד': 'Valid until',
+  'מחיר לשעת עבודה (₪)': 'Hourly rate (₪)',
+  'מורכבות פרויקט': 'Project complexity',
+  'פירוט עבודה': 'Work breakdown',
+  'שם השלב / מוצר': 'Phase / product name',
+  'שם שלב': 'Phase name',
+  'שעות שלב': 'Phase hours',
+  'מחיקת שורת פירוט': 'Delete breakdown line',
+  'הנחה': 'Discount',
+  'הנחה (%)': 'Discount (%)',
+  'מע"מ': 'VAT',
+  'סה"כ לתשלום': 'Total due',
+  'תאריך': 'Date',
+  'הדפסה': 'Print',
+  'ייצוא PDF': 'Export PDF',
+  'הצעת המחיר נוצרה': 'Quote created',
+  'הצעת המחיר עודכנה': 'Quote updated',
+  'שמירת הצעת המחיר נכשלה': 'Saving the quote failed',
+  'הצעת המחיר יוצאה ל-PDF': 'Quote exported to PDF',
+  'יצירת ה-PDF נכשלה': 'Creating the PDF failed',
+
   // ── Settings screens ──────────────────────────────────────────────────────
   "3–32 תווים באנגלית, ספרות, נקודה, מקף או קו תחתון. אופציונלי.": "3–32 Latin characters, digits, dot, hyphen or underscore. Optional.",
   "Connector ID לא הוגדר. יש לרשום את הקונקטור ב-workspace תחילה.": "No connector ID is set. Register the connector in the workspace first.",

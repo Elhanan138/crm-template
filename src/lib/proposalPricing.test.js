@@ -4,6 +4,7 @@ import {
   complexityLabel, getAdjustedRate, computePricing, VAT_RATE,
 } from './proposalPricing';
 import { TONES, normalizeTone, surfaceFor } from './tones';
+import { EN } from './i18n/dictionary';
 
 describe('a proposal status is declared like every other status', () => {
   it('carries a value, a Hebrew label and a tone the tone map knows', () => {
@@ -22,6 +23,16 @@ describe('a proposal status is declared like every other status', () => {
   it('answers for an unknown status rather than rendering a blank chip', () => {
     expect(proposalStatusMeta('not-a-status')).toBe(PROPOSAL_STATUSES[0]);
     expect(proposalStatusMeta(undefined).label).toBeTruthy();
+  });
+});
+
+// These labels reach t() through a variable, so the missing-string scan cannot
+// see them. Without this, the quote module reads half-English.
+describe('every label this module renders is translatable', () => {
+  it('has an English entry for each status and each complexity tier', () => {
+    for (const { label } of [...PROPOSAL_STATUSES, ...PROPOSAL_COMPLEXITIES]) {
+      expect(EN[label], `"${label}" has no English`).toBeTruthy();
+    }
   });
 });
 
