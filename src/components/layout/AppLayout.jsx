@@ -18,6 +18,7 @@ import { clearNavStack, handleRouteChange, consumePendingScroll } from '@/hooks/
 import { api } from '@/api/client';
 import { WideLayoutProvider, useIsWide } from '@/lib/WideLayoutContext';
 import { useSidebarCollapsed } from '@/lib/sidebarPrefs';
+import { markModuleSeen, moduleForPath } from '@/lib/whatsNew';
 
 function AppLayoutInner() {
   const announcementsEnabled = useCapability('announcements');
@@ -64,6 +65,12 @@ function AppLayoutInner() {
     handleRouteChange(prevPathRef.current, currentPath, scrollRef.current);
     prevPathRef.current = currentPath;
   }
+
+  // Opening a module is what makes its "new" dot go away.
+  useEffect(() => {
+    const moduleId = moduleForPath(location.pathname);
+    if (moduleId) markModuleSeen(moduleId);
+  }, [location.pathname]);
 
   // Restore scroll position after paint when navigating back
   useLayoutEffect(() => {

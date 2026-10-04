@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
+import { useWhatsNew, moduleForPath } from '@/lib/whatsNew';
 import { ChevronDown } from 'lucide-react';
 import { prefetchPath } from '@/lib/moduleRegistry';
 import { useI18n } from '@/lib/i18n';
@@ -12,6 +13,14 @@ const GROUP_ORDER = ['core', 'operations'];
 export default function SidebarNav({ items, isCollapsed, onNavigate }) {
   const location = useLocation();
   const { t } = useI18n();
+  // A dot on a link whose module has something the person has not opened yet.
+  const { hasNews } = useWhatsNew();
+  const modulesOf = (item) => (item.children?.length
+    ? item.children.map((c) => c.id)
+    : [moduleForPath(item.path)].filter(Boolean));
+  const NewDot = ({ className = '' }) => (
+    <span className={`w-1.5 h-1.5 rounded-full bg-info flex-shrink-0 ${className}`} aria-label={t('חדש')} />
+  );
   const [orderedItems, setOrderedItems] = useState(items);
 
   useEffect(() => {
@@ -119,6 +128,9 @@ export default function SidebarNav({ items, isCollapsed, onNavigate }) {
                     )}
                     <Icon className={`w-[18px] h-[18px] flex-shrink-0 ${active ? 'text-primary' : 'text-muted-foreground'}`} />
                     {!isCollapsed && <span className="truncate">{t(item.label)}</span>}
+                    {modulesOf(item).some(hasNews) && (
+                      <NewDot className={isCollapsed ? 'absolute top-1.5 end-1.5' : 'ms-auto'} />
+                    )}
                   </Link>
 
                   {/* Expand toggle — sub-pages are reachable without first
@@ -131,7 +143,7 @@ export default function SidebarNav({ items, isCollapsed, onNavigate }) {
                       aria-label={`${open ? t('סגירה') : t('פתיחה')} ${t(item.label)}`}
                       className="p-2 md:p-1 -ms-1 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted/70 transition-colors flex-shrink-0"
                     >
-                      <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-150 ${open ? '' : 'rotate-90'}`} />
+                      <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-150 ${open ? '' : 'rtl:rotate-90 ltr:-rotate-90'}`} />
                     </button>
                   )}
                 </div>
@@ -158,7 +170,10 @@ export default function SidebarNav({ items, isCollapsed, onNavigate }) {
                           {childActive && (
                             <span className="absolute -start-px top-1/2 -translate-y-1/2 w-0.5 h-5 rounded-full bg-primary" />
                           )}
-                          <span className="truncate block">{t(child.label)}</span>
+                          <span className="flex items-center gap-2 min-w-0">
+                            <span className="truncate">{t(child.label)}</span>
+                            {hasNews(child.id) && <NewDot />}
+                          </span>
                         </Link>
                       );
                     })}
