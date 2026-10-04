@@ -113,9 +113,16 @@ describe('generated schema', () => {
   // The generated SQL is what a person pastes into a production database. It
   // has to say what it does not do, or they will assume it does.
   describe('the SQL states its own limits', () => {
-    it('names the entities it cannot generate a table for', () => {
+    // The delivery side declares no schema. It used to get no table at all,
+    // so connecting a database left projects, tasks and quotes behind.
+    it('gives every entity without a schema a home in one document table', () => {
+      expect(expectedTables()).toContain('app_record');
+      expect(sql).toContain('create table if not exists app_record (');
+      expect(sql).toMatch(/data jsonb not null/);
+      expect(sql).toMatch(/unique \(entity, record_id\)/);
       for (const entity of ['Project', 'Task', 'Proposal', 'Client']) {
         expect(sql, entity).toContain(entity);
+        // Not a typed table of its own — no column list to drift.
         expect(expectedTables()).not.toContain(tableNameOf(entity));
       }
     });

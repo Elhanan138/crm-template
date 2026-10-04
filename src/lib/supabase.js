@@ -59,6 +59,27 @@ const SUPPORT_TABLES = [
     columns: ['entity text not null', `field_order jsonb default '[]'::jsonb`],
   },
   {
+    // Every entity that declares no schema — Project, Task, Proposal, Client
+    // and the twenty-odd records that hang off a project — in ONE table, one
+    // row per record, the record itself as a document.
+    //
+    // The alternative was a hand-written column list per entity: twenty lists
+    // that nothing derives and that would drift from the code the day after
+    // they were written. These records are read and written whole by the data
+    // layer anyway, so a document column loses nothing it was using. The
+    // three columns beside it are the ones a policy or an index needs.
+    entity: 'AppRecord',
+    columns: [
+      'entity text not null',
+      'record_id text not null',
+      `data jsonb not null default '{}'::jsonb`,
+      'owner_email text',
+      'project_id text',
+      'updated_date timestamptz not null default now()',
+      'unique (entity, record_id)',
+    ],
+  },
+  {
     entity: 'AuditLog',
     // Append-only on purpose: a log anyone can edit answers no question.
     appendOnly: true,
@@ -132,11 +153,10 @@ export function supabaseSchemaSql(prefix = '') {
     '-- Generated from the module manifest. Re-generate after adding a module.',
     '-- Run in the Supabase SQL editor.',
     '--',
-    '-- WHAT THIS COVERS: the schema-driven modules, plus the record trail and',
-    '-- the audit log. The delivery side — Project, Task, Proposal, Client and',
-    '-- the records hanging off a project — declares no schema, so there is',
-    '-- nothing here to generate a table from. Those entities still live in',
-    '-- local storage after you connect.',
+    '-- WHAT THIS COVERS: a typed table per schema-driven module, the record',
+    '-- trail, the audit log, and app_record — one document table for every',
+    '-- entity that declares no schema (Project, Task, Proposal, Client and the',
+    '-- records hanging off a project), keyed by (entity, record_id).',
     '--',
     '-- READ POLICY: every table is readable by any authenticated user. Row',
     '-- visibility (`scope` in src/lib/crm/schemas.js) is applied in the app,',
