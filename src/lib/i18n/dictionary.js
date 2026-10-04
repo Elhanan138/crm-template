@@ -557,6 +557,21 @@ export const EN = {
   "מחיר": "Price",
   "סכום ביניים": "Subtotal",
 
+  // ── Hand-offs between modules ─────────────────────────────────────────────
+  // Label and hint per hand-off. These reach t() through the action, so the
+  // missing-string scan cannot see them — the one that already existed had
+  // never been translated. src/lib/crm/recordActions.test.js now fails if a
+  // hand-off is declared without both.
+  'המרה לפרויקט': 'Convert to a project',
+  'פותח אשף פרויקט חדש עם פרטי הליד, ומסמן את הליד כנסגר בהצלחה': 'Opens the new-project wizard with the lead\'s details, and marks the lead won',
+  'הפקת הצעת מחיר': 'Raise a quote',
+  'פותח הצעת מחיר חדשה עם הלקוח מהליד': 'Opens a new quote with the customer from the lead',
+  'הפקת חשבונית': 'Raise an invoice',
+  'פותח חשבונית חדשה עם הלקוח והסכום מההצעה': 'Opens a new invoice with the customer and amount from the quote',
+  'הפיכה למנוי': 'Turn into a subscription',
+  'פותח מנוי חדש עם הלקוח והסכום מהחשבונית': 'Opens a new subscription with the customer and amount from the invoice',
+  'מהליד': 'From the lead',
+
   // ── Debt aging ────────────────────────────────────────────────────────────
   'גיול': 'Aging',
   'יתרה פתוחה': 'Outstanding',

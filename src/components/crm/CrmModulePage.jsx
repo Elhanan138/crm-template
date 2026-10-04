@@ -49,6 +49,34 @@ export function StatusPill({ meta }) {
 const NO_GROUP = '__none__';
 
 /**
+ * A new record pre-filled from the URL, for a hand-off out of another module.
+ *
+ * Deliberately strict: a parameter is read only when the schema declares a
+ * field by that name and that field is not derived. Anything else is ignored,
+ * so a link cannot plant a key the entity has no business holding.
+ *
+ * Returns null when nothing was carried over, which is what keeps a plain
+ * `?new=1` an ordinary blank form.
+ */
+export function seedFromParams(params, schema) {
+  const seed = {};
+  for (const field of schema?.fields || []) {
+    if (field.derive) continue;
+    const raw = params.get(field.key);
+    if (raw === null || raw === '') continue;
+    if (['number', 'currency', 'percent'].includes(field.type)) {
+      const n = Number(raw);
+      if (Number.isFinite(n)) seed[field.key] = n;
+    } else if (field.type === 'checkbox') {
+      seed[field.key] = raw === 'true' || raw === '1';
+    } else {
+      seed[field.key] = raw;
+    }
+  }
+  return Object.keys(seed).length ? seed : null;
+}
+
+/**
  * One page for any CRM entity. The schema decides the columns, the filters and
  * the form; this component decides nothing about a specific entity.
  *
@@ -171,13 +199,20 @@ export default function CrmModulePage({
 
   // A quick action from global search asks for the create form directly. It is
   // the same sheet the page's own button opens — not a second way in.
+  //
+  // A hand-off from another module arrives the same way, carrying what that
+  // module already knows (a customer, an amount) so nobody retypes it. Only
+  // keys this schema DECLARES are read, and derived fields are refused: the
+  // URL therefore cannot introduce a field the module does not have, and
+  // cannot freeze a number that is supposed to keep tracking its inputs.
   const wantsNew = searchParams.get('new');
   useEffect(() => {
     if (!wantsNew) return;
-    setSheetRecord(null);
+    setSheetRecord(seedFromParams(searchParams, schema));
     setSheetOpen(true);
     const next = new URLSearchParams(searchParams);
     next.delete('new');
+    for (const field of schema.fields) next.delete(field.key);
     setSearchParams(next, { replace: true });
   }, [wantsNew]);
 

@@ -3,7 +3,7 @@ import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { screen, cleanup, within, waitFor, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { renderWithProviders } from '@/test/utils';
-import CrmModulePage from './CrmModulePage';
+import CrmModulePage, { seedFromParams } from './CrmModulePage';
 import { CRM_SCHEMAS } from '@/lib/crm/schemas';
 
 // The local data client is backed by localStorage, which jsdom provides — so
@@ -382,5 +382,54 @@ describe('a module\'s own slice above the list', () => {
     await findInTable('Deal 1');
     // Only the tile itself — no chip, because nothing is focused yet.
     expect(screen.getAllByRole('button', { name: /עסקאות גדולות/ })).toHaveLength(1);
+  });
+});
+
+// A hand-off from another module arrives as `?new=1` plus the values it is
+// carrying. The target form must accept the fields its schema declares and
+// nothing else, or a link becomes a way to plant arbitrary keys on a record.
+describe('a new record seeded from the URL', () => {
+  const seed = (query) => seedFromParams(new URLSearchParams(query), CRM_SCHEMAS.invoices);
+
+  it('carries over the fields the schema declares', () => {
+    expect(seed('client_name=אקמה&amount=13500&vat_percent=18')).toEqual({
+      client_name: 'אקמה', amount: 13500, vat_percent: 18,
+    });
+  });
+
+  it('types numbers as numbers, not as the strings a URL carries', () => {
+    const result = seed('amount=13500');
+    expect(result.amount).toBe(13500);
+    expect(typeof result.amount).toBe('number');
+  });
+
+  it('ignores a key the schema does not declare', () => {
+    expect(seed('client_name=אקמה&role=admin&id=i9&__proto__=x')).toEqual({ client_name: 'אקמה' });
+  });
+
+  it('refuses a derived field — it would freeze a number that must keep tracking', () => {
+    // `balance` and `overdue_days` are computed from amount, VAT and the dates.
+    expect(seed('balance=1&overdue_days=99')).toBeNull();
+  });
+
+  it('ignores a number that is not one', () => {
+    expect(seed('amount=not-a-number')).toBeNull();
+    expect(seed('amount=not-a-number&client_name=אקמה')).toEqual({ client_name: 'אקמה' });
+  });
+
+  it('returns null for a plain ?new=1, so the form stays blank', () => {
+    expect(seed('')).toBeNull();
+    expect(seed('new=1')).toBeNull();
+  });
+
+  it('opens the create form pre-filled when the page loads with the parameters', async () => {
+    seedLeads(1);
+    renderWithProviders(
+      <CrmModulePage schema={CRM_SCHEMAS.invoices} moduleId="invoices" />,
+      { route: '/invoices?new=1&client_name=Acme+Ltd&amount=13500' },
+    );
+    const sheet = await screen.findByRole('dialog');
+    expect(within(sheet).getByDisplayValue('Acme Ltd')).toBeTruthy();
+    expect(within(sheet).getByDisplayValue('13500')).toBeTruthy();
   });
 });
