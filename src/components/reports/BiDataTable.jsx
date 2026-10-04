@@ -6,6 +6,8 @@ import { getColorForKey } from '@/components/development/reportUtils';
 import { translateValue } from './dataSources';
 import { formatDate } from '@/lib/formatDate';
 import GroupedTable from './GroupedTable';
+import SavedViews from './SavedViews';
+import { captureView, restoreView } from '@/lib/reports/savedViews';
 
 function formatCell(value, type) {
   if (value === null || value === undefined || value === '') return '—';
@@ -218,6 +220,20 @@ export default function BiDataTable({ dataSource, data, projectNames }) {
         >
           <Settings2 className="w-3.5 h-3.5" /> עמודות
         </button>
+
+        <SavedViews
+          sourceId={dataSource.id}
+          currentState={captureView({ visibleColumns, groupBy, aggregateFields, chartType, filters, sortConfig })}
+          onApply={(state) => {
+            const view = restoreView(state, allColumns);
+            setVisibleColumns(view.visibleColumns);
+            setGroupBy(view.groupBy);
+            if (view.aggregateFields.length) setAggregateFields(view.aggregateFields);
+            setChartType(view.chartType);
+            setFilters(view.filters);
+            setSortConfig(view.sortConfig);
+          }}
+        />
 
         <button
           onClick={exportCSV}

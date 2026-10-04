@@ -593,6 +593,15 @@ export const EN = {
   'חובה בהזמנה של ₪5,000 ומעלה לפני שהיא מאושרת, מוזמנת או מתקבלת.': 'Required on an order of ₪5,000 or more before it is approved, ordered or received.',
   'נדרש אישור לפני ההזמנה — סכום מעל סף האישור': 'Sign-off required — the amount is over the approval threshold',
 
+  // ── Saved reports ─────────────────────────────────────────────────────────
+  'דוחות שמורים': 'Saved reports',
+  'הדוח נמחק': 'Report deleted',
+  'הדוח נשמר': 'Report saved',
+  'מחיקת הדוח השמור': 'Delete the saved report',
+  'שם הדוח': 'Report name',
+  'שמור תצוגה': 'Save view',
+  'שמירת הדוח נכשלה': 'Saving the report failed',
+
   // ── Automation builder and library ────────────────────────────────────────
   'אין בחבילה הזו מודולים שהספרייה מכסה.': 'This bundle has none of the modules the library covers.',
   'אין תנאים': 'No conditions',
