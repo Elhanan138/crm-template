@@ -557,6 +557,18 @@ export const EN = {
   "מחיר": "Price",
   "סכום ביניים": "Subtotal",
 
+  // ── Price list performance ────────────────────────────────────────────────
+  'מחירון שלא מחזיק': 'Prices that are not holding',
+  'מחירון שדורש בדיקה': 'Price list to review',
+  'מעל ההנחה המרבית': 'Past the discount ceiling',
+  'נמכר תמיד בהנחה המרבית': 'Always sold at the ceiling',
+  'נמכרו מהקטלוג': 'sold from the catalog',
+  'הנחה בפועל': 'Actual discount',
+  'מרווח בפועל': 'Realized margin',
+  'סנן לרשימה': 'Filter the list',
+  'בטל סינון': 'Clear the filter',
+  'מחושב משורות החשבוניות — המרווח הוא מה שנגבה בפועל פחות העלות שבקטלוג.': 'Computed from the invoice lines — the margin is what was actually charged, less the cost on the catalog.',
+
   // ── Hand-offs between modules ─────────────────────────────────────────────
   // Label and hint per hand-off. These reach t() through the action, so the
   // missing-string scan cannot see them — the one that already existed had
