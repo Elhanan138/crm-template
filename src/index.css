@@ -1,0 +1,368 @@
+@import url('https://fonts.googleapis.com/css2?family=Heebo:wght@400;600;700;800&family=Assistant:wght@400;600;700&family=Frank+Ruhl+Libre:wght@700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --font-sans: 'Heebo', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    --font-heebo: 'Heebo', -apple-system, BlinkMacSystemFont, sans-serif;
+    --font-serif: 'Heebo', Georgia, sans-serif;
+
+    --background: 210 40% 98%;
+    --foreground: 222 47% 11%;
+    --card: 0 0% 100%;
+    --card-foreground: 222 47% 11%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 47% 11%;
+    --primary: 193 9% 19%;
+    --primary-foreground: 0 0% 100%;
+    --brand: 193 9% 19%;
+
+    /* Document surface — a quote, an invoice, a signed form. These are printed
+       on paper and rendered to PDF against white, so they are deliberately NOT
+       redefined under .dark: a proposal sent to a client cannot come out with
+       pale grey text on a white page because the sender was in dark mode.
+       Only the accent follows the brand, which is how a document inherits the
+       branding without naming a colour of its own. */
+    --doc: 0 0% 100%;
+    --doc-foreground: 0 0% 10%;
+    --doc-muted: 0 0% 40%;
+    --doc-rule: 0 0% 85%;
+    --doc-negative: 0 65% 42%;
+    --secondary: 215 16% 47%;
+    --secondary-foreground: 0 0% 100%;
+    --muted: 210 40% 96%;
+    --muted-foreground: 215 16% 47%;
+    --accent: 200 14% 95%;
+    --accent-foreground: 193 10% 22%;
+    --destructive: 0 75% 41%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 214 32% 91%;
+    --input: 214 32% 91%;
+    --ring: 193 9% 19%;
+    --success: 150 84% 30%;
+    --success-foreground: 0 0% 100%;
+    --success-muted: 150 60% 95%;
+    --warning: 38 92% 45%;
+    --warning-foreground: 0 0% 100%;
+    --warning-muted: 42 95% 94%;
+    --info: 205 85% 45%;
+    --info-foreground: 0 0% 100%;
+    --info-muted: 205 90% 95%;
+    --neutral-muted: 215 25% 95%;
+    --chart-1: 193 9% 19%;
+    --chart-2: 200 70% 50%;
+    --chart-3: 40 90% 55%;
+    --chart-4: 280 65% 55%;
+    --chart-5: 340 75% 55%;
+    --radius: 0.75rem;
+    --sidebar-background: 0 0% 100%;
+    --sidebar-foreground: 215 16% 47%;
+    --sidebar-primary: 193 9% 19%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 200 14% 95%;
+    --sidebar-accent-foreground: 193 10% 22%;
+    --sidebar-border: 214 32% 91%;
+    --sidebar-ring: 193 9% 19%;
+  }
+}
+
+@layer base {
+  * {
+    border-color: hsl(var(--border));
+    outline-color: hsl(var(--ring) / 0.5);
+  }
+
+  body {
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
+    font-family: var(--font-heebo);
+    font-size: 15px;
+  }
+
+  h1, h2, h3, h4 {
+    font-family: var(--font-heebo);
+  }
+}
+
+@layer components {
+  .text-page-title {
+    font-family: var(--font-heebo);
+    font-size: 1.25rem;
+    line-height: 1.75rem;
+    font-weight: 700;
+    color: hsl(var(--foreground));
+  }
+  @media (min-width: 640px) {
+    .text-page-title { font-size: 1.5rem; line-height: 2rem; }
+  }
+  .text-section-title {
+    font-size: 1rem;
+    line-height: 1.5rem;
+    font-weight: 600;
+    color: hsl(var(--foreground));
+  }
+  @media (min-width: 640px) {
+    .text-section-title { font-size: 1.125rem; line-height: 1.75rem; }
+  }
+  .text-card-title {
+    font-size: 1rem;
+    line-height: 1.5rem;
+    font-weight: 600;
+    color: hsl(var(--foreground));
+  }
+  .text-body {
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+  }
+  .text-caption {
+    font-size: 0.75rem;
+    line-height: 1rem;
+    color: hsl(var(--muted-foreground));
+  }
+}
+
+/* ReactQuill mobile + RTL optimization */
+@media (max-width: 640px) {
+}
+
+/* Micro-animations */
+@keyframes slide-in {
+  from { opacity: 0; transform: translateY(-6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-slide-in {
+  animation: slide-in 0.2s ease-out;
+}
+
+@keyframes fade-row {
+  from { opacity: 1; }
+  to { opacity: 0.6; }
+}
+
+/* Typewriter caret blink */
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+/* AI button glow — subtle radar pulse using design system primary token */
+@keyframes ai-pulse {
+  0% {
+    box-shadow: 0 0 0 0 hsl(var(--primary) / 0.35);
+  }
+  70% {
+    box-shadow: 0 0 0 7px hsl(var(--primary) / 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 hsl(var(--primary) / 0);
+  }
+}
+.ai-glow {
+  animation: ai-pulse 2.8s ease-out infinite;
+}
+
+/* Checklist checkbox fill animation */
+@keyframes check-fill {
+  from { transform: scale(0.5); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+.checklist-checkbox[data-state="checked"] svg {
+  animation: check-fill 0.2s ease-out;
+}
+
+/* Respect reduced-motion preference */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* iOS zoom prevention — enforce 16px font-size on mobile for all text inputs */
+@media (max-width: 768px) {
+  input, textarea, select {
+    font-size: 16px !important;
+  }
+}
+
+/* Notion editor — TipTap ProseMirror styling using design tokens only */
+.notion-editor .ProseMirror {
+  direction: rtl;
+  text-align: right;
+  min-height: 200px;
+  padding: 1rem 1.5rem;
+  outline: none;
+}
+.notion-editor .ProseMirror > * + * {
+  margin-top: 0.75rem;
+}
+.notion-editor .ProseMirror h1 {
+  font-family: var(--font-heebo);
+  font-size: 1.5rem;
+  line-height: 2rem;
+  font-weight: 700;
+  color: hsl(var(--foreground));
+  unicode-bidi: plaintext;
+}
+@media (min-width: 640px) {
+  .notion-editor .ProseMirror h1 { font-size: 1.875rem; line-height: 2.25rem; }
+}
+.notion-editor .ProseMirror h2 {
+  font-family: var(--font-heebo);
+  font-size: 1.25rem;
+  line-height: 1.75rem;
+  font-weight: 700;
+  color: hsl(var(--foreground));
+  unicode-bidi: plaintext;
+}
+@media (min-width: 640px) {
+  .notion-editor .ProseMirror h2 { font-size: 1.5rem; line-height: 2rem; }
+}
+.notion-editor .ProseMirror h3 {
+  font-family: var(--font-heebo);
+  font-size: 1.125rem;
+  line-height: 1.75rem;
+  font-weight: 600;
+  color: hsl(var(--foreground));
+  unicode-bidi: plaintext;
+}
+@media (min-width: 640px) {
+  .notion-editor .ProseMirror h3 { font-size: 1.25rem; line-height: 1.75rem; }
+}
+.notion-editor .ProseMirror p {
+  font-size: 15px;
+  line-height: 1.75rem;
+  color: hsl(var(--foreground));
+  unicode-bidi: plaintext;
+}
+@media (min-width: 640px) {
+  .notion-editor .ProseMirror p { font-size: 16px; }
+}
+.notion-editor .ProseMirror ul,
+.notion-editor .ProseMirror ol {
+  padding-inline-start: 1.5rem;
+  unicode-bidi: plaintext;
+}
+.notion-editor .ProseMirror ul { list-style-type: disc; }
+.notion-editor .ProseMirror ol { list-style-type: decimal; }
+.notion-editor .ProseMirror li { margin-top: 0.25rem; }
+.notion-editor .ProseMirror blockquote {
+  border-inline-start: 4px solid hsl(var(--primary) / 0.3);
+  background: hsl(var(--muted) / 0.4);
+  color: hsl(var(--muted-foreground));
+  border-radius: 0.5rem;
+  padding: 0.5rem 1rem;
+  margin: 0.75rem 0;
+}
+.notion-editor .ProseMirror pre {
+  background: hsl(var(--muted));
+  border: 1px solid hsl(var(--border));
+  border-radius: 0.5rem;
+  padding: 0.75rem 1rem;
+  direction: ltr;
+  text-align: left;
+  overflow-x: auto;
+}
+.notion-editor .ProseMirror code {
+  background: hsl(var(--muted));
+  color: hsl(var(--foreground));
+  border-radius: 0.25rem;
+  padding: 0.125rem 0.375rem;
+}
+.notion-editor .ProseMirror pre code {
+  background: transparent;
+  padding: 0;
+}
+.notion-editor .ProseMirror mark {
+  background: hsl(var(--warning-muted));
+  border-radius: 0.125rem;
+  padding: 0.125rem 0.25rem;
+}
+.notion-editor .ProseMirror a {
+  color: hsl(var(--primary));
+  text-decoration: none;
+}
+.notion-editor .ProseMirror a:hover { text-decoration: underline; }
+.notion-editor .ProseMirror hr {
+  border: none;
+  border-top: 1px solid hsl(var(--border));
+  margin: 1rem 0;
+}
+/* The placeholder inherited the browser's LTR default, so Hebrew punctuation
+   landed on the wrong side. Force it to render right-to-left like the editor. */
+.notion-editor .ProseMirror p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  float: right;
+  direction: rtl;
+  unicode-bidi: plaintext;
+  text-align: right;
+  color: hsl(var(--muted-foreground) / 0.6);
+  pointer-events: none;
+  height: 0;
+}
+.notion-editor .ProseMirror ul[data-type="taskList"] {
+  list-style: none;
+  padding-inline-start: 0;
+}
+.notion-editor .ProseMirror ul[data-type="taskList"] li {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+}
+.notion-editor .ProseMirror ul[data-type="taskList"] li > div {
+  flex: 1;
+}
+.notion-editor .ProseMirror ul[data-type="taskList"] li[data-checked="true"] {
+  text-decoration: line-through;
+  color: hsl(var(--muted-foreground));
+}
+.notion-editor .ProseMirror ul[data-type="taskList"] input[type="checkbox"] {
+  accent-color: hsl(var(--primary));
+  width: 1rem;
+  height: 1rem;
+  margin-top: 0.25rem;
+}
+@media (max-width: 768px) {
+  .notion-editor .ProseMirror,
+  .notion-editor .ProseMirror p { font-size: 16px; }
+}
+
+/* Expanded agent — zoom entire panel by 15% for larger text */
+@media (min-width: 640px) {
+  .agent-expanded-text {
+    zoom: 1.15;
+  }
+}
+
+/* RTL: keep text-right as authored — Hebrew text should stay right-aligned.
+   text-left is allowed to flip to text-right by postcss-rtlcss (correct for RTL design choices). */
+html[dir="rtl"] .text-right { text-align: right; }
+
+/* Print: hide everything except the proposal print view */
+@media print {
+  body * { visibility: hidden; }
+  .proposal-print, .proposal-print * { visibility: visible; }
+  .proposal-print { position: absolute; left: 0; top: 0; width: 100%; background: white; padding: 1cm; box-sizing: border-box; }
+  @page { margin: 0; }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: hsl(var(--border));
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--muted-foreground));
+}
