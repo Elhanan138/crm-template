@@ -5,7 +5,7 @@ import {
 import {
   monthlyRevenue, stockValue, stockState, STOCK_STATES, riskScore, riskBand,
   RISK_BANDS, residualScore, residualBand, slaState, SLA_STATES, warrantyState, WARRANTY_STATES,
-  yearsSince, daysUntil, ageInStage,
+  yearsSince, daysUntil, ageInStage, availability, AVAILABILITY,
 } from '@/lib/crm/derived';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -131,6 +131,11 @@ export const SECTOR_SCHEMAS = {
       { key: 'tenure_years', label: 'ותק (שנים)', type: 'number', list: true, derive: (r) => yearsSince(r.start_date) },
       { key: 'end_date', label: 'תאריך סיום', type: 'date' },
       { key: 'work_percent', label: 'היקף משרה %', type: 'percent' },
+      // Leave, as dates. The status field said "on leave" only if somebody
+      // remembered to set it and remembered to set it back.
+      { key: 'leave_from', label: 'חופשה מ-', type: 'date' },
+      { key: 'leave_until', label: 'חופשה עד', type: 'date' },
+      { key: 'availability', label: 'זמינות', type: 'select', options: AVAILABILITY, list: true, derive: availability },
       { key: 'email', label: 'אימייל', type: 'email' },
       { key: 'phone', label: 'טלפון', type: 'phone' },
       { key: 'location', label: 'מיקום', type: 'text' },

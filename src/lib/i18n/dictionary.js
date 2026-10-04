@@ -539,7 +539,6 @@ export const EN = {
   "מחשב…": "Calculating…",
   "לא ניתן לחשב תצוגה מקדימה": "The preview could not be calculated",
   "גרסה": "Version",
-  "קבצים": "files",
   "מודולים": "modules",
   "מודולים שיוסרו": "Modules that will be removed",
   "כל המודולים של הבניין הזה נכללים": "Every module in this build is included",
@@ -593,6 +592,25 @@ export const EN = {
   // ── Purchase approval ─────────────────────────────────────────────────────
   'חובה בהזמנה של ₪5,000 ומעלה לפני שהיא מאושרת, מוזמנת או מתקבלת.': 'Required on an order of ₪5,000 or more before it is approved, ordered or received.',
   'נדרש אישור לפני ההזמנה — סכום מעל סף האישור': 'Sign-off required — the amount is over the approval threshold',
+
+  // ── People ────────────────────────────────────────────────────────────────
+  'חופשה מ-': 'Leave from',
+  'חופשה עד': 'Leave until',
+  'זמינות': 'Availability',
+  'זמין': 'Available',
+  'יוצא בקרוב': 'Leaving soon',
+  'לא פעיל': 'Inactive',
+  'מבנה ארגוני': 'Org chart',
+  'בחופשה היום': 'on leave today',
+  'יוצאים בשבועיים הקרובים': 'leaving in the next two weeks',
+  'משתמש במערכת': 'Has a login',
+  'מטריצת כשירות': 'Competency matrix',
+  'מוכנות': 'Readiness',
+  'לא הוקצה': 'Not assigned',
+  'הסתר': 'Hide',
+  'הצג': 'Show',
+  'כווץ': 'Collapse',
+  'הרחב': 'Expand',
 
   // ── Risk register ─────────────────────────────────────────────────────────
   'הסתברות שיורית': 'Residual likelihood',

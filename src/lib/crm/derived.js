@@ -147,6 +147,29 @@ export const residualBand = (r) => {
   return score === null ? null : bandOfScore(score).value;
 };
 
+/**
+ * Whether someone is at work today, read from their leave dates.
+ *
+ * The `status` field said "on leave" only if somebody remembered to set it and
+ * remembered to set it back. Dates answer the question on the day itself.
+ */
+export const AVAILABILITY = [
+  { value: 'available', label: 'זמין', tone: 'success' },
+  { value: 'upcoming', label: 'יוצא בקרוב', tone: 'warning' },
+  { value: 'away', label: 'בחופשה', tone: 'info' },
+  { value: 'gone', label: 'לא פעיל', tone: 'muted' },
+];
+
+export const availability = (r) => {
+  if (r.status === 'ended') return 'gone';
+  const from = daysUntil(r.leave_from);
+  const until = daysUntil(r.leave_until);
+  if (from !== null && from <= 0 && (until === null || until >= 0)) return 'away';
+  if (from !== null && from > 0 && from <= 14) return 'upcoming';
+  if (from === null && r.status === 'leave') return 'away';
+  return 'available';
+};
+
 /** Hours booked against a work order, priced at a single blended rate. */
 export const workOrderCost = (rate) => (r) => Math.round(num(r.parts_cost) + num(r.labor_hours) * rate);
 
